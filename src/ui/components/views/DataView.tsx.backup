@@ -1,5 +1,5 @@
+import { Button } from '@create-figma-plugin/ui';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from '../base/Button';
 import { Input } from '../base/Input';
 import { Panel } from '../base/Panel';
 import { ToggleSwitch } from '../base/ToggleSwitch';
@@ -25,7 +25,7 @@ export function DataView({
   onUpdateSettings
 }: DataViewProps) {
   const { theme, colors, toggleTheme } = useTheme();
-
+  
   const handleSettingChange = (key: string, value: any) => {
     onUpdateSettings({
       ...storedSettings,
@@ -61,7 +61,7 @@ export function DataView({
       <Panel title="Data Export">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>CSV Export</h4>
+                        <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>CSV Export</h4>
             <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
               Export data as CSV files with proper formatting and headers. Perfect for analysis in Excel or Google Sheets.
             </p>
@@ -140,7 +140,7 @@ export function DataView({
           <div>
             <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Storage Actions</h4>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button onClick={onStorageAction} variant="secondary">
+              <Button onClick={onStorageAction} secondary>
                 Switch Theme: {userPreference}
               </Button>
               <Button
@@ -150,7 +150,7 @@ export function DataView({
                   lastExportPath: '',
                   favoriteColor: '#3772FF'
                 })}
-                variant="secondary"
+                secondary
               >
                 Reset Settings
               </Button>

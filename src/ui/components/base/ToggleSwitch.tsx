@@ -1,5 +1,4 @@
-import { COLORS } from '@shared/constants';
-import { h } from 'preact';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ToggleSwitchProps {
   checked: boolean;
@@ -8,6 +7,8 @@ interface ToggleSwitchProps {
 }
 
 export function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
+  const { colors } = useTheme();
+
   return (
     <div style={{
       display: 'flex',
@@ -16,7 +17,7 @@ export function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
       cursor: 'pointer'
     }} onClick={() => onChange(!checked)}>
       <span style={{
-        color: COLORS.textSecondary,
+        color: colors.textSecondary,
         fontSize: 13,
         fontWeight: 500
       }}>
@@ -26,7 +27,7 @@ export function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
         width: 36,
         height: 20,
         borderRadius: 10,
-        background: checked ? COLORS.accent : '#2a2d35',
+        background: checked ? colors.toggleBackgroundActive : colors.toggleBackground,
         position: 'relative',
         transition: 'background 0.2s ease',
         cursor: 'pointer'
@@ -35,7 +36,7 @@ export function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
           width: 16,
           height: 16,
           borderRadius: '50%',
-          background: '#fff',
+          background: colors.toggleSlider,
           position: 'absolute',
           top: 2,
           left: checked ? 18 : 2,

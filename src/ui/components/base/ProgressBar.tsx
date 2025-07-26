@@ -1,5 +1,5 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
-
+import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 interface ProgressBarProps {
   progress: number; // 0-100
   label?: string;
@@ -13,8 +13,10 @@ export function ProgressBar({
   label,
   showPercentage = true,
   height = 8,
-  color = COLORS.accent
+  color
 }: ProgressBarProps) {
+  const { colors } = useTheme();
+  const progressColor = color || colors.accent;
   const clampedProgress = Math.max(0, Math.min(100, progress));
 
   return (
@@ -26,7 +28,7 @@ export function ProgressBar({
           alignItems: 'center',
           marginBottom: 8,
           fontSize: 13,
-          color: COLORS.textColor
+          color: colors.textColor
         }}>
           {label && <span>{label}</span>}
           {showPercentage && <span>{Math.round(clampedProgress)}%</span>}
@@ -36,15 +38,15 @@ export function ProgressBar({
       <div style={{
         width: '100%',
         height,
-        background: COLORS.darkBg,
+        background: colors.darkBg,
         borderRadius: BORDER_RADIUS,
         overflow: 'hidden',
-        border: `1px solid ${COLORS.border}`
+        border: `1px solid ${colors.border}`
       }}>
         <div style={{
           width: `${clampedProgress}%`,
           height: '100%',
-          background: color,
+          background: progressColor,
           transition: 'width 0.3s ease',
           borderRadius: BORDER_RADIUS
         }} />

@@ -1,9 +1,10 @@
-import { Button, render } from '@create-figma-plugin/ui';
+import { render } from '@create-figma-plugin/ui';
 import { OperationResult } from '@main/types';
-import { COLORS, PLUGIN_NAME } from '@shared/constants';
+import { PLUGIN_NAME } from '@shared/constants';
 import { exportToCSV } from '@shared/exportUtils';
 import { copyToClipboard } from '@shared/utils';
 import { useState } from 'preact/hooks';
+import { Button } from './components/base/Button';
 import { ErrorBoundary } from './components/base/ErrorBoundary';
 import { Input } from './components/base/Input';
 import { ConfirmBox, MessageBox } from './components/base/MessageBox';
@@ -15,16 +16,25 @@ import { ToggleSwitch } from './components/base/ToggleSwitch';
 import { DebugPanel } from './components/panels/DebugPanel';
 import { HelpPopup } from './components/panels/HelpPopup';
 import { DataView } from './components/views/DataView';
+import { FigmaView } from './components/views/FigmaView';
 import { FormsView } from './components/views/FormsView';
 import { MessagingView } from './components/views/MessagingView';
 import { ModalsView } from './components/views/ModalsView';
 import { SectionsView } from './components/views/SectionsView';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { commonShortcuts, useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePluginStorage } from './hooks/usePluginStorage';
 import { useToast } from './hooks/useToast';
 import { useWindowResize } from './hooks/useWindowResize';
 
 function App() {
+  const { colors, theme } = useTheme();
+
+  // Apply theme to document body for CSS targeting
+  if (typeof document !== 'undefined') {
+    document.body.setAttribute('data-theme', theme);
+    document.body.className = `theme-${theme}`;
+  }
   const [scanResult, setScanResult] = useState<OperationResult | null>(null);
   const [processResult, setProcessResult] = useState<OperationResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -188,7 +198,7 @@ function App() {
       id: 'overview',
       title: 'Plugin Overview',
       content: (
-        <div style={{ color: COLORS.textSecondary, lineHeight: 1.5 }}>
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
           This starter includes comprehensive UI components, hooks, and utilities for building professional Figma plugins.
         </div>
       )
@@ -197,8 +207,8 @@ function App() {
       id: 'components',
       title: 'Available Components',
       content: (
-        <div style={{ color: COLORS.textSecondary, lineHeight: 1.5 }}>
-          Panels, Modals, Inputs, Dropdowns, Tabs, Accordions, Spinners, Tables, Notifications, and more.
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
+          Panels, Modals, Inputs, Dropdowns, Tabs, Accordions, Native Loading, Tables, Notifications, and more.
         </div>
       )
     },
@@ -206,7 +216,7 @@ function App() {
       id: 'features',
       title: 'Advanced Features',
       content: (
-        <div style={{ color: COLORS.textSecondary, lineHeight: 1.5 }}>
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
           Theme system, plugin storage, error boundaries, export utilities, and selection helpers.
         </div>
       )
@@ -219,9 +229,9 @@ function App() {
       showToast('An unexpected error occurred', 'error');
     }}>
       <div ref={containerRef} style={{
-        background: COLORS.darkBg,
+        background: colors.darkBg,
         padding: 24,
-        color: COLORS.textColor,
+        color: colors.textColor,
         fontFamily: 'Inter, sans-serif',
         position: 'relative',
         display: 'flex',
@@ -241,7 +251,7 @@ function App() {
           }}>
             <div>
               <h2 style={{
-                color: COLORS.textColor,
+                color: colors.textColor,
                 margin: 0,
                 marginBottom: 16,
                 fontWeight: 700,
@@ -249,7 +259,7 @@ function App() {
                 fontSize: 24
               }}>{PLUGIN_NAME}</h2>
               <p style={{
-                color: COLORS.textSecondary,
+                color: colors.textSecondary,
                 margin: '8px 0 0 0',
                 fontSize: 14,
                 lineHeight: 1.4
@@ -339,6 +349,15 @@ function App() {
               )
             },
             {
+              id: 'figma',
+              label: 'Figma',
+              content: (
+                <FigmaView
+                  onShowToast={showToast}
+                />
+              )
+            },
+            {
               id: 'data',
               label: 'Data',
               content: (
@@ -371,14 +390,14 @@ function App() {
             zIndex: 1000
           }}>
             <div style={{
-              background: COLORS.darkPanel,
+              background: colors.darkPanel,
               padding: 32,
               borderRadius: 8,
               textAlign: 'center',
               minWidth: 300,
-              border: `1px solid ${COLORS.border}`
+              border: `1px solid ${colors.border}`
             }}>
-              <div style={{ marginBottom: 16, color: COLORS.textColor, fontSize: 16 }}>
+              <div style={{ marginBottom: 16, color: colors.textColor, fontSize: 16 }}>
                 Scanning...
               </div>
               <ProgressBar
@@ -398,7 +417,7 @@ function App() {
           size="medium"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <p style={{ color: COLORS.textColor, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ color: colors.textColor, margin: 0, lineHeight: 1.5 }}>
               This is a custom modal with full control over content and behavior. You can add any
               components, forms, or content here.
             </p>
@@ -413,7 +432,7 @@ function App() {
             </div>
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-              <Button onClick={() => setShowModal(false)} secondary>
+              <Button onClick={() => setShowModal(false)} variant="secondary">
                 Cancel
               </Button>
               <Button onClick={() => {
@@ -469,7 +488,7 @@ function App() {
             width: 40,
             height: 40,
             borderRadius: '50%',
-            background: COLORS.accent,
+            background: colors.accent,
             border: 'none',
             color: 'white',
             fontSize: 18,
@@ -493,4 +512,12 @@ function App() {
   );
 }
 
-export default render(App);
+function AppWithTheme() {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  );
+}
+
+export default render(AppWithTheme);

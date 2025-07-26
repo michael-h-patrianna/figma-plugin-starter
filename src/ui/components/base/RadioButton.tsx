@@ -1,4 +1,4 @@
-import { COLORS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface RadioOption {
   value: string;
@@ -23,12 +23,13 @@ export function RadioButton({
   label,
   direction = 'vertical'
 }: RadioButtonProps) {
+  const { colors } = useTheme();
   return (
     <div>
       {label && (
         <label style={{
           display: 'block',
-          color: COLORS.textColor,
+          color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
           marginBottom: 8
@@ -58,8 +59,8 @@ export function RadioButton({
                 width: 16,
                 height: 16,
                 borderRadius: '50%',
-                border: `2px solid ${value === option.value ? COLORS.accent : COLORS.textSecondary}`,
-                background: value === option.value ? COLORS.accent : COLORS.darkBg,
+                border: `2px solid ${value === option.value ? colors.accent : colors.textSecondary}`,
+                background: value === option.value ? colors.accent : colors.darkBg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -84,7 +85,7 @@ export function RadioButton({
             </div>
 
             <span style={{
-              color: option.disabled ? COLORS.textSecondary : COLORS.textColor,
+              color: option.disabled ? colors.textSecondary : colors.textColor,
               fontSize: 13,
               userSelect: 'none'
             }}>

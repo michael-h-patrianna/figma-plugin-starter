@@ -1,10 +1,13 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DebugPanelProps {
   isVisible: boolean;
 }
 
 export function DebugPanel({ isVisible = false }: DebugPanelProps) {
+  const { colors } = useTheme();
+
   if (!isVisible) return null;
 
   return (
@@ -27,7 +30,7 @@ export function DebugPanel({ isVisible = false }: DebugPanelProps) {
         Debug
       </div>
       <div style={{
-        color: COLORS.textColor,
+        color: colors.textColor,
         fontSize: 13,
         lineHeight: 1.5
       }}>

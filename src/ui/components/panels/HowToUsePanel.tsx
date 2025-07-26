@@ -1,11 +1,14 @@
 import { Panel } from '../base/Panel';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export function HowToUsePanel() {
+  const { colors } = useTheme();
+
   return (
     <Panel title="How to use this plugin" variant="blue">
       <div
         style={{
-          color: '#fff',
+          color: colors.textColor,
           fontSize: 13,
           lineHeight: 1.5,
         }}

@@ -1,5 +1,5 @@
-import { Button } from '@create-figma-plugin/ui';
-import { COLORS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Button } from './Button';
 import { Modal } from './Modal';
 
 interface MessageBoxProps {
@@ -20,6 +20,8 @@ interface ConfirmBoxProps {
 }
 
 export function MessageBox({ isVisible, title, message, onOk }: MessageBoxProps) {
+  const { colors } = useTheme();
+
   return (
     <Modal
       isVisible={isVisible}
@@ -30,7 +32,7 @@ export function MessageBox({ isVisible, title, message, onOk }: MessageBoxProps)
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <p style={{
-          color: COLORS.textColor,
+          color: colors.textColor,
           margin: 0,
           lineHeight: 1.5,
           fontSize: 14
@@ -55,6 +57,8 @@ export function ConfirmBox({
   okText = 'OK',
   cancelText = 'Cancel'
 }: ConfirmBoxProps) {
+  const { colors } = useTheme();
+
   return (
     <Modal
       isVisible={isVisible}
@@ -64,7 +68,7 @@ export function ConfirmBox({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <p style={{
-          color: COLORS.textColor,
+          color: colors.textColor,
           margin: 0,
           lineHeight: 1.5,
           fontSize: 14
@@ -73,7 +77,7 @@ export function ConfirmBox({
         </p>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <Button onClick={onCancel} secondary>
+          <Button onClick={onCancel} variant="secondary">
             {cancelText}
           </Button>
           <Button onClick={onOk}>

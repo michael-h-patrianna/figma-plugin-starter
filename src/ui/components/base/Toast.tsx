@@ -1,4 +1,4 @@
-import { COLORS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Toast as ToastType } from '../../hooks/useToast';
 
 interface ToastProps {
@@ -7,13 +7,15 @@ interface ToastProps {
 }
 
 export function Toast({ toast, onDismiss }: ToastProps) {
+  const { colors } = useTheme();
+
   const getToastColor = (type: string) => {
     switch (type) {
-      case 'success': return COLORS.success;
-      case 'error': return COLORS.error;
-      case 'warning': return COLORS.warning;
-      case 'info': return COLORS.info;
-      default: return COLORS.darkPanel;
+      case 'success': return colors.success;
+      case 'error': return colors.error;
+      case 'warning': return colors.warning;
+      case 'info': return colors.info;
+      default: return colors.darkPanel;
     }
   };
 

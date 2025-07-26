@@ -1,9 +1,11 @@
+import { getErrors, getInfos, getWarnings } from '@main/errors';
 import { Issue } from '@main/types';
-import { getErrors, getWarnings, getInfos } from '@main/errors';
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
-import { h } from 'preact';
+import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export function NotificationBanner({ issues }: { issues: Issue[] }) {
+  const { colors } = useTheme();
+
   if (!issues || issues.length === 0) return null;
 
   const errors = getErrors(issues);
@@ -28,10 +30,10 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
     }}>
       <div style={{
         color: errors.length > 0
-          ? COLORS.error
+          ? colors.error
           : warnings.length > 0
-            ? COLORS.warning
-            : COLORS.info,
+            ? colors.warning
+            : colors.info,
         fontWeight: 600,
         marginBottom: 12,
         fontSize: 14
@@ -42,7 +44,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
       {errors.length > 0 && (
         <div style={{ marginBottom: (warnings.length > 0 || infos.length > 0) ? 12 : 0 }}>
           <div style={{
-            color: COLORS.error,
+            color: colors.error,
             fontWeight: 600,
             marginBottom: 8,
             fontSize: 13
@@ -51,7 +53,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
           </div>
           {errors.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
-              color: COLORS.textColor,
+              color: colors.textColor,
               fontSize: 12,
               marginBottom: 4,
               paddingLeft: 12
@@ -65,7 +67,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
       {warnings.length > 0 && (
         <div style={{ marginBottom: infos.length > 0 ? 12 : 0 }}>
           <div style={{
-            color: COLORS.warning,
+            color: colors.warning,
             fontWeight: 600,
             marginBottom: 8,
             fontSize: 13
@@ -74,7 +76,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
           </div>
           {warnings.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
-              color: COLORS.textColor,
+              color: colors.textColor,
               fontSize: 12,
               marginBottom: 4,
               paddingLeft: 12
@@ -88,7 +90,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
       {infos.length > 0 && (
         <div>
           <div style={{
-            color: COLORS.info,
+            color: colors.info,
             fontWeight: 600,
             marginBottom: 8,
             fontSize: 13
@@ -97,7 +99,7 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
           </div>
           {infos.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
-              color: COLORS.textColor,
+              color: colors.textColor,
               fontSize: 12,
               marginBottom: 4,
               paddingLeft: 12

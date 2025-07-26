@@ -1,5 +1,6 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { h } from 'preact';
+import { useTheme } from '../../contexts/ThemeContext';
 
 
 type PanelVariant = 'standard' | 'yellow' | 'blue';
@@ -28,19 +29,21 @@ export function Panel({
   status,
   variant = 'standard'
 }: PanelProps) {
+  const { colors } = useTheme();
+
   const getStatusColor = (type: string) => {
     switch (type) {
-      case 'success': return COLORS.success;
-      case 'error': return COLORS.error;
-      case 'warning': return COLORS.warning;
-      case 'info': return COLORS.info;
-      default: return COLORS.textSecondary;
+      case 'success': return colors.success;
+      case 'error': return colors.error;
+      case 'warning': return colors.warning;
+      case 'info': return colors.info;
+      default: return colors.textSecondary;
     }
   };
 
   // Panel background/border by variant
-  let background: string = COLORS.darkPanel;
-  let border: string = `1px solid ${COLORS.border}`;
+  let background: string = colors.darkPanel;
+  let border: string = `1px solid ${colors.border}`;
   if (variant === 'yellow') {
     background = 'rgba(243, 156, 18, 0.08)';
     border = '1px solid rgba(243, 156, 18, 0.25)';
@@ -62,10 +65,10 @@ export function Panel({
     }}>
       {/* Header */}
       <div style={{
-        color: COLORS.textSecondary,
+        color: colors.textSecondary,
         fontWeight: 600,
         padding: `${padding}px ${padding}px`,
-        borderBottom: `1px solid ${COLORS.border}`,
+        borderBottom: `1px solid ${colors.border}`,
         fontSize: 14,
         display: 'flex',
         alignItems: 'center',
@@ -94,10 +97,10 @@ export function Panel({
       {/* Subtitle */}
       {subtitle && (
         <div style={{
-          color: COLORS.textSecondary,
+          color: colors.textSecondary,
           fontSize: 12,
           padding: `8px ${padding}px 0 ${padding}px`,
-          borderBottom: `1px solid ${COLORS.border}`,
+          borderBottom: `1px solid ${colors.border}`,
           paddingBottom: 8
         }}>
           {subtitle}

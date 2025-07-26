@@ -1,5 +1,5 @@
-import { COLORS } from '@shared/constants';
 import { h } from 'preact';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DataTableProps {
   data: Array<Record<string, any>>;
@@ -13,10 +13,12 @@ interface DataTableProps {
 }
 
 export function DataTable({ data, columns, maxHeight }: DataTableProps) {
+  const { colors } = useTheme();
+
   if (!data || data.length === 0) {
     return (
       <div style={{
-        color: COLORS.textSecondary,
+        color: colors.textSecondary,
         fontSize: 14,
         textAlign: 'center',
         padding: 20
@@ -34,16 +36,16 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
   const shouldScroll = data.length > maxRowsVisible;
 
   return (
-    <div 
-      className="data-table-container" 
+    <div
+      className="data-table-container"
       style={{
         overflow: shouldScroll ? 'auto' : 'visible',
         maxHeight: shouldScroll ? calculatedMaxHeight : 'auto',
-        border: `1px solid ${COLORS.border}`,
+        border: `1px solid ${colors.border}`,
         borderRadius: 6,
         /* Custom scrollbar styling */
         scrollbarWidth: 'thin',
-        scrollbarColor: `${COLORS.textSecondary} ${COLORS.darkPanel}`,
+        scrollbarColor: `${colors.textSecondary} ${colors.darkPanel}`,
         /* Webkit scrollbar styling */
         WebkitScrollbarWidth: '8px'
       } as any}>
@@ -53,15 +55,15 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
           height: 8px;
         }
         .data-table-container::-webkit-scrollbar-track {
-          background: ${COLORS.darkPanel};
+          background: ${colors.darkPanel};
           border-radius: 4px;
         }
         .data-table-container::-webkit-scrollbar-thumb {
-          background: ${COLORS.textSecondary};
+          background: ${colors.textSecondary};
           border-radius: 4px;
         }
         .data-table-container::-webkit-scrollbar-thumb:hover {
-          background: ${COLORS.textColor};
+          background: ${colors.textColor};
         }
       `}</style>
       <table style={{
@@ -71,14 +73,14 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
         tableLayout: 'fixed'
       }}>
         <thead>
-          <tr style={{ background: COLORS.darkPanel }}>
+          <tr style={{ background: colors.darkPanel }}>
             {columns.map(column => (
               <th key={column.key} style={{
                 padding: '8px 12px',
                 textAlign: 'left',
                 fontWeight: 600,
-                color: COLORS.textSecondary,
-                borderBottom: `1px solid ${COLORS.border}`,
+                color: colors.textSecondary,
+                borderBottom: `1px solid ${colors.border}`,
                 width: column.width,
                 height: `${headerHeight}px`,
                 boxSizing: 'border-box',
@@ -93,7 +95,7 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
         <tbody>
           {data.map((row, rowIndex) => (
             <tr key={rowIndex} style={{
-              borderBottom: `1px solid ${COLORS.border}`,
+              borderBottom: `1px solid ${colors.border}`,
               background: rowIndex % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
               height: `${rowHeight}px`,
               minHeight: `${rowHeight}px`,
@@ -106,7 +108,7 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
                 return (
                   <td key={column.key} style={{
                     padding: '6px 12px',
-                    color: COLORS.textColor,
+                    color: colors.textColor,
                     verticalAlign: 'middle',
                     height: `${rowHeight}px`,
                     boxSizing: 'border-box',

@@ -1,6 +1,7 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { h } from 'preact';
 import { useEffect } from 'preact/hooks';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModalProps {
   isVisible: boolean;
@@ -19,6 +20,8 @@ export function Modal({
   size = 'medium',
   showCloseButton = true
 }: ModalProps) {
+  const { colors } = useTheme();
+
   // Handle escape key
   useEffect(() => {
     if (!isVisible) return;
@@ -64,9 +67,9 @@ export function Modal({
     >
       <div
         style={{
-          background: COLORS.darkPanel,
+          background: colors.darkPanel,
           borderRadius: BORDER_RADIUS,
-          border: `1px solid ${COLORS.border}`,
+          border: `1px solid ${colors.border}`,
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
           display: 'flex',
           flexDirection: 'column',
@@ -78,7 +81,7 @@ export function Modal({
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: `1px solid ${COLORS.border}`,
+            borderBottom: `1px solid ${colors.border}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
@@ -87,7 +90,7 @@ export function Modal({
           <h3
             style={{
               margin: 0,
-              color: COLORS.textColor,
+              color: colors.textColor,
               fontSize: 16,
               fontWeight: 600
             }}
@@ -100,15 +103,15 @@ export function Modal({
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: COLORS.textSecondary,
+                color: colors.textSecondary,
                 fontSize: 18,
                 cursor: 'pointer',
                 padding: 4,
                 borderRadius: 4,
                 transition: 'color 0.2s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = COLORS.textColor}
-              onMouseLeave={(e) => e.currentTarget.style.color = COLORS.textSecondary}
+              onMouseEnter={(e) => e.currentTarget.style.color = colors.textColor}
+              onMouseLeave={(e) => e.currentTarget.style.color = colors.textSecondary}
             >
               ×
             </button>

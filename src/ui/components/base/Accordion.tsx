@@ -1,6 +1,7 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface AccordionItem {
   id: string;
@@ -16,6 +17,7 @@ interface AccordionProps {
 }
 
 export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: AccordionProps) {
+  const { colors } = useTheme();
   const [openItems, setOpenItems] = useState<string[]>(defaultOpen);
 
   const toggleItem = (itemId: string) => {
@@ -42,7 +44,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
           <div
             key={item.id}
             style={{
-              border: `1px solid ${COLORS.border}`,
+              border: `1px solid ${colors.border}`,
               borderRadius: BORDER_RADIUS,
               marginBottom: isLast ? 0 : 8,
               overflow: 'hidden'
@@ -55,9 +57,9 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                background: item.disabled ? COLORS.darkBg : COLORS.darkPanel,
+                background: item.disabled ? colors.darkBg : colors.darkPanel,
                 border: 'none',
-                color: item.disabled ? COLORS.textSecondary : COLORS.textColor,
+                color: item.disabled ? colors.textSecondary : colors.textColor,
                 fontSize: 14,
                 fontWeight: 500,
                 textAlign: 'left',
@@ -69,12 +71,12 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
               }}
               onMouseEnter={(e) => {
                 if (!item.disabled) {
-                  e.currentTarget.style.backgroundColor = COLORS.darkBg;
+                  e.currentTarget.style.backgroundColor = colors.darkBg;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!item.disabled) {
-                  e.currentTarget.style.backgroundColor = COLORS.darkPanel;
+                  e.currentTarget.style.backgroundColor = colors.darkPanel;
                 }
               }}
             >
@@ -93,8 +95,8 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
               <div
                 style={{
                   padding: '16px',
-                  borderTop: `1px solid ${COLORS.border}`,
-                  background: COLORS.darkBg,
+                  borderTop: `1px solid ${colors.border}`,
+                  background: colors.darkBg,
                   animation: 'accordionSlideDown 0.2s ease-out'
                 }}
               >

@@ -42,10 +42,301 @@
   }
 }
 
+/* Theme support for Figma UI components */
+
+/* Dark theme (default) */
+:root {
+  --figma-button-secondary-bg: #2a2d35;
+  --figma-button-secondary-bg-hover: #383b44;
+  --figma-button-secondary-text: #ffffff;
+  --figma-button-disabled-bg: #383b44;
+  --figma-button-disabled-text: #6c757d;
+  --figma-input-bg: #2a2d35;
+  --figma-input-border: #2c3039;
+  --figma-input-border-focus: #4f94ff;
+  --figma-input-text: #ffffff;
+  --figma-text-color: #ffffff;
+  --figma-text-secondary: #a0a3a8;
+  --figma-bg: #181a20;
+  --figma-bg-secondary: #202329;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --figma-button-secondary-bg: #f1f3f4;
+  --figma-button-secondary-bg-hover: #e8eaed;
+  --figma-button-secondary-text: #2c3e50;
+  --figma-button-disabled-bg: #e8eaed;
+  --figma-button-disabled-text: #95a5a6;
+  --figma-input-bg: #ffffff;
+  --figma-input-border: #e1e5e9;
+  --figma-input-border-focus: #4f94ff;
+  --figma-input-text: #2c3e50;
+  --figma-text-color: #2c3e50;
+  --figma-text-secondary: #6c757d;
+  --figma-bg: #ffffff;
+  --figma-bg-secondary: #f8f9fa;
+}
+
+/* Override Figma UI component styles */
+body[data-theme] button[data-variant="secondary"],
+.theme-light button[data-variant="secondary"],
+.theme-dark button[data-variant="secondary"],
+button[secondary],
+button[data-secondary="true"],
+div[class*="button"][class*="secondary"] button,
+button.secondary {
+  background-color: var(--figma-button-secondary-bg) !important;
+  background: var(--figma-button-secondary-bg) !important;
+  color: var(--figma-button-secondary-text) !important;
+  border: 1px solid var(--figma-input-border) !important;
+}
+
+body[data-theme] button[data-variant="secondary"]:hover,
+.theme-light button[data-variant="secondary"]:hover,
+.theme-dark button[data-variant="secondary"]:hover,
+button[secondary]:hover,
+button[data-secondary="true"]:hover,
+div[class*="button"][class*="secondary"] button:hover,
+button.secondary:hover {
+  background-color: var(--figma-button-secondary-bg-hover) !important;
+  background: var(--figma-button-secondary-bg-hover) !important;
+}
+
+/* Force override of transparent backgrounds */
+button[secondary] {
+  background: var(--figma-button-secondary-bg) !important;
+  background-color: var(--figma-button-secondary-bg) !important;
+}
+
+/* Disabled button styling */
+body[data-theme] button:disabled,
+.theme-light button:disabled,
+.theme-dark button:disabled {
+  background-color: var(--figma-button-disabled-bg) !important;
+  color: var(--figma-button-disabled-text) !important;
+  border-color: var(--figma-input-border) !important;
+}
+
+/* Number input arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Custom number input styling */
+.number-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.number-input-arrows {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.number-input-arrow {
+  width: 12px;
+  height: 8px;
+  background: var(--figma-text-secondary);
+  border: none;
+  cursor: pointer;
+  font-size: 8px;
+  line-height: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--figma-bg);
+}
+
+.number-input-arrow:hover {
+  background: var(--figma-text-color);
+}
+
+/* Textbox/Input field improvements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+.figma-textbox,
+.textbox,
+div[class*="textbox"],
+div[class*="searchTextbox"] input {
+  background-color: var(--figma-input-bg) !important;
+  border-color: var(--figma-input-border) !important;
+  color: var(--figma-input-text) !important;
+  cursor: text !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+.figma-textbox:focus,
+.textbox:focus,
+div[class*="textbox"]:focus-within,
+div[class*="searchTextbox"]:focus-within {
+  border-color: var(--figma-input-border-focus) !important;
+}
+
+/* Dropdown improvements */
+.dropdown,
+.figma-dropdown,
+select,
+div[class*="dropdown"],
+div[class*="Dropdown"] {
+  background-color: var(--figma-input-bg) !important;
+  border-color: var(--figma-input-border) !important;
+  color: var(--figma-input-text) !important;
+}
+
+/* Dropdown menu/options */
+div[class*="dropdown"] div[class*="menu"],
+div[class*="Dropdown"] div[class*="menu"],
+div[class*="options"] {
+  background-color: var(--figma-input-bg) !important;
+  border-color: var(--figma-input-border) !important;
+  color: var(--figma-input-text) !important;
+}
+
+/* Dropdown option items */
+div[class*="dropdown"] div[class*="option"],
+div[class*="Dropdown"] div[class*="option"],
+div[class*="options"] div {
+  background-color: transparent !important;
+  color: var(--figma-input-text) !important;
+}
+
+div[class*="dropdown"] div[class*="option"]:hover,
+div[class*="Dropdown"] div[class*="option"]:hover,
+div[class*="options"] div:hover {
+  background-color: var(--figma-bg-secondary) !important;
+}
+
+/* Checkbox improvements */
+input[type="checkbox"] {
+  background-color: var(--figma-input-bg) !important;
+  border-color: var(--figma-input-border) !important;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--figma-input-border-focus) !important;
+  border-color: var(--figma-input-border-focus) !important;
+}
+
+/* Tab improvements */
+.tab,
+.figma-tab,
+[role="tab"] {
+  color: var(--figma-text-secondary) !important;
+}
+
+.tab[data-current="true"],
+.tab.current,
+.figma-tab[data-current="true"],
+[role="tab"][aria-selected="true"] {
+  color: var(--figma-text-color) !important;
+  border-bottom-color: var(--figma-input-border-focus) !important;
+}
+
+/* Text cursor improvements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea {
+  cursor: text !important;
+}
+
+/* Better support for segmented controls */
+.segmented-control,
+.figma-segmented-control,
+div[class*="segmentedControl"] {
+  background-color: var(--figma-bg-secondary) !important;
+}
+
+.segmented-control button,
+.figma-segmented-control button,
+div[class*="segmentedControl"] button {
+  color: var(--figma-text-secondary) !important;
+  background-color: transparent !important;
+}
+
+.segmented-control button[data-current="true"],
+.segmented-control button.current,
+.figma-segmented-control button[data-current="true"],
+div[class*="segmentedControl"] button[data-current="true"] {
+  color: var(--figma-text-color) !important;
+  background-color: var(--figma-input-bg) !important;
+}
+
+/* File upload button */
+div[class*="fileUploadButton"],
+.file-upload-button {
+  background-color: var(--figma-button-secondary-bg) !important;
+  border-color: var(--figma-input-border) !important;
+  color: var(--figma-button-secondary-text) !important;
+}
+
+/* Icon buttons */
+button[class*="iconButton"],
+.icon-button {
+  background-color: var(--figma-button-secondary-bg) !important;
+  border-color: var(--figma-input-border) !important;
+  color: var(--figma-button-secondary-text) !important;
+}
+
+button[class*="iconButton"]:hover,
+.icon-button:hover {
+  background-color: var(--figma-button-secondary-bg-hover) !important;
+}
+
+/* Color input/picker styling */
+input[type="color"] {
+  background-color: var(--figma-input-bg) !important;
+  border-color: var(--figma-input-border) !important;
+}
+
+/* Loading indicator container */
+div[class*="loadingIndicator"] {
+  color: var(--figma-text-color) !important;
+}
+
+/* General text styling for Figma components */
+div[class*="text"],
+span[class*="text"],
+label {
+  color: var(--figma-text-color) !important;
+}
+
+/* Middle align container */
+div[class*="middleAlign"] {
+  color: var(--figma-text-color) !important;
+}
+
 /* Global scrollbar styles */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #A3A3A3 #23262F;
+  scrollbar-color: var(--figma-text-secondary) var(--figma-bg-secondary);
 }
 
 *::-webkit-scrollbar {
@@ -54,20 +345,66 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: #23262F;
+  background: var(--figma-bg-secondary);
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #A3A3A3;
+  background: var(--figma-text-secondary);
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #F4F4F4;
+  background: var(--figma-text-color);
 }
 
-/* Spinner animation class */
-.spinner {
-  animation: spin 1s linear infinite;
+/* Force theme application on all elements */
+body[data-theme="light"] *,
+body[data-theme="dark"] * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+/* Additional fallback for stubborn components */
+body[data-theme] div,
+body[data-theme] span,
+body[data-theme] button,
+body[data-theme] input,
+body[data-theme] textarea,
+body[data-theme] select {
+  color: inherit;
+}
+
+/* Extra specificity for secondary buttons */
+body[data-theme="light"] button[secondary],
+body[data-theme="light"] div button[secondary] {
+  background-color: #f1f3f4 !important;
+  background: #f1f3f4 !important;
+  color: #2c3e50 !important;
+  border-color: #e1e5e9 !important;
+}
+
+body[data-theme="dark"] button[secondary],
+body[data-theme="dark"] div button[secondary] {
+  background-color: #2a2d35 !important;
+  background: #2a2d35 !important;
+  color: #ffffff !important;
+  border-color: #2c3039 !important;
+}
+
+/* Override any transparent/inherit backgrounds */
+button[secondary][style*="background: transparent"],
+button[secondary][style*="background-color: transparent"],
+button[secondary][style*="background: inherit"] {
+  background: var(--figma-button-secondary-bg) !important;
+  background-color: var(--figma-button-secondary-bg) !important;
+}
+
+/* Override any hardcoded Figma colors */
+body[data-theme] [style*="color: rgb"] {
+  color: var(--figma-text-color) !important;
+}
+
+body[data-theme] [style*="background: rgb"],
+body[data-theme] [style*="background-color: rgb"] {
+  background-color: var(--figma-input-bg) !important;
 }

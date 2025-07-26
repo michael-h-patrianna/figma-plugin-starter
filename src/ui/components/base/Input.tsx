@@ -1,5 +1,6 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { useState } from 'preact/hooks';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface InputProps {
   value: string;
@@ -31,6 +32,7 @@ export function Input({
   step
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const { colors } = useTheme();
 
   const inputProps: any = {
     type,
@@ -44,14 +46,15 @@ export function Input({
     style: {
       width: '100%',
       padding: '8px 12px',
-      background: disabled ? COLORS.darkBg : '#2a2d35',
-      border: `1px solid ${error ? COLORS.error : isFocused ? COLORS.accent : COLORS.border}`,
+      background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
+      border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
       borderRadius: BORDER_RADIUS,
-      color: disabled ? COLORS.textSecondary : COLORS.textColor,
+      color: disabled ? colors.textDisabled : colors.textColor,
       fontSize: 13,
       outline: 'none',
       transition: 'border-color 0.2s ease',
-      fontFamily: 'inherit'
+      fontFamily: 'inherit',
+      cursor: disabled ? 'not-allowed' : 'text'
     }
   };
 
@@ -66,19 +69,19 @@ export function Input({
       {label && (
         <label style={{
           display: 'block',
-          color: COLORS.textColor,
+          color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
           marginBottom: 4
         }}>
           {label}
-          {required && <span style={{ color: COLORS.error }}>*</span>}
+          {required && <span style={{ color: colors.error }}>*</span>}
         </label>
       )}
       <input {...inputProps} />
       {error && (
         <div style={{
-          color: COLORS.error,
+          color: colors.error,
           fontSize: 11,
           marginTop: 4
         }}>
@@ -117,19 +120,20 @@ export function Textarea({
   rows = 3
 }: TextareaProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const { colors } = useTheme();
 
   return (
     <div style={{ width }}>
       {label && (
         <label style={{
           display: 'block',
-          color: COLORS.textColor,
+          color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
           marginBottom: 4
         }}>
           {label}
-          {required && <span style={{ color: COLORS.error }}>*</span>}
+          {required && <span style={{ color: colors.error }}>*</span>}
         </label>
       )}
       <textarea
@@ -146,10 +150,10 @@ export function Textarea({
           width: '100%',
           height,
           padding: '8px 12px',
-          background: disabled ? COLORS.darkBg : '#2a2d35',
-          border: `1px solid ${error ? COLORS.error : isFocused ? COLORS.accent : COLORS.border}`,
+          background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
+          border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
           borderRadius: BORDER_RADIUS,
-          color: disabled ? COLORS.textSecondary : COLORS.textColor,
+          color: disabled ? colors.textDisabled : colors.textColor,
           fontSize: 13,
           outline: 'none',
           transition: 'border-color 0.2s ease',
@@ -157,7 +161,8 @@ export function Textarea({
           resize: 'none',
           minHeight: '60px',
           maxHeight: '150px',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          cursor: disabled ? 'not-allowed' : 'text'
         }}
       />
       <div style={{
@@ -167,7 +172,7 @@ export function Textarea({
       }}>
         {error && (
           <div style={{
-            color: COLORS.error,
+            color: colors.error,
             fontSize: 11
           }}>
             {error}
@@ -175,7 +180,7 @@ export function Textarea({
         )}
         {maxLength && (
           <div style={{
-            color: COLORS.textSecondary,
+            color: colors.textSecondary,
             fontSize: 11,
             marginLeft: 'auto'
           }}>

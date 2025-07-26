@@ -1,5 +1,5 @@
-import { COLORS } from '@shared/constants';
 import { useMemo } from 'preact/hooks';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Accordion } from '../base/Accordion';
 import { DataTable } from '../base/DataTable';
 import { DatePicker } from '../base/DatePicker';
@@ -55,6 +55,8 @@ export function FormsView({
   selectedTime,
   onTimeChange
 }: FormsViewProps) {
+  const { colors } = useTheme();
+
   const dropdownOptions = [
     { value: 'option1', label: 'First Option' },
     { value: 'option2', label: 'Second Option' },
@@ -95,11 +97,11 @@ export function FormsView({
       width: '25%',
       render: (value: string) => {
         if (value === 'ok') {
-          return <span style={{ color: COLORS.success }}>✓ OK</span>;
+          return <span style={{ color: colors.success }}>✓ OK</span>;
         } else if (value === 'error') {
-          return <span style={{ color: COLORS.error }}>✗ Error</span>;
+          return <span style={{ color: colors.error }}>✗ Error</span>;
         }
-        return <span style={{ color: COLORS.textSecondary }}>-</span>;
+        return <span style={{ color: colors.textSecondary }}>-</span>;
       }
     },
     { key: 'value', label: 'Value', width: '20%' }
@@ -169,7 +171,7 @@ export function FormsView({
       <Panel title="Date & Time Inputs">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <p style={{ color: COLORS.textSecondary, margin: '0 0 12px 0', fontSize: 13, lineHeight: 1.5 }}>
+            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 13, lineHeight: 1.5 }}>
               Native HTML5 date and time pickers with proper styling for the dark theme.
             </p>
           </div>
@@ -199,14 +201,14 @@ export function FormsView({
           </div>
 
           <div style={{
-            background: COLORS.darkBg,
-            border: `1px solid ${COLORS.border}`,
+            background: colors.darkBg,
+            border: `1px solid ${colors.border}`,
             borderRadius: 6,
             padding: 12,
             fontSize: 12
           }}>
-            <div style={{ color: COLORS.textSecondary, marginBottom: 8 }}>Selected values:</div>
-            <div style={{ color: COLORS.textColor, fontFamily: 'monospace' }}>
+            <div style={{ color: colors.textSecondary, marginBottom: 8 }}>Selected values:</div>
+            <div style={{ color: colors.textColor, fontFamily: 'monospace' }}>
               Date: {selectedDate || 'Not selected'}<br />
               Time: {selectedTime || 'Not selected'}
               {selectedDate && selectedTime && (
@@ -223,7 +225,7 @@ export function FormsView({
       {/* Data Table Panel */}
       <Panel title="Data Table">
         <div style={{ marginBottom: 12 }}>
-          <p style={{ color: COLORS.textSecondary, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+          <p style={{ color: colors.textSecondary, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
             Interactive data table with sorting, filtering, and selection capabilities. ({tableData.length} rows - scrollable after row 8)
           </p>
         </div>

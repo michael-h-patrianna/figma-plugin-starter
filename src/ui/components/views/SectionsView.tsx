@@ -1,6 +1,6 @@
-import { Button } from '@create-figma-plugin/ui';
 import { OperationResult } from '@main/types';
-import { COLORS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Button } from '../base/Button';
 import { DataTable } from '../base/DataTable';
 import { NotificationBanner } from '../base/NotificationBanner';
 import { Panel } from '../base/Panel';
@@ -19,6 +19,7 @@ export function SectionsView({
   onLoadDemoData,
   onCopyData
 }: SectionsViewProps) {
+  const { colors } = useTheme();
   // Demo data for table - more rows to test scrolling
   const tableData = scanResult?.data ? [
     { id: 1, name: 'Layer 1', type: 'Rectangle', visible: true, x: 0, y: 0 },
@@ -77,7 +78,7 @@ export function SectionsView({
             <NotificationBanner issues={scanResult.issues || []} />
             {scanResult.data && (
               <div>
-                <div style={{ marginBottom: 12, fontSize: 13, color: COLORS.textSecondary }}>
+                <div style={{ marginBottom: 12, fontSize: 13, color: colors.textSecondary }}>
                   Selection: {scanResult.data.selectionCount} objects from page "{scanResult.data.pageInfo?.name}"
                 </div>
                 <DataTable
@@ -89,7 +90,7 @@ export function SectionsView({
           </div>
         ) : (
           <div style={{
-            color: COLORS.textSecondary,
+            color: colors.textSecondary,
             fontSize: 14,
             textAlign: 'center',
             padding: 20
@@ -112,14 +113,14 @@ export function SectionsView({
           <div style={{
             maxHeight: '200px',
             overflow: 'auto',
-            background: COLORS.darkBg,
-            border: `1px solid ${COLORS.border}`,
+            background: colors.darkBg,
+            border: `1px solid ${colors.border}`,
             borderRadius: 4,
             padding: 12
           }}>
             <pre style={{
               background: 'transparent',
-              color: COLORS.textColor,
+              color: colors.textColor,
               fontSize: 11,
               margin: 0,
               lineHeight: 1.4,
@@ -132,7 +133,7 @@ export function SectionsView({
           </div>
         ) : (
           <div style={{
-            color: COLORS.textSecondary,
+            color: colors.textSecondary,
             fontSize: 14,
             textAlign: 'center',
             padding: 20

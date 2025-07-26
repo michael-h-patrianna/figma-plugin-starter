@@ -1,4 +1,4 @@
-import { COLORS } from '@shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DatePickerProps {
   value: string;
@@ -19,12 +19,13 @@ export function DatePicker({
   max,
   disabled = false
 }: DatePickerProps) {
+  const { colors } = useTheme();
   return (
     <div style={{ width }}>
       {label && (
         <label style={{
           display: 'block',
-          color: COLORS.textColor,
+          color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
           marginBottom: 6
@@ -44,9 +45,9 @@ export function DatePicker({
           width: '100%',
           padding: '8px 12px',
           fontSize: 12,
-          color: disabled ? COLORS.textSecondary : COLORS.textColor,
-          background: disabled ? COLORS.border : COLORS.darkPanel,
-          border: `1px solid ${COLORS.border}`,
+          color: disabled ? colors.textDisabled : colors.textColor,
+          background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
+          border: `1px solid ${colors.inputBorder}`,
           borderRadius: 6,
           outline: 'none',
           boxSizing: 'border-box',
@@ -56,11 +57,11 @@ export function DatePicker({
         }}
         onFocus={(e) => {
           if (!disabled) {
-            e.currentTarget.style.borderColor = COLORS.accent;
+            e.currentTarget.style.borderColor = colors.inputBorderFocus;
           }
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = COLORS.border;
+          e.currentTarget.style.borderColor = colors.inputBorder;
         }}
       />
     </div>

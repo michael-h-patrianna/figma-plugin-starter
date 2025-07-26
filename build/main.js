@@ -1,1 +1,258 @@
-var a=Object.defineProperty,_=Object.defineProperties,O=Object.getOwnPropertyDescriptor,y=Object.getOwnPropertyDescriptors,A=Object.getOwnPropertyNames,p=Object.getOwnPropertySymbols;var f=Object.prototype.hasOwnProperty,P=Object.prototype.propertyIsEnumerable;var u=(e,o,r)=>o in e?a(e,o,{enumerable:!0,configurable:!0,writable:!0,value:r}):e[o]=r,l=(e,o)=>{for(var r in o||(o={}))f.call(o,r)&&u(e,r,o[r]);if(p)for(var r of p(o))P.call(o,r)&&u(e,r,o[r]);return e},d=(e,o)=>_(e,y(o));var i=(e,o)=>()=>(e&&(o=e(e=0)),o);var C=(e,o)=>{for(var r in o)a(e,r,{get:o[r],enumerable:!0})},T=(e,o,r,t)=>{if(o&&typeof o=="object"||typeof o=="function")for(let n of A(o))!f.call(e,n)&&n!==r&&a(e,n,{get:()=>o[n],enumerable:!(t=O(o,n))||t.enumerable});return e};var D=e=>T(a({},"__esModule",{value:!0}),e);function c(e,o){if(typeof __html__=="undefined")throw new Error("No UI defined");let r=`<div id="create-figma-plugin"></div><script>document.body.classList.add('theme-${figma.editorType}');const __FIGMA_COMMAND__='${typeof figma.command=="undefined"?"":figma.command}';const __SHOW_UI_DATA__=${JSON.stringify(typeof o=="undefined"?{}:o)};${__html__}</script>`;figma.showUI(r,d(l({},e),{themeColors:typeof e.themeColors=="undefined"?!0:e.themeColors}))}var g=i(()=>{});var E=i(()=>{g()});var I=i(()=>{"use strict"});function x(e){return e.some(o=>o.level==="error")}var s,m,N=i(()=>{"use strict";s={NO_SELECTION:"NO_SELECTION",INVALID_SELECTION:"INVALID_SELECTION",UNSUPPORTED_NODE_TYPE:"UNSUPPORTED_NODE_TYPE",PROCESSING_FAILED:"PROCESSING_FAILED",INVALID_DATA:"INVALID_DATA",MISSING_PROPERTY:"MISSING_PROPERTY",UNKNOWN_ERROR:"UNKNOWN_ERROR",PERMISSION_DENIED:"PERMISSION_DENIED",NETWORK_ERROR:"NETWORK_ERROR"},m={noSelection(){return{code:s.NO_SELECTION,message:"Please select at least one object to continue",level:"warning"}},invalidSelection(e){return{code:s.INVALID_SELECTION,message:e?"Invalid selection: "+e:"The selected objects are not valid for this operation",level:"error"}},unsupportedNodeType(e,o){return{code:s.UNSUPPORTED_NODE_TYPE,message:"Unsupported node type: "+e+". Please select a different object.",level:"error",nodeId:o}},processingFailed(e){return{code:s.PROCESSING_FAILED,message:e?"Processing failed: "+e:"Processing failed due to an unexpected error",level:"error"}},missingProperty(e,o){return{code:s.MISSING_PROPERTY,message:"Missing required property: "+e,level:"error",nodeId:o}},unknownError(e){let o=e instanceof Error?e.message:"An unknown error occurred";return{code:s.UNKNOWN_ERROR,message:"Unexpected error: "+o,level:"error"}},permissionDenied(e){return{code:s.PERMISSION_DENIED,message:e?"Permission denied: "+e:"You do not have permission to perform this action",level:"error"}},success(e){return{code:"SUCCESS",message:e,level:"info"}},info(e){return{code:"INFO",message:e,level:"info"}},warning(e){return{code:"WARNING",message:e,level:"warning"}}}});var S={};C(S,{default:()=>v});function v(){c({height:600,width:800}),figma.ui.onmessage=async e=>{if(console.log("Main received message:",e.type),e.type==="SCAN"){figma.ui.postMessage({type:"SCAN_PROGRESS",progress:10});let o=await L();figma.ui.postMessage({type:"SCAN_PROGRESS",progress:100}),figma.ui.postMessage({type:"SCAN_RESULT",data:o})}else if(e.type==="PROCESS")try{let o=await F(e.data);figma.ui.postMessage({type:"PROCESS_RESULT",data:o})}catch(o){console.error("Process failed:",o),figma.ui.postMessage({type:"PROCESS_RESULT",data:{success:!1,issues:[m.unknownError(o)]}})}else e.type==="RESIZE"&&figma.ui.resize(e.width,e.height)}}async function L(){let e=figma.currentPage.selection,o=[];e.length===0&&o.push(m.noSelection()),e.forEach(t=>{t.type==="CONNECTOR"&&o.push(m.unsupportedNodeType(t.type,t.id))});let r={selectionCount:e.length,selectedTypes:e.map(t=>t.type),pageInfo:{name:figma.currentPage.name,nodeCount:figma.currentPage.children.length}};return{success:!x(o),data:r,issues:o,message:`Scanned ${e.length} selected objects`}}async function F(e){let o=[];return await new Promise(t=>setTimeout(t,500)),{success:!0,data:{processed:!0,timestamp:Date.now(),input:e},issues:o,message:"Processing completed successfully"}}var R=i(()=>{"use strict";E();I();N()});var M={"src/main/index.ts--default":(R(),D(S)).default},w="src/main/index.ts--default";M[w]();
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// node_modules/@create-figma-plugin/utilities/lib/ui.js
+function showUI(options, data) {
+  if (typeof __html__ === "undefined") {
+    throw new Error("No UI defined");
+  }
+  const html = `<div id="create-figma-plugin"></div><script>document.body.classList.add('theme-${figma.editorType}');const __FIGMA_COMMAND__='${typeof figma.command === "undefined" ? "" : figma.command}';const __SHOW_UI_DATA__=${JSON.stringify(typeof data === "undefined" ? {} : data)};${__html__}</script>`;
+  figma.showUI(html, __spreadProps(__spreadValues({}, options), {
+    themeColors: typeof options.themeColors === "undefined" ? true : options.themeColors
+  }));
+}
+var init_ui = __esm({
+  "node_modules/@create-figma-plugin/utilities/lib/ui.js"() {
+  }
+});
+
+// node_modules/@create-figma-plugin/utilities/lib/index.js
+var init_lib = __esm({
+  "node_modules/@create-figma-plugin/utilities/lib/index.js"() {
+    init_ui();
+  }
+});
+
+// src/shared/constants.ts
+var DEFAULT_WIDTH, DEFAULT_HEIGHT;
+var init_constants = __esm({
+  "src/shared/constants.ts"() {
+    "use strict";
+    DEFAULT_WIDTH = 800;
+    DEFAULT_HEIGHT = 600;
+  }
+});
+
+// src/main/errors.ts
+function hasErrors(issues) {
+  return issues.some((issue) => issue.level === "error");
+}
+var ERROR_CODES, ErrorHelpers;
+var init_errors = __esm({
+  "src/main/errors.ts"() {
+    "use strict";
+    ERROR_CODES = {
+      // Selection errors
+      NO_SELECTION: "NO_SELECTION",
+      INVALID_SELECTION: "INVALID_SELECTION",
+      UNSUPPORTED_NODE_TYPE: "UNSUPPORTED_NODE_TYPE",
+      // Processing errors
+      PROCESSING_FAILED: "PROCESSING_FAILED",
+      INVALID_DATA: "INVALID_DATA",
+      MISSING_PROPERTY: "MISSING_PROPERTY",
+      // General errors
+      UNKNOWN_ERROR: "UNKNOWN_ERROR",
+      PERMISSION_DENIED: "PERMISSION_DENIED",
+      NETWORK_ERROR: "NETWORK_ERROR"
+    };
+    ErrorHelpers = {
+      noSelection() {
+        return {
+          code: ERROR_CODES.NO_SELECTION,
+          message: "Please select at least one object to continue",
+          level: "warning"
+        };
+      },
+      invalidSelection(reason) {
+        return {
+          code: ERROR_CODES.INVALID_SELECTION,
+          message: reason ? "Invalid selection: " + reason : "The selected objects are not valid for this operation",
+          level: "error"
+        };
+      },
+      unsupportedNodeType(nodeType, nodeId) {
+        return {
+          code: ERROR_CODES.UNSUPPORTED_NODE_TYPE,
+          message: "Unsupported node type: " + nodeType + ". Please select a different object.",
+          level: "error",
+          nodeId
+        };
+      },
+      processingFailed(details) {
+        return {
+          code: ERROR_CODES.PROCESSING_FAILED,
+          message: details ? "Processing failed: " + details : "Processing failed due to an unexpected error",
+          level: "error"
+        };
+      },
+      missingProperty(propertyName, nodeId) {
+        return {
+          code: ERROR_CODES.MISSING_PROPERTY,
+          message: "Missing required property: " + propertyName,
+          level: "error",
+          nodeId
+        };
+      },
+      unknownError(error) {
+        const message = error instanceof Error ? error.message : "An unknown error occurred";
+        return {
+          code: ERROR_CODES.UNKNOWN_ERROR,
+          message: "Unexpected error: " + message,
+          level: "error"
+        };
+      },
+      permissionDenied(action) {
+        return {
+          code: ERROR_CODES.PERMISSION_DENIED,
+          message: action ? "Permission denied: " + action : "You do not have permission to perform this action",
+          level: "error"
+        };
+      },
+      // Success/info messages
+      success(message) {
+        return {
+          code: "SUCCESS",
+          message,
+          level: "info"
+        };
+      },
+      info(message) {
+        return {
+          code: "INFO",
+          message,
+          level: "info"
+        };
+      },
+      warning(message) {
+        return {
+          code: "WARNING",
+          message,
+          level: "warning"
+        };
+      }
+    };
+  }
+});
+
+// src/main/index.ts
+var main_exports = {};
+__export(main_exports, {
+  default: () => main_default
+});
+function main_default() {
+  showUI({ height: DEFAULT_HEIGHT, width: DEFAULT_WIDTH });
+  figma.ui.onmessage = async (msg) => {
+    console.log("Main received message:", msg.type);
+    if (msg.type === "SCAN") {
+      figma.ui.postMessage({ type: "SCAN_PROGRESS", progress: 10 });
+      const result = await performScan();
+      figma.ui.postMessage({ type: "SCAN_PROGRESS", progress: 100 });
+      figma.ui.postMessage({ type: "SCAN_RESULT", data: result });
+    } else if (msg.type === "PROCESS") {
+      try {
+        const result = await performProcess(msg.data);
+        figma.ui.postMessage({ type: "PROCESS_RESULT", data: result });
+      } catch (error) {
+        console.error("Process failed:", error);
+        figma.ui.postMessage({
+          type: "PROCESS_RESULT",
+          data: {
+            success: false,
+            issues: [ErrorHelpers.unknownError(error)]
+          }
+        });
+      }
+    } else if (msg.type === "RESIZE") {
+      figma.ui.resize(msg.width, msg.height);
+    }
+  };
+}
+async function performScan() {
+  const selection = figma.currentPage.selection;
+  const issues = [];
+  if (selection.length === 0) {
+    issues.push(ErrorHelpers.noSelection());
+  }
+  selection.forEach((node) => {
+    if (node.type === "CONNECTOR") {
+      issues.push(ErrorHelpers.unsupportedNodeType(node.type, node.id));
+    }
+  });
+  const data = {
+    selectionCount: selection.length,
+    selectedTypes: selection.map((node) => node.type),
+    pageInfo: {
+      name: figma.currentPage.name,
+      nodeCount: figma.currentPage.children.length
+    }
+  };
+  return {
+    success: !hasErrors(issues),
+    data,
+    issues,
+    message: `Scanned ${selection.length} selected objects`
+  };
+}
+async function performProcess(inputData) {
+  const issues = [];
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const processedData = {
+    processed: true,
+    timestamp: Date.now(),
+    input: inputData
+  };
+  return {
+    success: true,
+    data: processedData,
+    issues,
+    message: "Processing completed successfully"
+  };
+}
+var init_main = __esm({
+  "src/main/index.ts"() {
+    "use strict";
+    init_lib();
+    init_constants();
+    init_errors();
+  }
+});
+
+// <stdin>
+var modules = { "src/main/index.ts--default": (init_main(), __toCommonJS(main_exports))["default"] };
+var commandId = true ? "src/main/index.ts--default" : figma.command;
+modules[commandId]();

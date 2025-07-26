@@ -1,5 +1,6 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { Component, h } from 'preact';
+import { getThemeColors } from '../../contexts/ThemeContext';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -36,6 +37,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   render() {
+    const colors = getThemeColors('dark'); // Default to dark theme for error boundary
+
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback && this.state.error) {
@@ -45,15 +48,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       // Default error UI
       return (
         <div style={{
-          background: COLORS.darkPanel,
-          border: `1px solid ${COLORS.error}`,
+          background: colors.darkPanel,
+          border: `1px solid ${colors.error}`,
           borderRadius: BORDER_RADIUS,
           padding: 24,
           margin: 16,
           textAlign: 'center'
         }}>
           <div style={{
-            color: COLORS.error,
+            color: colors.error,
             fontSize: 18,
             fontWeight: 600,
             marginBottom: 12
@@ -62,7 +65,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
 
           <div style={{
-            color: COLORS.textSecondary,
+            color: colors.textSecondary,
             fontSize: 14,
             marginBottom: 16,
             lineHeight: 1.5
@@ -72,14 +75,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
           {this.state.error && (
             <details style={{
-              background: COLORS.darkBg,
+              background: colors.darkBg,
               borderRadius: BORDER_RADIUS,
               padding: 12,
               marginBottom: 16,
               textAlign: 'left'
             }}>
               <summary style={{
-                color: COLORS.textColor,
+                color: colors.textColor,
                 cursor: 'pointer',
                 fontSize: 13,
                 fontWeight: 500,
@@ -88,7 +91,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 Error details
               </summary>
               <pre style={{
-                color: COLORS.error,
+                color: colors.error,
                 fontSize: 11,
                 fontFamily: 'Monaco, monospace',
                 overflow: 'auto',
@@ -106,7 +109,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <button
             onClick={() => this.setState({ hasError: false, error: undefined, errorInfo: undefined })}
             style={{
-              background: COLORS.accent,
+              background: colors.accent,
               border: 'none',
               borderRadius: BORDER_RADIUS,
               color: '#fff',

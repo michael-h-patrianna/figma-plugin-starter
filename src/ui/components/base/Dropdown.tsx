@@ -1,5 +1,6 @@
-import { BORDER_RADIUS, COLORS } from '@shared/constants';
+import { BORDER_RADIUS } from '@shared/constants';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DropdownOption {
   value: string;
@@ -24,6 +25,7 @@ export function Dropdown({
   disabled = false,
   width = '200px'
 }: DropdownProps) {
+  const { colors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -50,10 +52,10 @@ export function Dropdown({
         style={{
           width: '100%',
           padding: '8px 12px',
-          background: disabled ? COLORS.darkBg : '#2a2d35',
-          border: `1px solid ${COLORS.border}`,
+          background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
+          border: `1px solid ${colors.inputBorder}`,
           borderRadius: BORDER_RADIUS,
-          color: disabled ? COLORS.textSecondary : COLORS.textColor,
+          color: disabled ? colors.textDisabled : colors.textColor,
           fontSize: 13,
           textAlign: 'left',
           cursor: disabled ? 'not-allowed' : 'pointer',
@@ -64,12 +66,12 @@ export function Dropdown({
         }}
         onMouseEnter={(e) => {
           if (!disabled) {
-            e.currentTarget.style.borderColor = COLORS.accent;
+            e.currentTarget.style.borderColor = colors.inputBorderFocus;
           }
         }}
         onMouseLeave={(e) => {
           if (!disabled) {
-            e.currentTarget.style.borderColor = COLORS.border;
+            e.currentTarget.style.borderColor = colors.inputBorder;
           }
         }}
       >
@@ -90,8 +92,8 @@ export function Dropdown({
             top: '100%',
             left: 0,
             right: 0,
-            background: COLORS.darkPanel,
-            border: `1px solid ${COLORS.border}`,
+            background: colors.inputBackground,
+            border: `1px solid ${colors.inputBorder}`,
             borderRadius: BORDER_RADIUS,
             marginTop: 4,
             maxHeight: '200px',
@@ -115,7 +117,7 @@ export function Dropdown({
                 padding: '8px 12px',
                 background: 'transparent',
                 border: 'none',
-                color: option.disabled ? COLORS.textSecondary : COLORS.textColor,
+                color: option.disabled ? colors.textDisabled : colors.textColor,
                 fontSize: 13,
                 textAlign: 'left',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
@@ -123,7 +125,7 @@ export function Dropdown({
               }}
               onMouseEnter={(e) => {
                 if (!option.disabled) {
-                  e.currentTarget.style.backgroundColor = COLORS.darkBg;
+                  e.currentTarget.style.backgroundColor = colors.backgroundSecondary;
                 }
               }}
               onMouseLeave={(e) => {

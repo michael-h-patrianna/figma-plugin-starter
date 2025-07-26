@@ -1,5 +1,4 @@
-import { COLORS } from '@shared/constants';
-import { h } from 'preact';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HelpPopupProps {
   isVisible: boolean;
@@ -7,6 +6,8 @@ interface HelpPopupProps {
 }
 
 export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
+  const { colors } = useTheme();
+
   if (!isVisible) return null;
 
   return (
@@ -16,7 +17,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(24, 26, 32, 0.9)',
+      background: colors.overlay,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -24,10 +25,10 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
       backdropFilter: 'blur(4px)'
     }}>
       <div style={{
-        background: COLORS.darkPanel,
+        background: colors.darkPanel,
         borderRadius: 12,
         padding: 32,
-        border: `1px solid ${COLORS.border}`,
+        border: `1px solid ${colors.border}`,
         maxWidth: 500,
         width: '90%',
         maxHeight: '80vh',
@@ -41,7 +42,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
           marginBottom: 24
         }}>
           <h2 style={{
-            color: COLORS.textColor,
+            color: colors.textColor,
             margin: 0,
             fontWeight: 700,
             fontSize: 20
@@ -53,7 +54,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             style={{
               background: 'transparent',
               border: 'none',
-              color: COLORS.textSecondary,
+              color: colors.textSecondary,
               fontSize: 24,
               cursor: 'pointer',
               padding: 4,
@@ -66,12 +67,12 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
 
         {/* Content */}
         <div style={{
-          color: COLORS.textColor,
+          color: colors.textColor,
           lineHeight: 1.6
         }}>
           <section style={{ marginBottom: 24 }}>
             <h3 style={{
-              color: COLORS.accent,
+              color: colors.accent,
               marginBottom: 12,
               fontSize: 16,
               fontWeight: 600
@@ -81,7 +82,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             <p style={{
               margin: 0,
               fontSize: 14,
-              color: COLORS.textSecondary
+              color: colors.textSecondary
             }}>
               Toggle Demo Mode to explore all components and features. Try loading demo data, testing notifications, and simulating progress indicators. This mode showcases the starter's capabilities without requiring actual Figma selections.
             </p>
@@ -89,7 +90,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
 
           <section style={{ marginBottom: 24 }}>
             <h3 style={{
-              color: COLORS.accent,
+              color: colors.accent,
               marginBottom: 12,
               fontSize: 16,
               fontWeight: 600
@@ -99,7 +100,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             <p style={{
               margin: 0,
               fontSize: 14,
-              color: COLORS.textSecondary
+              color: colors.textSecondary
             }}>
               Includes Panel, DataTable, NotificationBanner, Toast, DebugPanel, and more. Each component is designed to be reusable and follows consistent styling patterns with the dark theme.
             </p>
@@ -107,7 +108,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
 
           <section style={{ marginBottom: 24 }}>
             <h3 style={{
-              color: COLORS.accent,
+              color: colors.accent,
               marginBottom: 12,
               fontSize: 16,
               fontWeight: 600
@@ -117,7 +118,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             <p style={{
               margin: 0,
               fontSize: 14,
-              color: COLORS.textSecondary
+              color: colors.textSecondary
             }}>
               Features useToast for notifications, usePluginMessages for Figma communication, and useWindowResize for automatic plugin resizing. These hooks handle common plugin patterns.
             </p>
@@ -125,7 +126,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
 
           <section style={{ marginBottom: 24 }}>
             <h3 style={{
-              color: COLORS.accent,
+              color: colors.accent,
               marginBottom: 12,
               fontSize: 16,
               fontWeight: 600
@@ -135,7 +136,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             <p style={{
               margin: 0,
               fontSize: 14,
-              color: COLORS.textSecondary
+              color: colors.textSecondary
             }}>
               Built-in error helpers create consistent messages across your plugin. The NotificationBanner displays errors, warnings, and info messages with proper styling and icons.
             </p>
@@ -143,7 +144,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
 
           <section>
             <h3 style={{
-              color: COLORS.accent,
+              color: colors.accent,
               marginBottom: 12,
               fontSize: 16,
               fontWeight: 600
@@ -153,7 +154,7 @@ export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
             <p style={{
               margin: 0,
               fontSize: 14,
-              color: COLORS.textSecondary
+              color: colors.textSecondary
             }}>
               Use Debug Mode to add development utilities. The starter includes TypeScript, ESLint, Prettier, and hot reloading. Copy this template and customize for your specific plugin needs.
             </p>

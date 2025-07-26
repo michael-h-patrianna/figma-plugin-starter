@@ -1,5 +1,5 @@
-import { COLORS } from '@shared/constants';
 import { h } from 'preact';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface Tab {
   id: string;
@@ -16,12 +16,14 @@ interface TabsProps {
 }
 
 export function Tabs({ tabs, activeTab, onChange, variant = 'default' }: TabsProps) {
+  const { colors } = useTheme();
+
   return (
     <div style={{ width: '100%' }}>
       {/* Tab Navigation */}
       <div style={{
         display: 'flex',
-        borderBottom: `2px solid ${COLORS.border}`,
+        borderBottom: `2px solid ${colors.border}`,
         marginBottom: 16,
         position: 'relative'
       }}>
@@ -37,10 +39,10 @@ export function Tabs({ tabs, activeTab, onChange, variant = 'default' }: TabsPro
                 background: 'transparent',
                 border: 'none',
                 color: tab.disabled
-                  ? COLORS.textSecondary
+                  ? colors.textSecondary
                   : isActive
-                    ? COLORS.accent
-                    : COLORS.textColor,
+                    ? colors.accent
+                    : colors.textColor,
                 padding: '12px 20px 10px 20px',
                 fontSize: 14,
                 fontWeight: isActive ? 600 : 500,
@@ -48,18 +50,18 @@ export function Tabs({ tabs, activeTab, onChange, variant = 'default' }: TabsPro
                 transition: 'color 0.2s ease',
                 position: 'relative',
                 outline: 'none',
-                borderBottom: isActive ? `2px solid ${COLORS.accent}` : '2px solid transparent',
+                borderBottom: isActive ? `2px solid ${colors.accent}` : '2px solid transparent',
                 marginBottom: '-2px' // Overlap the parent border
               }}
               onMouseEnter={(e) => {
                 if (!tab.disabled && !isActive) {
-                  e.currentTarget.style.color = COLORS.accent;
-                  e.currentTarget.style.borderBottomColor = `${COLORS.accent}40`;
+                  e.currentTarget.style.color = colors.accent;
+                  e.currentTarget.style.borderBottomColor = `${colors.accent}40`;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!tab.disabled && !isActive) {
-                  e.currentTarget.style.color = COLORS.textColor;
+                  e.currentTarget.style.color = colors.textColor;
                   e.currentTarget.style.borderBottomColor = 'transparent';
                 }
               }}
