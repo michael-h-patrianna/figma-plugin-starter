@@ -3,11 +3,18 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Build outputs
 build/
 dist/
+dist-package/
 *.tsbuildinfo
+
+# Figma plugin specific
+*.figma-plugin
+figma-plugin-*.zip
+manifest-*.json
 
 # Environment variables
 .env
@@ -97,7 +104,34 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
-node_modules
 
 # Documentation files
 spec.md
+
+# Temporary files
+temp/
+tmp/
+
+# TypeScript cache
+*.tscache
+
+# ESLint cache
+.eslintcache
+
+# Prettier cache
+.prettierrcache
+
+# Webpack cache
+.webpack/
+
+# Rollup cache
+.rollup.cache
+
+# Turbo cache
+.turbo/
+
+# VS Code extension cache
+.vscode-test/
+
+# Git backup files
+*.orig
