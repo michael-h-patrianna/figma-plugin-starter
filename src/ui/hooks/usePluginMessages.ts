@@ -1,8 +1,9 @@
-import { useEffect, useCallback } from 'react';
+import { OperationResult } from '@main/types';
+import { useCallback, useEffect } from 'react';
 
 export function usePluginMessages(
-  onScanResult: (payload: any) => void,
-  onExportResult: (payload: any) => void,
+  onScanResult: (result: OperationResult) => void,
+  onProcessResult: (result: OperationResult) => void,
   onScanProgress?: (progress: number) => void
 ) {
   useEffect(() => {
@@ -10,19 +11,21 @@ export function usePluginMessages(
       if (event.data.pluginMessage) {
         const { type, data, progress } = event.data.pluginMessage;
         if (type === 'SCAN_RESULT') onScanResult(data);
-        if (type === 'EXPORT_RESULT') onExportResult(data);
+        if (type === 'PROCESS_RESULT') onProcessResult(data);
         if (type === 'SCAN_PROGRESS' && onScanProgress) onScanProgress(progress);
       }
     }
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [onScanResult, onExportResult, onScanProgress]);
+  }, [onScanResult, onProcessResult, onScanProgress]);
 
   const sendScan = useCallback(() => {
     parent.postMessage({ pluginMessage: { type: 'SCAN' } }, '*');
   }, []);
-  const sendExport = useCallback((scan?: any) => {
-    parent.postMessage({ pluginMessage: { type: 'EXPORT', scan } }, '*');
+
+  const sendProcess = useCallback((data?: any) => {
+    parent.postMessage({ pluginMessage: { type: 'PROCESS', data } }, '*');
   }, []);
-  return { sendScan, sendExport };
+
+  return { sendScan, sendProcess };
 }

@@ -1,64 +1,96 @@
 import { showUI } from '@create-figma-plugin/utilities';
-import { scanQuestline } from './scan';
-import { exportQuestline } from './export';
-import { ScanResult, Issue } from './types';
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from '@shared/constants';
+import { ErrorHelpers, hasErrors } from './errors';
+import { Issue, OperationResult } from './types';
 
 export default function () {
-  showUI({ height: 700, width: 1100 });
+  showUI({ height: DEFAULT_HEIGHT, width: DEFAULT_WIDTH });
 
   figma.ui.onmessage = async (msg) => {
+    console.log('Main received message:', msg.type);
+
     if (msg.type === 'SCAN') {
       // Send initial progress
       figma.ui.postMessage({ type: 'SCAN_PROGRESS', progress: 10 });
-      
-      const result = await scanQuestline();
-      
+
+      const result = await performScan();
+
       // Send completion progress
       figma.ui.postMessage({ type: 'SCAN_PROGRESS', progress: 100 });
-      
+
       figma.ui.postMessage({ type: 'SCAN_RESULT', data: result });
-    } else if (msg.type === 'EXPORT') {
-      console.log('EXPORT DEBUG: Starting export...');
-      
+    }
+    else if (msg.type === 'PROCESS') {
       try {
-        // Use existing scan result if available, otherwise scan
-        let scan: ScanResult;
-        if (msg.scan) {
-          scan = msg.scan as ScanResult;
-          console.log('EXPORT DEBUG: Using existing scan result');
-        } else {
-          console.log('EXPORT DEBUG: No scan provided, scanning...');
-          scan = await scanQuestline();
-        }
-        
-        console.log('EXPORT DEBUG: Scan result:', scan);
-        
-        if (scan.issues.some((i: Issue) => i.level === 'error')) {
-          console.log('EXPORT DEBUG: Scan has errors, aborting export');
-          figma.ui.postMessage({ type: 'EXPORT_RESULT', data: { json: null, issues: scan.issues } });
-          return;
-        }
-        
-        console.log('EXPORT DEBUG: Calling exportQuestline...');
-        const result = await exportQuestline(scan);
-        console.log('EXPORT DEBUG: Export result:', result);
-        figma.ui.postMessage({ type: 'EXPORT_RESULT', data: result });
+        const result = await performProcess(msg.data);
+        figma.ui.postMessage({ type: 'PROCESS_RESULT', data: result });
       } catch (error) {
-        console.log('EXPORT DEBUG: Export failed with error:', error);
-        figma.ui.postMessage({ 
-          type: 'EXPORT_RESULT', 
-          data: { 
-            json: null, 
-            issues: [{ 
-              code: 'UNKNOWN', 
-              message: `Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 
-              level: 'error' 
-            }] 
-          } 
+        console.error('Process failed:', error);
+        figma.ui.postMessage({
+          type: 'PROCESS_RESULT',
+          data: {
+            success: false,
+            issues: [ErrorHelpers.unknownError(error)]
+          }
         });
       }
-    } else if (msg.type === 'RESIZE') {
+    }
+    else if (msg.type === 'RESIZE') {
       figma.ui.resize(msg.width, msg.height);
     }
+  };
+}
+
+async function performScan(): Promise<OperationResult> {
+  // Example scan operation - customize this for your plugin
+  const selection = figma.currentPage.selection;
+  const issues: Issue[] = [];
+
+  if (selection.length === 0) {
+    issues.push(ErrorHelpers.noSelection());
+  }
+
+  // Example: Check for unsupported node types
+  selection.forEach(node => {
+    if (node.type === 'CONNECTOR') {
+      issues.push(ErrorHelpers.unsupportedNodeType(node.type, node.id));
+    }
+  });
+
+  const data = {
+    selectionCount: selection.length,
+    selectedTypes: selection.map(node => node.type),
+    pageInfo: {
+      name: figma.currentPage.name,
+      nodeCount: figma.currentPage.children.length
+    }
+  };
+
+  return {
+    success: !hasErrors(issues),
+    data,
+    issues,
+    message: `Scanned ${selection.length} selected objects`
+  };
+}
+
+async function performProcess(inputData: any): Promise<OperationResult> {
+  // Example process operation - customize this for your plugin
+  const issues: Issue[] = [];
+
+  // Simulate some processing
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const processedData = {
+    processed: true,
+    timestamp: Date.now(),
+    input: inputData
+  };
+
+  return {
+    success: true,
+    data: processedData,
+    issues,
+    message: 'Processing completed successfully'
   };
 }

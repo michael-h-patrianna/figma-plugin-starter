@@ -1,74 +1,40 @@
-import { EventHandler } from '@create-figma-plugin/utilities'
+import { EventHandler } from '@create-figma-plugin/utilities';
 
-// Types for questline theming plugin
+// Generic types for Figma plugin starter
 
-export interface Quest {
-  questKey: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  rotation: number;
-  lockedImg: string; // path to PNG file (State=locked)
-  activeImg: string; // path to PNG file (State=active) - mandatory
-  unclaimedImg: string; // path to PNG file (State=unclaimed)
-  completedImg: string; // path to PNG file (State=completed)
-}
-
-export interface QuestlineExport {
-  questlineId: string;
-  frameSize: { width: number; height: number };
-  background: { exportUrl: string };
-  quests: Quest[];
-}
-
-export type IssueLevel = 'error' | 'warning';
+export type IssueLevel = 'error' | 'warning' | 'info';
 
 export interface Issue {
-  code: IssueCode;
+  code: string;
   message: string;
   nodeId?: string;
   level: IssueLevel;
 }
 
-export type IssueCode =
-  | 'MISSING_BG'
-  | 'TOO_FEW_QUESTS'
-  | 'TOO_MANY_QUESTS'
-  | 'DUPLICATE_QUEST_KEY'
-  | 'INVALID_QUEST_KEY'
-  | 'QUEST_KEY_DOUBLE_WHITESPACE'
-  | 'QUEST_KEY_OUT_OF_BOUNDS'
-  | 'QUEST_KEY_NOT_INSIDE_PARENT'
-  | 'QUEST_KEY_AUTO_LAYOUT_ENABLED'
-  | 'MISSING_ACTIVE_VARIANT'
-  | 'MISSING_QUEST_KEY'
-  | 'IMAGE_EXPORT_FAILED'
-  | 'VALIDATION_FAILED'
-  | 'UNKNOWN';
+export interface PluginData {
+  // Generic data structure for plugin operations
+  [key: string]: any;
+}
 
-export interface ScanResult {
-  questlineId: string;
-  frameSize: { width: number; height: number };
-  backgroundNodeId: string;
-  backgroundFillUrl?: string;
-  quests: Array<{
-    nodeId: string;
-    questKey: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    rotation: number;
-    lockedNodeId: string;
-    activeNodeId: string;
-    unclaimedNodeId: string;
-    completedNodeId: string;
-    lockedImgUrl?: string;
-    activeImgUrl?: string;
-    unclaimedImgUrl?: string;
-    completedImgUrl?: string;
-    isFlattened?: boolean;
-  }>;
-  issues: Issue[];
+export interface OperationResult {
+  success: boolean;
+  data?: PluginData;
+  issues?: Issue[];
+  message?: string;
+}
+
+// Plugin message types
+export interface ScanMessage extends EventHandler {
+  name: 'SCAN';
+  handler: () => void;
+}
+
+export interface ProcessMessage extends EventHandler {
+  name: 'PROCESS';
+  handler: (data: PluginData) => void;
+}
+
+export interface ResizeMessage extends EventHandler {
+  name: 'RESIZE';
+  handler: (width: number, height: number) => void;
 }
