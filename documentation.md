@@ -34,10 +34,11 @@ This documentation covers all the custom components, hooks, and features in this
 - [Button](#button) - Clickable actions with primary/secondary/danger variants
 - [Input](#input) - Native HTML input elements with theming
 - [Textbox](#textbox) - Enhanced text input fields with icons and validation
-- [CustomDropdown](#customdropdown) - Select menus and option pickers
+- [Dropdown](#dropdown) - Select menus and option pickers
 - [Checkbox](#checkbox) - Toggle options and boolean settings
 - [ToggleSwitch](#toggleswitch) - Modern on/off switches
 - [RadioButton](#radiobutton) - Single choice from multiple options
+- [ColorPicker](#colorpicker) - Color selection with HTML color input
 - [DatePicker](#datepicker) - Date selection components
 - [TimePicker](#timepicker) - Time selection components
 
@@ -60,6 +61,7 @@ This documentation covers all the custom components, hooks, and features in this
 ### Container & Navigation Components
 - [Panel](#panel) - Container components with consistent styling
 - [Modal](#modal) - Overlay dialogs and popups
+- [ProgressModal](#progressmodal) - Progress display in modal format
 - [Accordion](#accordion) - Expandable content sections
 - [Tabs](#tabs) - Tabbed interfaces
 - [DataTable](#datatable) - Sortable tables with theming
@@ -69,6 +71,7 @@ This documentation covers all the custom components, hooks, and features in this
 - [SettingsDropdown](#settingsdropdown) - Settings menu with cog icon
 
 ### System & State Management
+- [ErrorBoundary](#errorboundary) - Error catching and fallback UI
 - [Theme System](#theme-system) - Light/dark mode management
 - [useSettings Hook](#usesettings-hook) - Automatic settings persistence
 - [Plugin Messaging System](#plugin-messaging-system) - UI ↔ Main thread communication
@@ -318,7 +321,7 @@ function UserForm() {
 
 ---
 
-## CustomDropdown
+## Dropdown
 
 **What it's for**: Letting users pick one option from a list (like a select menu).
 
@@ -326,7 +329,7 @@ function UserForm() {
 
 ### Import
 ```tsx
-import { CustomDropdown } from '@ui/components/base/CustomDropdown';
+import { Dropdown } from '@ui/components/base/Dropdown';
 ```
 
 ### Basic Usage
@@ -341,7 +344,7 @@ function MyComponent() {
   ];
 
   return (
-    <CustomDropdown
+    <Dropdown
       options={options}
       value={selectedType}
       onValueChange={setSelectedType}
@@ -381,7 +384,7 @@ const colorOptions = [
   { value: 'green', text: '🟢 Green' }
 ];
 
-<CustomDropdown
+<Dropdown
   options={colorOptions}
   value={selectedColor}
   onValueChange={setSelectedColor}
@@ -396,7 +399,7 @@ const sizeOptions = [
   { value: '32', text: '32px - Extra Large' }
 ];
 
-<CustomDropdown
+<Dropdown
   options={sizeOptions}
   value={fontSize}
   onValueChange={setFontSize}
@@ -435,7 +438,7 @@ function LayerSettings() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
         <label style={{ display: 'block', marginBottom: 4 }}>Layer Type:</label>
-        <CustomDropdown
+        <Dropdown
           options={layerTypes}
           value={layerType}
           onValueChange={setLayerType}
@@ -445,7 +448,7 @@ function LayerSettings() {
 
       <div>
         <label style={{ display: 'block', marginBottom: 4 }}>Blend Mode:</label>
-        <CustomDropdown
+        <Dropdown
           options={blendModes}
           value={blendMode}
           onValueChange={setBlendMode}
@@ -1213,6 +1216,66 @@ function MyComponent() {
 
 ---
 
+## ProgressModal
+
+**What it's for**: Displaying progress indicators in a modal overlay format.
+
+**When to use**: For long-running operations that need to show progress and prevent user interaction with the main interface.
+
+### Import
+```tsx
+import { ProgressModal } from '@ui/components/base/ProgressModal';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [progress, setProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleProcess = () => {
+    setProgress(0);
+    setIsProcessing(true);
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setIsProcessing(false), 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+  };
+
+  return (
+    <div>
+      <Button onClick={handleProcess}>Start Process</Button>
+
+      <ProgressModal
+        isVisible={isProcessing}
+        onClose={() => setIsProcessing(false)}
+        progress={progress}
+        title="Processing Files"
+        description="Please wait while we process your files..."
+        showCloseButton={false}
+      />
+    </div>
+  );
+}
+```
+
+### Props
+- `isVisible`: `boolean` - Controls modal visibility
+- `onClose`: `() => void` - Callback when modal should close
+- `progress`: `number` - Progress value (0-100)
+- `title`: `string` - Modal title (optional, defaults to "Processing")
+- `description`: `string` - Description text (optional, defaults to "Please wait while we process your request")
+- `showCloseButton`: `boolean` - Whether to show close button (optional, defaults to false, automatically shows when progress reaches 100%)
+
+---
+
 ## DataTable
 
 **What it's for**: Displaying tabular data with sorting, filtering, and theming support.
@@ -1370,6 +1433,180 @@ function MyComponent() {
 
 ---
 
+## ColorPicker
+
+**What it's for**: Simple, themeable color selection using the native HTML color input.
+
+**When to use**: For any color selection needs - theme colors, UI elements, styling options, or any feature that requires users to pick colors.
+
+### Import
+```tsx
+import { ColorPicker } from '@ui/components/base/ColorPicker';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [selectedColor, setSelectedColor] = useState('#3772FF');
+
+  return (
+    <ColorPicker
+      value={selectedColor}
+      onChange={setSelectedColor}
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `value` | String | No | Current color value in hex format | `"#3772FF"`, `"#ff0000"` |
+| `onChange` | Function | No | Called when color changes | `(color) => setColor(color)` |
+| `disabled` | Boolean | No | Makes color picker uninteractive | `true`, `false` |
+| `size` | String | No | Size variant: `'small'`, `'medium'` (default), `'large'` | `"large"` |
+
+### Common Examples
+
+```tsx
+// Basic color picker
+<ColorPicker
+  value={primaryColor}
+  onChange={setPrimaryColor}
+/>
+
+// Different sizes
+<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+  <ColorPicker
+    value={color1}
+    onChange={setColor1}
+    size="small"
+  />
+  <ColorPicker
+    value={color2}
+    onChange={setColor2}
+    size="medium"
+  />
+  <ColorPicker
+    value={color3}
+    onChange={setColor3}
+    size="large"
+  />
+</div>
+
+// Disabled color picker
+<ColorPicker
+  value="#cccccc"
+  onChange={() => {}}
+  disabled
+/>
+
+// Color picker with label
+<div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+  <label style={{ fontSize: 12, fontWeight: 500 }}>
+    Accent Color
+  </label>
+  <ColorPicker
+    value={accentColor}
+    onChange={setAccentColor}
+  />
+</div>
+```
+
+### Real-World Usage Pattern
+```tsx
+function ThemeEditor() {
+  const [colors, setColors] = useState({
+    primary: '#3772FF',
+    secondary: '#7C3AED',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444'
+  });
+
+  const updateColor = (colorKey: string, newColor: string) => {
+    setColors(prev => ({
+      ...prev,
+      [colorKey]: newColor
+    }));
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <h3>Theme Colors</h3>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div>
+          <label>Primary Color</label>
+          <ColorPicker
+            value={colors.primary}
+            onChange={(color) => updateColor('primary', color)}
+          />
+        </div>
+
+        <div>
+          <label>Secondary Color</label>
+          <ColorPicker
+            value={colors.secondary}
+            onChange={(color) => updateColor('secondary', color)}
+          />
+        </div>
+
+        <div>
+          <label>Success Color</label>
+          <ColorPicker
+            value={colors.success}
+            onChange={(color) => updateColor('success', color)}
+            size="small"
+          />
+        </div>
+
+        <div>
+          <label>Warning Color</label>
+          <ColorPicker
+            value={colors.warning}
+            onChange={(color) => updateColor('warning', color)}
+            size="small"
+          />
+        </div>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <h4>Preview</h4>
+        <div style={{
+          padding: 16,
+          backgroundColor: colors.primary,
+          color: 'white',
+          borderRadius: 8
+        }}>
+          Primary color preview
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Features
+
+- **Native HTML Color Input**: Uses the browser's built-in color picker for maximum compatibility
+- **Theming Integration**: Automatically adapts border colors to match your theme
+- **Size Variants**: Three size options (small: 32px, medium: 40px, large: 56px)
+- **Focus States**: Interactive border color changes on focus/blur
+- **Disabled State**: Proper disabled styling with reduced opacity
+- **Accessibility**: Inherits all native HTML color input accessibility features
+
+### Notes
+
+- Returns hex color values in the format `#RRGGBB`
+- Supports all standard hex color formats
+- Default value is `#3772FF` (blue) if no value provided
+- Browser support is excellent across all modern browsers
+- No external dependencies - uses native HTML functionality
+
+---
+
 ## DatePicker
 
 **What it's for**: Selecting dates for scheduling, filtering, or any date-related input.
@@ -1379,6 +1616,7 @@ function MyComponent() {
 ### Import
 ```tsx
 import { DatePicker } from '@ui/components/base/DatePicker';
+```
 ```
 
 ### Basic Usage
@@ -1670,6 +1908,87 @@ const {
   isPersistent        // Whether storage is persistent
 } = useSettings();
 ```
+
+---
+
+## ErrorBoundary
+
+**What it's for**: Catching JavaScript errors in child components and providing a fallback UI to prevent the entire plugin from crashing.
+
+**When to use**: Wrap components that might throw errors, especially during development or around risky operations.
+
+### Import
+```tsx
+import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [hasError, setHasError] = useState(false);
+
+  // Component that might throw an error
+  const RiskyComponent = () => {
+    if (hasError) {
+      throw new Error('Something went wrong!');
+    }
+    return <div>Everything is working fine!</div>;
+  };
+
+  return (
+    <div>
+      <Button onClick={() => setHasError(true)}>
+        Trigger Error
+      </Button>
+      <Button onClick={() => setHasError(false)}>
+        Reset
+      </Button>
+
+      <ErrorBoundary
+        onError={(error, errorInfo) => {
+          console.error('Caught error:', error, errorInfo);
+          showToast('An error occurred!', 'error');
+        }}
+      >
+        <RiskyComponent />
+      </ErrorBoundary>
+    </div>
+  );
+}
+```
+
+### Advanced Usage with Custom Fallback
+```tsx
+<ErrorBoundary
+  fallback={(error, errorInfo) => (
+    <div style={{ padding: 16, border: '1px solid red' }}>
+      <h3>Custom Error Display</h3>
+      <p>Error: {error.message}</p>
+      <Button onClick={() => window.location.reload()}>
+        Reload Plugin
+      </Button>
+    </div>
+  )}
+  onError={(error, errorInfo) => {
+    // Send error to logging service
+    analytics.track('plugin_error', { error: error.message });
+  }}
+>
+  <MyRiskyComponent />
+</ErrorBoundary>
+```
+
+### Props
+- `children`: React elements to wrap with error boundary
+- `fallback`: `(error: Error, errorInfo: any) => JSX.Element` - Optional custom fallback UI function
+- `onError`: `(error: Error, errorInfo: any) => void` - Optional error handler callback
+
+### Features
+- **Default Fallback UI**: Provides a styled error display with details and retry button
+- **Error Details**: Shows error message and component stack trace in expandable section
+- **Retry Mechanism**: "Try Again" button to reset the error state
+- **Error Logging**: Automatically logs errors to console and calls optional error handler
+- **Theming**: Uses theme colors for consistent styling
 
 ---
 

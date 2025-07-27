@@ -1,3 +1,4 @@
+import { ColorPicker } from '@ui/components/base/ColorPicker';
 import { DataTable } from '@ui/components/base/DataTable';
 import { DatePicker } from '@ui/components/base/DatePicker';
 import { Dropdown } from '@ui/components/base/Dropdown';
@@ -46,11 +47,14 @@ export function FormsView({ }: FormsViewProps) {
   });
   const [selectedTime, setSelectedTime] = useState('09:00');
 
+  // Color picker state
+  const [selectedColor, setSelectedColor] = useState('#3772FF');
+
   const dropdownOptions = [
-    { value: 'option1', label: 'First Option' },
-    { value: 'option2', label: 'Second Option' },
-    { value: 'option3', label: 'Third Option' },
-    { value: 'disabled', label: 'Disabled Option', disabled: true }
+    { value: 'option1', text: 'First Option' },
+    { value: 'option2', text: 'Second Option' },
+    { value: 'option3', text: 'Third Option' },
+    { value: 'disabled', text: 'Disabled Option', disabled: true }
   ];
 
   const radioOptions = [
@@ -100,8 +104,7 @@ export function FormsView({ }: FormsViewProps) {
       {/* Comprehensive Form Layout Demo */}
       <Panel title="Form Layout">
         <Form
-          title="Form Components & Layout Options"
-          description="Compact showcase of all form elements with responsive layouts"
+
         >
           <FormSection title="Input Fields & Controls">
             <FormGroup>
@@ -138,7 +141,7 @@ export function FormsView({ }: FormsViewProps) {
                   <Dropdown
                     options={dropdownOptions}
                     value={selectedDropdown}
-                    onChange={setSelectedDropdown}
+                    onValueChange={setSelectedDropdown}
                     placeholder="Select option"
                   />
                 </FormField>
@@ -209,6 +212,41 @@ export function FormsView({ }: FormsViewProps) {
         <InfoBox title="Layout Notice" variant="plain">
           The Form component automatically removes bottom margins from the last elements for consistent spacing.
         </InfoBox>
+      </Panel>
+
+      {/* Color Picker */}
+      <Panel title="Color Picker">
+        <Form
+
+        >
+          <FormSection title="Color Picker">
+            <FormGroup>
+              <FormRow columns={3}>
+                <FormField label="Small Color Picker">
+                  <ColorPicker
+                    value={selectedColor}
+                    onChange={setSelectedColor}
+                    size="small"
+                  />
+                </FormField>
+                <FormField label="Medium Color Picker">
+                  <ColorPicker
+                    value={selectedColor}
+                    onChange={setSelectedColor}
+                    size="medium"
+                  />
+                </FormField>
+                <FormField label="Large Color Picker">
+                  <ColorPicker
+                    value={selectedColor}
+                    onChange={setSelectedColor}
+                    size="large"
+                  />
+                </FormField>
+              </FormRow>
+            </FormGroup>
+          </FormSection>
+        </Form>
       </Panel>
 
       {/* Toast Notification */}

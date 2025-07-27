@@ -1,116 +1,161 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 
+/**
+ * Configuration for a dropdown option.
+ */
 interface DropdownOption {
+  /** Unique value for the option */
   value: string;
-  label: string;
+  /** Display text for the option */
+  text: string;
+  /** Whether the option is disabled and cannot be selected */
   disabled?: boolean;
 }
 
+/**
+ * Props for the Dropdown component.
+ */
 interface DropdownProps {
+  /** Array of options to display in the dropdown */
   options: DropdownOption[];
+  /** Currently selected value */
   value: string;
-  onChange: (value: string) => void;
+  /** Callback function called when selection changes */
+  onValueChange: (value: string) => void;
+  /** Placeholder text shown when no option is selected */
   placeholder?: string;
+  /** Whether the dropdown is disabled */
   disabled?: boolean;
-  width?: string;
+  /** Additional CSS class names */
+  className?: string;
+  /** Additional inline styles */
+  style?: any;
 }
 
+/**
+ * A custom dropdown/select component with themed styling and keyboard navigation.
+ *
+ * Provides a styled dropdown menu with hover states, disabled options,
+ * click-outside-to-close functionality, and smooth animations.
+ *
+ * @param props - The dropdown props
+ * @returns A styled dropdown select component
+ *
+ * @example
+ * ```tsx
+ * const [selectedColor, setSelectedColor] = useState('');
+ *
+ * const colorOptions = [
+ *   { value: 'red', text: 'Red' },
+ *   { value: 'blue', text: 'Blue' },
+ *   { value: 'green', text: 'Green', disabled: true }
+ * ];
+ *
+ * <Dropdown
+ *   options={colorOptions}
+ *   value={selectedColor}
+ *   onValueChange={setSelectedColor}
+ *   placeholder="Choose a color"
+ * />
+ * ```
+ */
 export function Dropdown({
   options,
   value,
-  onChange,
-  placeholder = 'Select option...',
+  onValueChange,
+  placeholder = 'Select...',
   disabled = false,
-  width = '100%'
+  className = '',
+  style = {}
 }: DropdownProps) {
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Safely find selected option
-  const selectedOption = options?.find(option => option.value === value) || null;
+  const selectedOption = options.find((opt: DropdownOption) => opt.value === value);
 
-  // Safe onChange handler
-  const handleOptionSelect = useCallback((optionValue: string) => {
-    try {
-      onChange(optionValue);
-    } catch (error) {
-      console.error('Error in dropdown onChange:', error);
-    } finally {
-      setIsOpen(false);
-    }
-  }, [onChange]);
-
-  // Safe toggle handler
-  const handleToggle = useCallback(() => {
-    if (!disabled) {
-      setIsOpen(prev => !prev);
-    }
-  }, [disabled]);
   useEffect(() => {
+    /**
+     * Handles clicks outside the dropdown to close it.
+     */
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
+  /**
+   * Toggles the dropdown open/closed state.
+   */
+  const toggleOpen = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
     }
+  };
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
+  /**
+   * Selects an option and closes the dropdown.
+   *
+   * @param optionValue - The value of the option to select
+   * @param optionDisabled - Whether the option is disabled
+   */
+  const selectOption = (optionValue: string, optionDisabled?: boolean) => {
+    if (!optionDisabled) {
+      onValueChange(optionValue);
+      setIsOpen(false);
+    }
+  };
 
-  if (!options || options.length === 0) {
-    return (
-      <div style={{ width }}>
-        <div style={{
-          padding: `${spacing.sm}px ${spacing.md - 4}px`,
-          background: colors.inputBackgroundDisabled,
-          border: `1px solid ${colors.inputBorder}`,
-          borderRadius: BORDER_RADIUS,
-          color: colors.textDisabled,
-          fontSize: 13
-        }}>
-          No options available
-        </div>
-      </div>
-    );
-  }
+  const buttonStyle = {
+    width: '100%',
+    padding: '8px 12px',
+    background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
+    border: `1px solid ${colors.inputBorder}`,
+    borderRadius: '6px',
+    color: disabled ? colors.textDisabled : colors.textColor,
+    fontSize: '13px',
+    textAlign: 'left' as const,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    transition: 'border-color 0.2s ease',
+    outline: 'none',
+    fontFamily: 'inherit',
+    ...style
+  };
+
+  const menuStyle = {
+    position: 'absolute' as const,
+    top: '100%',
+    left: 0,
+    right: 0,
+    background: colors.inputBackground,
+    border: `1px solid ${colors.inputBorder}`,
+    borderRadius: '6px',
+    marginTop: '4px',
+    maxHeight: '200px',
+    overflowY: 'auto' as const,
+    zIndex: 1000,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
+  };
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', width }}>
-      {/* Trigger */}
+    <div
+      ref={dropdownRef}
+      style={{ position: 'relative', width: '100%' }}
+      className={`custom-dropdown ${className}`}
+    >
       <button
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        type="button"
+        onClick={toggleOpen}
         disabled={disabled}
-        style={{
-          width: '100%',
-          padding: `${spacing.sm}px ${spacing.md - 4}px`,
-          background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
-          border: `1px solid ${colors.inputBorder}`,
-          borderRadius: BORDER_RADIUS,
-          color: disabled ? colors.textDisabled : colors.textColor,
-          fontSize: 13,
-          textAlign: 'left',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          transition: 'border-color 0.2s ease'
-        }}
+        style={buttonStyle}
         onMouseEnter={(e) => {
           if (!disabled) {
             e.currentTarget.style.borderColor = colors.inputBorderFocus;
@@ -122,47 +167,31 @@ export function Dropdown({
           }
         }}
       >
-        <span>{selectedOption ? selectedOption.label : placeholder}</span>
         <span style={{
+          color: selectedOption ? colors.textColor : colors.textSecondary,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          {selectedOption ? selectedOption.text : placeholder}
+        </span>
+        <span style={{
+          color: colors.textSecondary,
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s ease'
+          transition: 'transform 0.2s ease',
+          fontSize: '12px'
         }}>
           ▼
         </span>
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            background: colors.inputBackground,
-            border: `1px solid ${colors.inputBorder}`,
-            borderRadius: BORDER_RADIUS,
-            marginTop: spacing.xs,
-            maxHeight: '200px',
-            overflowY: 'auto',
-            zIndex: 1000,
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          {options.map((option) => (
+        <div style={menuStyle}>
+          {options.map((option: DropdownOption) => (
             <button
               key={option.value}
-              onClick={() => {
-                if (!option.disabled) {
-                  try {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  } catch (error) {
-                    console.error('Error in dropdown onChange:', error);
-                    setIsOpen(false);
-                  }
-                }
-              }}
+              type="button"
+              onClick={() => selectOption(option.value, option.disabled)}
               disabled={option.disabled}
               style={{
                 width: '100%',
@@ -170,10 +199,11 @@ export function Dropdown({
                 background: 'transparent',
                 border: 'none',
                 color: option.disabled ? colors.textDisabled : colors.textColor,
-                fontSize: 13,
+                fontSize: '13px',
                 textAlign: 'left',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease'
+                transition: 'background-color 0.2s ease',
+                fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
                 if (!option.disabled) {
@@ -181,12 +211,10 @@ export function Dropdown({
                 }
               }}
               onMouseLeave={(e) => {
-                if (!option.disabled) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
+                e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
-              {option.label}
+              {option.text}
             </button>
           ))}
         </div>

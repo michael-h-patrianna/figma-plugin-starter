@@ -11,7 +11,6 @@ import { DebugPanel } from '@ui/components/panels/DebugPanel';
 import { HelpPopup } from '@ui/components/panels/HelpPopup';
 import { ContentView } from '@ui/components/views/ContentView';
 import { DataView } from '@ui/components/views/DataView';
-import { FigmaView } from '@ui/components/views/FigmaView';
 import { FormsView } from '@ui/components/views/FormsView';
 import { MessagingView } from '@ui/components/views/MessagingView';
 import { ModalsView } from '@ui/components/views/ModalsView';
@@ -279,13 +278,6 @@ function App() {
               label: 'Messaging',
               content: (
                 <MessagingView />
-              )
-            },
-            {
-              id: 'figma',
-              label: 'Figma',
-              content: (
-                <FigmaView />
               )
             },
             {
