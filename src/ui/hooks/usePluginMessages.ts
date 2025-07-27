@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'preact/hooks';
 
 /**
  * Configuration for message handlers in the plugin communication hook.

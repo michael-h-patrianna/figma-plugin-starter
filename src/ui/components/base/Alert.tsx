@@ -1,5 +1,5 @@
 import { useTheme } from '@ui/contexts/ThemeContext';
-import React from 'react';
+import { ComponentChildren } from 'preact';
 
 export type AlertType = 'info' | 'warning' | 'error' | 'success';
 
@@ -7,7 +7,7 @@ interface AlertProps {
   /** Type of alert that determines the color scheme */
   type: AlertType;
   /** The main content of the alert */
-  children: React.ReactNode;
+  children: ComponentChildren;
   /** Optional icon to display (defaults based on type) */
   icon?: string;
   /** Whether to show the alert (for conditional rendering) */

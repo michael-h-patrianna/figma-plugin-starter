@@ -1,16 +1,19 @@
-# Figma Plugin Custom UI Components User Guide
+# Figma Plugin Starter - Complete Component & Feature Guide
 
-Welcome to the complete guide for using custom UI components in your Figma plugin! 🎨
+Welcome to the complete guide for your Figma plugin starter! 🎨
 
-This documentation covers all the custom components in the `src/ui/components/base` folder. These components are specifically designed to work seamlessly with your plugin's theming system, providing a consistent and professional look that adapts to both light and dark themes.
+This documentation covers all the custom components, hooks, and features in your plugin. Everything is designed to work seamlessly with the theming system, providing a consistent and professional look that adapts to both light and dark themes.
 
-## Why Use These Custom Components?
+## 🌟 What's Included
 
-✅ **Better Theme Control**: Unlike default Figma UI components, these give you full control over styling
-✅ **No More White-on-White Issues**: Properly themed backgrounds that always look good
-✅ **Beginner-Friendly**: Simple APIs with clear prop names
-✅ **Consistent Design**: All components follow the same design patterns
-✅ **Accessibility Built-in**: Keyboard navigation and screen reader support included
+✅ **Complete UI Component Library** - 15+ themeable components ready to use
+✅ **Settings System** - Automatic save/load with persistence in real Figma plugins
+✅ **Theme System** - Light/dark mode with smooth transitions
+✅ **Plugin Communication** - Easy messaging between UI and main thread
+✅ **Toast Notifications** - User-friendly alerts and confirmations
+✅ **Context Menus** - Right-click functionality with settings dropdown
+✅ **Error Handling** - Graceful error boundaries and user feedback
+✅ **TypeScript Support** - Full type safety throughout
 
 ---
 
@@ -54,12 +57,44 @@ import { Button } from '../../base/Button';        // From nested folders
 ---
 
 ## Table of Contents
-- [Button](#button) - Clickable actions and form submissions
+
+### 🎯 Core Components
+- [Button](#button) - Clickable actions with primary/secondary/danger variants
 - [Textbox](#textbox) - Text input fields with icons and validation
 - [CustomDropdown](#customdropdown) - Select menus and option pickers
 - [Checkbox](#checkbox) - Toggle options and boolean settings
+- [ToggleSwitch](#toggleswitch) - Modern on/off switches
+- [RadioButton](#radiobutton) - Single choice from multiple options
+
+### 🎨 UI & Layout
+- [Alert](#alert) - Notification banners with info/success/warning/error types
 - [InfoBox](#infobox) - Contextual information boxes with theming
+- [Panel](#panel) - Container components with consistent styling
+- [Modal](#modal) - Overlay dialogs and popups
+- [Toast](#toast) - Temporary notifications and feedback
+- [ContextMenu](#contextmenu) - Right-click menus and dropdowns
+
+### 🔧 Advanced Components
+- [DataTable](#datatable) - Sortable tables with theming
+- [Accordion](#accordion) - Expandable content sections
+- [Tabs](#tabs) - Tabbed interfaces
+- [ProgressBar](#progressbar) - Loading and progress indicators
+- [DatePicker](#datepicker) - Date selection components
+- [Spinner](#spinner) - Loading indicators
+
+### ⚙️ Settings & Configuration
+- [SettingsDropdown](#settingsdropdown) - Settings menu with cog icon
+- [useSettings Hook](#usesettings-hook) - Automatic settings persistence
+- [Theme System](#theme-system) - Light/dark mode management
+
+### 💬 Communication & State
+- [usePluginMessages Hook](#usepluginmessages-hook) - UI ↔ Main thread communication
+- [useToast Hook](#usetoast-hook) - Toast notification management
+- [Plugin Storage](#plugin-storage) - Persistent data storage
+
+### 📚 Patterns & Examples
 - [Common Patterns](#common-patterns) - Real-world usage examples
+- [Error Handling](#error-handling) - Error boundaries and user feedback
 - [Troubleshooting](#troubleshooting) - Solutions to common issues
 
 ---
@@ -687,6 +722,546 @@ No additional setup required - just use the component and it adapts!
 
 ---
 
+## Alert
+
+**What it's for**: Displaying important notifications, feedback messages, and status updates with clear visual hierarchy.
+
+**When to use**: For user feedback, form validation, status updates, or any message that requires immediate user attention.
+
+### Import
+```tsx
+import { Alert } from '@ui/components/base/Alert';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <Alert type="success">
+      Your settings have been saved successfully!
+    </Alert>
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `type` | String | ✅ Yes | Alert type: `'info'`, `'success'`, `'warning'`, `'error'` | `"success"` |
+| `children` | ReactNode | ✅ Yes | The alert message content | `"Operation completed"` |
+| `variant` | String | No | Style variant: `'solid'` (default) or `'subtle'` | `"subtle"` |
+| `icon` | String | No | Custom icon override | `"🎉"` |
+
+### Alert Types
+
+- **`info`**: Blue theme for general information
+- **`success`**: Green theme for successful operations
+- **`warning`**: Orange theme for warnings and cautions
+- **`error`**: Red theme for errors and failures
+
+### Variants
+
+- **`solid`** (default): Prominent styling with bold colors
+- **`subtle`**: Muted styling with lighter colors
+
+### Common Examples
+
+```tsx
+// Success message
+<Alert type="success">
+  ✅ Your design tokens have been exported successfully!
+</Alert>
+
+// Error message with subtle styling
+<Alert type="error" variant="subtle">
+  ❌ Failed to connect to the API. Please try again.
+</Alert>
+
+// Warning with custom icon
+<Alert type="warning" icon="⚠️">
+  Large files may take longer to process.
+</Alert>
+
+// Info message
+<Alert type="info">
+  💡 Tip: Use Cmd+Z to undo your last action.
+</Alert>
+```
+
+---
+
+## ToggleSwitch
+
+**What it's for**: Modern on/off switches for settings and preferences.
+
+**When to use**: For boolean settings, feature toggles, or any binary choice that needs a modern interface.
+
+### Import
+```tsx
+import { ToggleSwitch } from '@ui/components/base/ToggleSwitch';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  return (
+    <ToggleSwitch
+      checked={isEnabled}
+      onChange={setIsEnabled}
+      label="Enable notifications"
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `checked` | Boolean | ✅ Yes | Whether the switch is on/off | `true`, `false` |
+| `onChange` | Function | ✅ Yes | Called when switch is toggled | `(checked) => setEnabled(checked)` |
+| `label` | String | No | Text label next to the switch | `"Dark mode"` |
+| `disabled` | Boolean | No | Makes switch unclickable | `true`, `false` |
+
+### Common Examples
+
+```tsx
+// Basic toggle switch
+<ToggleSwitch
+  checked={darkMode}
+  onChange={setDarkMode}
+  label="Dark mode"
+/>
+
+// Settings toggles
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+  <ToggleSwitch
+    checked={notifications}
+    onChange={setNotifications}
+    label="Push notifications"
+  />
+  <ToggleSwitch
+    checked={autoSave}
+    onChange={setAutoSave}
+    label="Auto-save"
+  />
+  <ToggleSwitch
+    checked={analytics}
+    onChange={setAnalytics}
+    label="Share analytics"
+    disabled={!isPremium}
+  />
+</div>
+```
+
+---
+
+## Toast
+
+**What it's for**: Temporary notifications that appear and disappear automatically.
+
+**When to use**: For confirmations, quick feedback, or non-critical messages that don't require user action.
+
+### Import
+```tsx
+import { Toast } from '@ui/components/base/Toast';
+import { useToast } from '@ui/hooks/useToast';
+```
+
+### Basic Usage with useToast Hook
+```tsx
+function MyComponent() {
+  const { showToast } = useToast();
+
+  const handleSave = () => {
+    // Your save logic here
+    showToast('Settings saved successfully!', 'success');
+  };
+
+  return (
+    <Button onClick={handleSave}>Save Settings</Button>
+  );
+}
+```
+
+### useToast Hook
+
+The `useToast` hook provides an easy way to show toast notifications:
+
+```tsx
+const { toast, showToast, dismissToast } = useToast();
+
+// Show different types of toasts
+showToast('Info message', 'info');
+showToast('Success!', 'success');
+showToast('Warning!', 'warning');
+showToast('Error occurred', 'error');
+
+// Dismiss current toast
+dismissToast();
+```
+
+### Common Examples
+
+```tsx
+function SettingsForm() {
+  const { showToast } = useToast();
+  const [settings, setSettings] = useState({});
+
+  const handleSave = async () => {
+    try {
+      await saveSettings(settings);
+      showToast('Settings saved successfully!', 'success');
+    } catch (error) {
+      showToast('Failed to save settings', 'error');
+    }
+  };
+
+  const handleReset = () => {
+    setSettings(DEFAULT_SETTINGS);
+    showToast('Settings reset to defaults', 'info');
+  };
+
+  return (
+    <div>
+      {/* Your form here */}
+      <Button onClick={handleSave}>Save</Button>
+      <Button onClick={handleReset} variant="secondary">Reset</Button>
+    </div>
+  );
+}
+```
+
+---
+
+## ContextMenu
+
+**What it's for**: Right-click menus and dropdown menus with smart positioning.
+
+**When to use**: For context-sensitive actions, settings menus, or any dropdown that needs to position itself intelligently.
+
+### Import
+```tsx
+import { ContextMenu } from '@ui/components/base/ContextMenu';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleRightClick = (e) => {
+    e.preventDefault();
+    setPosition({ x: e.clientX, y: e.clientY });
+    setIsOpen(true);
+  };
+
+  const menuItems = [
+    {
+      id: 'copy',
+      content: <span>📋 Copy</span>,
+      onClick: () => {
+        console.log('Copy clicked');
+        setIsOpen(false);
+      }
+    },
+    {
+      id: 'delete',
+      content: <span style={{ color: 'red' }}>🗑️ Delete</span>,
+      onClick: () => {
+        console.log('Delete clicked');
+        setIsOpen(false);
+      }
+    }
+  ];
+
+  return (
+    <div onContextMenu={handleRightClick}>
+      Right-click me!
+
+      <ContextMenu
+        isOpen={isOpen}
+        position={position}
+        items={menuItems}
+        onClose={() => setIsOpen(false)}
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## SettingsDropdown
+
+**What it's for**: A pre-built settings menu with theme and debug toggles, triggered by a cog icon.
+
+**When to use**: For plugin settings, preferences, or configuration options.
+
+### Import
+```tsx
+import { SettingsDropdown } from '@ui/components/base/SettingsDropdown';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [debugMode, setDebugMode] = useState(false);
+
+  return (
+    <SettingsDropdown
+      debugMode={debugMode}
+      onDebugToggle={setDebugMode}
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `debugMode` | Boolean | ✅ Yes | Current debug mode state | `true`, `false` |
+| `onDebugToggle` | Function | ✅ Yes | Called when debug toggle is clicked | `(enabled) => setDebug(enabled)` |
+
+---
+
+## Modal
+
+**What it's for**: Overlay dialogs that focus user attention on specific tasks or information.
+
+**When to use**: For confirmations, forms, detailed views, or any content that needs to be displayed above the main interface.
+
+### Import
+```tsx
+import { Modal } from '@ui/components/base/Modal';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <Button onClick={() => setIsOpen(true)}>Open Modal</Button>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Confirm Action"
+      >
+        <p>Are you sure you want to delete this item?</p>
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <Button onClick={() => setIsOpen(false)} variant="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} variant="danger">
+            Delete
+          </Button>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+```
+
+---
+
+## useSettings Hook
+
+**What it's for**: Automatic settings persistence with save/load functionality.
+
+**When to use**: For any plugin that needs to remember user preferences between sessions.
+
+### Import
+```tsx
+import { useSettings } from '@ui/hooks/useSettings';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const { settings, updateSettings, isLoading } = useSettings();
+
+  if (isLoading) {
+    return <div>Loading settings...</div>;
+  }
+
+  return (
+    <div>
+      <ToggleSwitch
+        checked={settings.debugMode}
+        onChange={(checked) => updateSettings({ debugMode: checked })}
+        label="Debug Mode"
+      />
+
+      <ToggleSwitch
+        checked={settings.theme === 'dark'}
+        onChange={(checked) => updateSettings({ theme: checked ? 'dark' : 'light' })}
+        label="Dark Mode"
+      />
+    </div>
+  );
+}
+```
+
+### Settings Interface
+```tsx
+interface PluginSettings {
+  theme: 'light' | 'dark';
+  debugMode: boolean;
+  userText: string;
+  lastSaved: string;
+}
+```
+
+### Hook Returns
+```tsx
+const {
+  settings,           // Current settings object
+  updateSettings,     // Function to update settings
+  saveSettings,       // Manual save function
+  loadSettings,       // Manual load function
+  clearSettings,      // Clear all settings
+  isLoading,          // Loading state
+  isSaving,           // Saving state
+  isPersistent        // Whether storage is persistent
+} = useSettings();
+```
+
+---
+
+## usePluginMessages Hook
+
+**What it's for**: Communication between the UI and main thread with flexible message handling.
+
+**When to use**: For any plugin that needs to communicate between the UI and Figma's main thread.
+
+### Import
+```tsx
+import { usePluginMessages } from '@ui/hooks/usePluginMessages';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const { sendMessage } = usePluginMessages({
+    onScanComplete: (data) => {
+      console.log('Scan completed:', data);
+      showToast('Scan completed successfully!', 'success');
+    },
+    onError: (error) => {
+      console.error('Plugin error:', error);
+      showToast(`Error: ${error.message}`, 'error');
+    }
+  });
+
+  const handleScan = () => {
+    sendMessage('scan', { includeHidden: true });
+  };
+
+  return (
+    <Button onClick={handleScan}>Start Scan</Button>
+  );
+}
+```
+
+### Message Handler Pattern
+```tsx
+const { sendMessage } = usePluginMessages({
+  onScanComplete: (data) => {
+    // Handle scan completion
+    setResults(data.results);
+    setProgress(100);
+  },
+
+  onProgress: (data) => {
+    // Handle progress updates
+    setProgress(data.percentage);
+  },
+
+  onError: (error) => {
+    // Handle errors
+    setError(error.message);
+  }
+});
+
+// Send messages to main thread
+sendMessage('scan', { options: { deep: true } });
+sendMessage('export', { format: 'svg' });
+```
+
+---
+
+## Theme System
+
+**What it's for**: Consistent theming across all components with light/dark mode support.
+
+**When to use**: All components automatically use the theme system. Use the theme context for custom styling.
+
+### Import
+```tsx
+import { useTheme } from '@ui/contexts/ThemeContext';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const { colors, theme, toggleTheme } = useTheme();
+
+  return (
+    <div style={{
+      backgroundColor: colors.background,
+      color: colors.textColor,
+      padding: 16,
+      borderRadius: 8
+    }}>
+      <h3 style={{ color: colors.accent }}>Custom Themed Component</h3>
+      <p style={{ color: colors.textSecondary }}>
+        This component uses theme colors automatically.
+      </p>
+      <Button onClick={toggleTheme}>
+        Switch to {theme === 'light' ? 'dark' : 'light'} mode
+      </Button>
+    </div>
+  );
+}
+```
+
+### Available Theme Colors
+```tsx
+const { colors } = useTheme();
+
+// Text colors
+colors.textColor      // Primary text
+colors.textSecondary  // Secondary/muted text
+colors.textInverse    // Inverse text (white on dark, black on light)
+
+// Background colors
+colors.background     // Main background
+colors.backgroundHover // Hover states
+colors.surface        // Card/panel backgrounds
+
+// Interactive colors
+colors.accent         // Brand/accent color
+colors.accentHover    // Accent hover state
+colors.border         // Border colors
+colors.focus          // Focus ring colors
+
+// Status colors
+colors.success        // Success states
+colors.error          // Error states
+colors.warning        // Warning states
+colors.info          // Info states
+```
+
+---
+
 ## Common Patterns
 
 ### Form with Validation
@@ -1184,7 +1759,25 @@ import { Checkbox } from '@ui/components/base/Checkbox';
 
 ## Need More Help?
 
-🔍 **See Real Examples**:
+### 🔍 **Additional Components Available**
+
+Your starter includes many more components beyond those documented above. Check `src/ui/components/base/` for:
+
+- **DataTable.tsx** - Sortable data tables
+- **Accordion.tsx** - Expandable sections
+- **ProgressBar.tsx** - Loading indicators
+- **DatePicker.tsx** - Date selection
+- **TimePicker.tsx** - Time selection
+- **Spinner.tsx** - Loading spinners
+- **NotificationBanner.tsx** - App-wide notifications
+- **ErrorBoundary.tsx** - Error handling wrapper
+- **MessageBox.tsx** - Dialog messages
+- **Input.tsx** - Alternative text input
+- **Dropdown.tsx** - Alternative dropdown
+
+Each component includes TypeScript types and example usage in the component file.
+
+### 📚 **See Real Examples**:
 - Check out `src/ui/components/views/FigmaView.tsx` for complete working examples
 - View `src/ui/components/views/FormsView.tsx` for InfoBox demonstrations
 - See `src/ui/components/examples/PluginCommunicationExample.tsx` for the new usePluginMessages pattern

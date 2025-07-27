@@ -5,7 +5,7 @@ import { Textbox } from '@ui/components/base/Textbox';
 import { ToggleSwitch } from '@ui/components/base/ToggleSwitch';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { PluginSettings } from '@ui/hooks/useSettings';
-import React, { useState } from 'react';
+import { useState } from 'preact/hooks';
 
 interface DataViewProps {
   settings: PluginSettings;

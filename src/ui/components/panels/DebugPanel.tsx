@@ -20,13 +20,6 @@ interface DebugPanelProps {
  * ```tsx
  * const [debugMode, setDebugMode] = useState(false);
  *
- * // Toggle debug mode with keyboard shortcut
- * useKeyboardShortcuts([{
- *   key: 'd',
- *   ctrlKey: true,
- *   action: () => setDebugMode(!debugMode)
- * }]);
- *
  * <DebugPanel isVisible={debugMode} />
  * ```
  */
