@@ -65,7 +65,7 @@ export function Panel({
   status,
   variant = 'standard'
 }: PanelProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   /**
    * Gets the color for a status type.
@@ -116,15 +116,15 @@ export function Panel({
         alignItems: 'center',
         justifyContent: 'space-between',
         flexShrink: 0,
-        paddingBottom: 12
+        paddingBottom: spacing.md - 4
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
           <span>{title}</span>
           {status && (
             <span style={{
               background: `${getStatusColor(status.type)}20`,
               color: getStatusColor(status.type),
-              padding: '2px 8px',
+              padding: `${spacing.xs / 2}px ${spacing.sm}px`,
               borderRadius: 4,
               fontSize: 12,
               fontWeight: 500
@@ -141,9 +141,9 @@ export function Panel({
         <div style={{
           color: colors.textSecondary,
           fontSize: 12,
-          padding: `8px ${padding}px 0 ${padding}px`,
+          padding: `${spacing.sm}px ${padding}px 0 ${padding}px`,
           borderBottom: `1px solid ${colors.border}`,
-          paddingBottom: 8
+          paddingBottom: spacing.sm
         }}>
           {subtitle}
         </div>

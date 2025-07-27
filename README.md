@@ -51,13 +51,24 @@ npm run dev
 src/
 ├── main/
 │   ├── index.ts          # Plugin entry point
-│   └── types.ts          # Shared types
+│   ├── types.ts          # Shared types
+│   ├── messaging.ts      # Main thread messaging
+│   ├── errors.ts         # Error handling
+│   └── tools/            # Plugin tools and utilities
 ├── ui/
-│   ├── components/base/  # UI components
-│   ├── hooks/           # Custom hooks
-│   ├── contexts/        # React contexts
-│   └── index.tsx        # UI entry point
-└── shared/              # Shared utilities
+│   ├── components/       # UI components
+│   │   ├── base/         # Base UI components
+│   │   ├── panels/       # Panel components
+│   │   └── views/        # View components
+│   ├── hooks/            # Custom hooks
+│   ├── contexts/         # React contexts
+│   ├── state/            # State management
+│   ├── messaging-simple.ts # UI messaging system
+│   └── index.tsx         # UI entry point
+└── shared/               # Shared utilities
+    ├── constants.ts      # App constants
+    ├── utils.ts          # Utility functions
+    └── messaging.ts      # Shared messaging types
 ```
 
 ## Development

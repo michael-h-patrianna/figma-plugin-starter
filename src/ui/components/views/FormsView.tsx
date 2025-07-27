@@ -1,6 +1,8 @@
 import { DataTable } from '@ui/components/base/DataTable';
 import { DatePicker } from '@ui/components/base/DatePicker';
 import { Dropdown } from '@ui/components/base/Dropdown';
+import { Form, FormField, FormGroup, FormRow, FormSection } from '@ui/components/base/FormLayout';
+import { InfoBox } from '@ui/components/base/InfoBox';
 import { Input, Textarea } from '@ui/components/base/Input';
 import { Panel } from '@ui/components/base/Panel';
 import { RadioButton } from '@ui/components/base/RadioButton';
@@ -29,7 +31,7 @@ interface FormsViewProps {
  * @returns The rendered FormsView React element
  */
 export function FormsView({ }: FormsViewProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { toast, showToast, dismissToast } = useToast();
 
   // Form state
@@ -38,25 +40,11 @@ export function FormsView({ }: FormsViewProps) {
   const [selectedDropdown, setSelectedDropdown] = useState('');
   const [selectedRadio, setSelectedRadio] = useState('medium');
   const [toggleState, setToggleState] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0]; // YYYY-MM-DD format
   });
   const [selectedTime, setSelectedTime] = useState('09:00');
-
-  /**
-   * Simulates a loading state for demonstration purposes.
-  /**
-   * Simulates a loading state for demonstration purposes.
-   */
-  const demoLoadingState = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showToast('Loading simulation completed!', 'success');
-    }, 2000);
-  };
 
   const dropdownOptions = [
     { value: 'option1', label: 'First Option' },
@@ -72,8 +60,7 @@ export function FormsView({ }: FormsViewProps) {
     { value: 'disabled', label: 'Extra Large (Disabled)', disabled: true }
   ];
 
-  // Generate demo table data - 20 rows with the last one having status
-  // Use useMemo to prevent regeneration on every render
+  // Generate demo table data
   const tableData = useMemo(() => {
     const data = [];
     for (let i = 1; i <= 20; i++) {
@@ -87,7 +74,7 @@ export function FormsView({ }: FormsViewProps) {
       });
     }
     return data;
-  }, []); // Empty dependency array means this only runs once
+  }, []);
 
   const tableColumns = [
     { key: 'name', label: 'Name', width: '30%' },
@@ -109,131 +96,119 @@ export function FormsView({ }: FormsViewProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Standard Form Elements Panel */}
-      <Panel title="Standard Form Elements">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Input
-              value={inputValue}
-              onChange={setInputValue}
-              placeholder="Enter text..."
-              label="Text Input"
-              width="180px"
-            />
-            <Input
-              value={inputValue}
-              onChange={setInputValue}
-              type="number"
-              placeholder="0"
-              label="Number Input"
-              width="100px"
-              min={0}
-              max={100}
-            />
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
+      {/* Comprehensive Form Layout Demo */}
+      <Panel title="Form Layout">
+        <Form
+          title="Form Components & Layout Options"
+          description="Compact showcase of all form elements with responsive layouts"
+        >
+          <FormSection title="Input Fields & Controls">
+            <FormGroup>
+              <FormRow columns={3}>
+                <FormField label="Text Input" required>
+                  <Input
+                    value={inputValue}
+                    onChange={setInputValue}
+                    placeholder="Enter text..."
+                  />
+                </FormField>
+                <FormField label="Number Input">
+                  <Input
+                    value=""
+                    onChange={() => { }}
+                    type="number"
+                    placeholder="0"
+                    min={0}
+                    max={100}
+                  />
+                </FormField>
+                <FormField label="Disabled Input">
+                  <Input
+                    value="Disabled"
+                    onChange={() => { }}
+                    placeholder="Disabled"
+                    disabled={true}
+                  />
+                </FormField>
+              </FormRow>
 
-          <div style={{ display: 'flex', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
-            <Dropdown
-              options={dropdownOptions}
-              value={selectedDropdown}
-              onChange={setSelectedDropdown}
-              placeholder="Select option"
-              width="160px"
-            />
-            <ToggleSwitch
-              checked={toggleState}
-              onChange={setToggleState}
-              label="Enable Feature"
-            />
-          </div>
+              <FormRow columns={4}>
+                <FormField label="Dropdown">
+                  <Dropdown
+                    options={dropdownOptions}
+                    value={selectedDropdown}
+                    onChange={setSelectedDropdown}
+                    placeholder="Select option"
+                  />
+                </FormField>
+                <FormField label="Date">
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                  />
+                </FormField>
+                <FormField label="Time">
+                  <TimePicker
+                    value={selectedTime}
+                    onChange={setSelectedTime}
+                    step={300}
+                  />
+                </FormField>
+                <FormField label="Toggle">
+                  <ToggleSwitch
+                    checked={toggleState}
+                    onChange={setToggleState}
+                    label="Enable"
+                  />
+                </FormField>
+              </FormRow>
 
-          <RadioButton
-            options={radioOptions}
-            value={selectedRadio}
-            onChange={setSelectedRadio}
-            name="size"
-            label="Size Options"
-            direction="horizontal"
-          />
+              <FormRow columns={2}>
+                <FormField label="Radio Options">
+                  <RadioButton
+                    options={radioOptions}
+                    value={selectedRadio}
+                    onChange={setSelectedRadio}
+                    name="size"
+                    direction="horizontal"
+                  />
+                </FormField>
+                <FormField label="Disabled Toggle">
+                  <ToggleSwitch
+                    checked={false}
+                    onChange={() => { }}
+                    label="Disabled"
+                    disabled={true}
+                  />
+                </FormField>
+              </FormRow>
 
-          <Textarea
-            value={textareaValue}
-            onChange={setTextareaValue}
-            placeholder="Enter longer text..."
-            label="Textarea (Scrollable)"
-            maxLength={500}
-            rows={4}
-          />
-        </div>
-      </Panel>
+              <FormField label="Description" helpText="Maximum 500 characters">
+                <Textarea
+                  value={textareaValue}
+                  onChange={setTextareaValue}
+                  placeholder="Enter description..."
+                  maxLength={500}
+                  rows={3}
+                />
+              </FormField>
+            </FormGroup>
+          </FormSection>
 
-      {/* Date and Time Panel */}
-      <Panel title="Date & Time Inputs">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 13, lineHeight: 1.5 }}>
-              Native HTML5 date and time pickers with proper styling for the dark theme.
-            </p>
-          </div>
+          <FormSection title="Data Table">
+            <FormGroup>
+              <DataTable
+                data={tableData}
+                columns={tableColumns}
+              />
+            </FormGroup>
+          </FormSection>
+        </Form>
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'end' }}>
-            <DatePicker
-              value={selectedDate}
-              onChange={setSelectedDate}
-              label="Start Date"
-              min="2024-01-01"
-              max="2025-12-31"
-            />
-
-            <TimePicker
-              value={selectedTime}
-              onChange={setSelectedTime}
-              label="Start Time"
-              step={300} // 5-minute intervals
-            />
-
-            <DatePicker
-              value={selectedDate}
-              onChange={setSelectedDate}
-              label="End Date (Disabled)"
-              disabled={true}
-            />
-          </div>
-
-          <div style={{
-            background: colors.darkBg,
-            border: `1px solid ${colors.border}`,
-            borderRadius: 6,
-            padding: 12,
-            fontSize: 12
-          }}>
-            <div style={{ color: colors.textSecondary, marginBottom: 8 }}>Selected values:</div>
-            <div style={{ color: colors.textColor, fontFamily: 'monospace' }}>
-              Date: {selectedDate || 'Not selected'}<br />
-              Time: {selectedTime || 'Not selected'}
-              {selectedDate && selectedTime && (
-                <>
-                  <br />
-                  Combined: {new Date(`${selectedDate}T${selectedTime}`).toLocaleString()}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </Panel>
-
-      {/* Data Table Panel */}
-      <Panel title="Data Table">
-        <div style={{ marginBottom: 12 }}>
-          <p style={{ color: colors.textSecondary, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
-            Interactive data table with sorting, filtering, and selection capabilities. ({tableData.length} rows - scrollable after row 8)
-          </p>
-        </div>
-        <DataTable
-          data={tableData}
-          columns={tableColumns}
-        />
+        <InfoBox title="Layout Notice" variant="plain">
+          The Form component automatically removes bottom margins from the last elements for consistent spacing.
+        </InfoBox>
       </Panel>
 
       {/* Toast Notification */}

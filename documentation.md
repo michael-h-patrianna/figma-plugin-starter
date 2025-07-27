@@ -9,59 +9,69 @@ This documentation covers all the custom components, hooks, and features in this
 1. **Import Components** using the @ui alias:
    ```tsx
    import { Button } from '@ui/components/base/Button';
+   import { FormGroup, FormRow, FormField } from '@ui/components/base/FormLayout';
    ```
 
 2. **Use it in your JSX** with the required props:
    ```tsx
    <Button onClick={() => alert('Hello!')}>Click Me</Button>
+
+   <FormGroup title="User Details">
+     <FormRow columns={2}>
+       <FormField label="First Name" required>
+         <Input value={firstName} onChange={setFirstName} />
+       </FormField>
+       <FormField label="Last Name" required>
+         <Input value={lastName} onChange={setLastName} />
+       </FormField>
+     </FormRow>
+   </FormGroup>
    ```
-
-### Import Paths
-
-The project uses TypeScript path aliases for clean, consistent imports:
-```tsx
-import { Button } from '@ui/components/base/Button';
-import { Textbox } from '@ui/components/base/Textbox';
-import { CustomDropdown } from '@ui/components/base/CustomDropdown';
-```
-
-### Available Aliases
-- `@ui/*` → `src/ui/*` (UI components, contexts, hooks)
-- `@main/*` → `src/main/*` (Main thread code, types)
-- `@shared/*` → `src/shared/*` (Shared utilities)
-
----
 
 ## Table of Contents
 
-### Components
+### Basic Form Components
 - [Button](#button) - Clickable actions with primary/secondary/danger variants
-- [Textbox](#textbox) - Text input fields with icons and validation
+- [Input](#input) - Native HTML input elements with theming
+- [Textbox](#textbox) - Enhanced text input fields with icons and validation
 - [CustomDropdown](#customdropdown) - Select menus and option pickers
 - [Checkbox](#checkbox) - Toggle options and boolean settings
 - [ToggleSwitch](#toggleswitch) - Modern on/off switches
 - [RadioButton](#radiobutton) - Single choice from multiple options
+- [DatePicker](#datepicker) - Date selection components
+- [TimePicker](#timepicker) - Time selection components
+
+### Form Layout Components
+- [Form](#form) - Top-level form wrapper with title and spacing
+- [FormGroup](#formgroup) - Groups related form elements
+- [FormRow](#formrow) - Horizontal layout with responsive columns
+- [FormField](#formfield) - Individual field wrapper with labels
+
+### Display & Feedback Components
 - [Alert](#alert) - Notification banners with info/success/warning/error types
 - [InfoBox](#infobox) - Contextual information boxes with theming
+- [Toast](#toast) - Temporary notifications and feedback
+- [NotificationBanner](#notificationbanner) - Banner notifications
+- [MessageBox](#messagebox) - Message display component
+- [Code](#code) - Code display with syntax highlighting
+- [Spinner](#spinner) - Loading indicators
+- [ProgressBar](#progressbar) - Loading and progress indicators
+
+### Container & Navigation Components
 - [Panel](#panel) - Container components with consistent styling
 - [Modal](#modal) - Overlay dialogs and popups
-- [Toast](#toast) - Temporary notifications and feedback
-- [ContextMenu](#contextmenu) - Right-click menus and dropdowns
-- [DataTable](#datatable) - Sortable tables with theming
 - [Accordion](#accordion) - Expandable content sections
 - [Tabs](#tabs) - Tabbed interfaces
-- [ProgressBar](#progressbar) - Loading and progress indicators
-- [DatePicker](#datepicker) - Date selection components
-- [Spinner](#spinner) - Loading indicators
+- [DataTable](#datatable) - Sortable tables with theming
 
-### Settings & Configuration
+### Interaction Components
+- [ContextMenu](#contextmenu) - Right-click menus and dropdowns
 - [SettingsDropdown](#settingsdropdown) - Settings menu with cog icon
-- [useSettings Hook](#usesettings-hook) - Automatic settings persistence
-- [Theme System](#theme-system) - Light/dark mode management
 
-### Communication & State
-- [usePluginMessages Hook](#plugin-communication-hook) - UI ↔ Main thread communication
-- [Toast Hook](#toast) - Toast notification management (see Toast section)
+### System & State Management
+- [Theme System](#theme-system) - Light/dark mode management
+- [useSettings Hook](#usesettings-hook) - Automatic settings persistence
+- [Plugin Messaging System](#plugin-messaging-system) - UI ↔ Main thread communication
 
 ---
 
@@ -138,7 +148,77 @@ function SaveDialog({ onSave, onCancel, isSaving }) {
 
 ---
 
-## Textbox
+## Input
+
+**What it's for**: Basic HTML input elements with consistent theming and styling.
+
+**When to use**: For simple text inputs that don't need the enhanced features of Textbox.
+
+### Import
+```tsx
+import { Input } from '@ui/components/base/Input';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Input
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      placeholder="Enter text"
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `value` | String | ✅ Yes | Current input value | `"Hello World"` |
+| `onChange` | Function | ✅ Yes | Called when value changes | `(e) => setValue(e.target.value)` |
+| `placeholder` | String | No | Placeholder text | `"Type here..."` |
+| `disabled` | Boolean | No | Makes input uneditable | `true`, `false` |
+| `type` | String | No | HTML input type | `"text"`, `"email"`, `"password"` |
+
+### Common Examples
+
+```tsx
+// Basic text input
+<Input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Full name"
+/>
+
+// Email input
+<Input
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  placeholder="email@example.com"
+/>
+
+// Password input
+<Input
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Password"
+/>
+
+// Disabled input
+<Input
+  value="Read-only value"
+  onChange={() => {}}
+  disabled
+/>
+```
+
+---
 
 **What it's for**: Getting text input from users - names, descriptions, search terms, etc.
 
@@ -510,7 +590,91 @@ function ExportSettings() {
 
 ---
 
-## InfoBox
+## RadioButton
+
+**What it's for**: Single choice selection from a group of mutually exclusive options.
+
+**When to use**: When users need to select exactly one option from multiple choices.
+
+### Import
+```tsx
+import { RadioButton } from '@ui/components/base/RadioButton';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [selectedSize, setSelectedSize] = useState('medium');
+
+  const sizeOptions = [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' }
+  ];
+
+  return (
+    <RadioButton
+      options={sizeOptions}
+      value={selectedSize}
+      onChange={setSelectedSize}
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `options` | Array | ✅ Yes | Array of option objects | `[{value: 'a', label: 'Option A'}]` |
+| `value` | String | ✅ Yes | Currently selected value | `"medium"` |
+| `onChange` | Function | ✅ Yes | Called when selection changes | `(value) => setSelected(value)` |
+| `disabled` | Boolean | No | Disables all options | `true`, `false` |
+
+### Option Format
+Each option should be an object with:
+```tsx
+{
+  value: 'unique-value',     // The value returned in onChange
+  label: 'Display Text',     // What the user sees
+  disabled: false            // Optional: disable this specific option
+}
+```
+
+### Common Examples
+
+```tsx
+// Size selector
+const sizes = [
+  { value: 'xs', label: 'Extra Small' },
+  { value: 's', label: 'Small' },
+  { value: 'm', label: 'Medium' },
+  { value: 'l', label: 'Large' },
+  { value: 'xl', label: 'Extra Large' }
+];
+
+<RadioButton
+  options={sizes}
+  value={selectedSize}
+  onChange={setSelectedSize}
+/>
+
+// Priority selector with disabled option
+const priorities = [
+  { value: 'low', label: 'Low Priority' },
+  { value: 'medium', label: 'Medium Priority' },
+  { value: 'high', label: 'High Priority' },
+  { value: 'critical', label: 'Critical', disabled: true }
+];
+
+<RadioButton
+  options={priorities}
+  value={priority}
+  onChange={setPriority}
+/>
+```
+
+---
 
 **What it's for**: Displaying contextual information, tips, warnings, or important messages with visual hierarchy.
 
@@ -808,6 +972,106 @@ function SettingsForm() {
       <Button onClick={handleSave}>Save</Button>
       <Button onClick={handleReset} variant="secondary">Reset</Button>
     </div>
+  );
+}
+```
+
+---
+
+## NotificationBanner
+
+**What it's for**: Persistent banner notifications at the top of interfaces.
+
+**When to use**: For important system messages, warnings, or persistent status updates.
+
+### Import
+```tsx
+import { NotificationBanner } from '@ui/components/base/NotificationBanner';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <NotificationBanner type="info" onDismiss={() => setVisible(false)}>
+      System maintenance scheduled for tonight at 2 AM.
+    </NotificationBanner>
+  );
+}
+```
+
+---
+
+## MessageBox
+
+**What it's for**: Displaying messages with consistent styling and theming.
+
+**When to use**: For status messages, confirmations, or informational content.
+
+### Import
+```tsx
+import { MessageBox } from '@ui/components/base/MessageBox';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <MessageBox title="Success" type="success">
+      Your changes have been saved successfully.
+    </MessageBox>
+  );
+}
+```
+
+---
+
+## Code
+
+**What it's for**: Displaying code snippets with syntax highlighting and consistent styling.
+
+**When to use**: For showing code examples, configuration snippets, or technical documentation.
+
+### Import
+```tsx
+import { Code } from '@ui/components/base/Code';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const codeExample = `function hello() {
+  console.log('Hello, world!');
+}`;
+
+  return (
+    <Code language="javascript">
+      {codeExample}
+    </Code>
+  );
+}
+```
+
+---
+
+## Panel
+
+**What it's for**: Container component with consistent padding, borders, and theming.
+
+**When to use**: For grouping related content with visual boundaries.
+
+### Import
+```tsx
+import { Panel } from '@ui/components/base/Panel';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <Panel title="Settings">
+      <p>Panel content goes here.</p>
+    </Panel>
   );
 }
 ```
@@ -1135,6 +1399,172 @@ function MyComponent() {
 
 ---
 
+## TimePicker
+
+**What it's for**: Selecting time values for scheduling or time-related inputs.
+
+**When to use**: For time selection in forms, scheduling features, or time-based configurations.
+
+### Import
+```tsx
+import { TimePicker } from '@ui/components/base/TimePicker';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [selectedTime, setSelectedTime] = useState('12:00');
+
+  return (
+    <TimePicker
+      value={selectedTime}
+      onChange={setSelectedTime}
+      placeholder="Select time"
+    />
+  );
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `value` | String | ✅ Yes | Current time value | `"14:30"`, `"2:30 PM"` |
+| `onChange` | Function | ✅ Yes | Called when time changes | `(time) => setTime(time)` |
+| `placeholder` | String | No | Placeholder text | `"Select time"` |
+| `disabled` | Boolean | No | Makes time picker uneditable | `true`, `false` |
+| `format` | String | No | Time format: `'24h'` or `'12h'` | `"12h"` |
+
+### Common Examples
+
+```tsx
+// 24-hour format
+<TimePicker
+  value={startTime}
+  onChange={setStartTime}
+  format="24h"
+  placeholder="Start time"
+/>
+
+// 12-hour format with AM/PM
+<TimePicker
+  value={endTime}
+  onChange={setEndTime}
+  format="12h"
+  placeholder="End time"
+/>
+
+// Disabled time picker
+<TimePicker
+  value="09:00"
+  onChange={() => {}}
+  disabled
+/>
+```
+
+---
+
+## Form
+
+**What it's for**: Top-level form wrapper with title, description, and consistent spacing.
+
+**When to use**: To wrap form content and provide structure.
+
+### Import
+```tsx
+import { Form } from '@ui/components/base/FormLayout';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <Form title="Settings" onSubmit={handleSubmit}>
+      {/* Form content */}
+    </Form>
+  );
+}
+```
+
+---
+
+## FormGroup
+
+**What it's for**: Groups related form elements with optional title and consistent spacing.
+
+**When to use**: To organize related form fields together.
+
+### Import
+```tsx
+import { FormGroup } from '@ui/components/base/FormLayout';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <FormGroup title="User Details">
+      {/* Form rows and fields */}
+    </FormGroup>
+  );
+}
+```
+
+---
+
+## FormRow
+
+**What it's for**: Horizontal layout of form elements in columns with responsive wrapping.
+
+**When to use**: To place form fields side by side.
+
+### Import
+```tsx
+import { FormRow } from '@ui/components/base/FormLayout';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <FormRow columns={2}>
+      <FormField label="First Name">
+        <Input value={firstName} onChange={setFirstName} />
+      </FormField>
+      <FormField label="Last Name">
+        <Input value={lastName} onChange={setLastName} />
+      </FormField>
+    </FormRow>
+  );
+}
+```
+
+---
+
+## FormField
+
+**What it's for**: Wraps individual form elements with label, help text, and error handling.
+
+**When to use**: To add labels and styling to form inputs.
+
+### Import
+```tsx
+import { FormField } from '@ui/components/base/FormLayout';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <FormField label="Email" required>
+      <Input value={email} onChange={setEmail} />
+    </FormField>
+  );
+}
+```
+
+---
+
 ## Spinner
 
 **What it's for**: Indicating loading states for operations without specific progress information.
@@ -1307,86 +1737,445 @@ colors.info          // Info states
 
 ---
 
-## Plugin Communication Hook
+## Plugin Messaging System
 
-### usePluginMessages
+The plugin messaging system enables communication between the UI thread and the main Figma thread. This allows you to trigger operations on Figma nodes, request data analysis, and receive results back in the UI.
 
-The `usePluginMessages` hook is for handling communication between your plugin UI and the main Figma thread.
+### Architecture
+
+- **UI Thread**: Runs in an iframe with access to React/Preact and web APIs
+- **Main Thread**: Runs in Figma's sandbox with access to the Figma API and document nodes
+- **Communication**: Bidirectional message passing using `postMessage` API
+
+### UI to Main Thread Communication
 
 #### Import
 ```tsx
-import { usePluginMessages } from '@ui/hooks/usePluginMessages';
+import { sendToMain } from '@ui/messaging-simple';
 ```
 
-####  Usage
+#### Sending Messages
 ```tsx
-function MyPluginComponent() {
-  const [scanProgress, setScanProgress] = useState(0);
-  const [lastResult, setLastResult] = useState(null);
+// Simple message with no data
+sendToMain('SCAN_NODES');
 
-  const { sendMessage } = usePluginMessages({
-    onMessage: (type, data) => {
-      switch (type) {
-        case 'SCAN_RESULT':
-          console.log('Scan completed:', data);
-          setLastResult(data);
-          break;
+// Message with data payload
+sendToMain('EXPORT_SELECTION', {
+  format: 'PNG',
+  scale: 2,
+  includeMetadata: true
+});
 
-        case 'PROCESS_RESULT':
-          console.log('Process completed:', data);
-          setLastResult(data);
-          break;
+// Complex data structures
+sendToMain('BATCH_RENAME', {
+  pattern: 'Layer_{index}',
+  startIndex: 1,
+  nodes: ['node-id-1', 'node-id-2']
+});
+```
 
-        case 'SCAN_PROGRESS':
-          setScanProgress(data); // data is the progress value
-          break;
+### Main Thread to UI Communication
 
-        case 'ERROR':
-          console.error('Plugin error:', data);
-          break;
+#### Receiving Messages in Main Thread
+```typescript
+// src/main/index.ts
+figma.ui.onmessage = (msg) => {
+  const { type, ...data } = msg.pluginMessage || msg;
 
-        case 'CUSTOM_ACTION':
-          console.log('Custom action result:', data);
-          break;
+  switch (type) {
+    case 'SCAN_NODES':
+      handleNodeScan(data);
+      break;
 
-        default:
-          console.log('Unknown message type:', type, data);
-      }
+    case 'EXPORT_SELECTION':
+      handleExportSelection(data);
+      break;
+
+    case 'BATCH_RENAME':
+      handleBatchRename(data);
+      break;
+
+    default:
+      console.log('Unknown message type:', type);
+  }
+};
+```
+
+#### Sending Results Back to UI
+```typescript
+// Send simple response
+figma.ui.postMessage({
+  type: 'SCAN_COMPLETE',
+  nodeCount: 42
+});
+
+// Send detailed analysis results
+figma.ui.postMessage({
+  type: 'ANALYSIS_RESULT',
+  summary: {
+    totalNodes: 156,
+    componentCount: 23,
+    textNodes: 67
+  },
+  nodes: extractedNodeData,
+  timestamp: Date.now()
+});
+
+// Send progress updates
+figma.ui.postMessage({
+  type: 'PROGRESS',
+  percentage: 65,
+  currentTask: 'Processing components'
+});
+```
+
+### Receiving Messages in UI
+
+#### Import
+```tsx
+import { usePluginMessages } from '@ui/messaging-simple';
+```
+
+#### Basic Usage
+```tsx
+function MyComponent() {
+  const [results, setResults] = useState(null);
+  const [progress, setProgress] = useState(0);
+
+  usePluginMessages({
+    SCAN_COMPLETE: (data) => {
+      console.log('Scan finished:', data.nodeCount);
+      setResults(data);
+    },
+
+    ANALYSIS_RESULT: (data) => {
+      console.log('Analysis complete:', data.summary);
+      setResults(data);
+    },
+
+    PROGRESS: (data) => {
+      setProgress(data.percentage);
+    },
+
+    ERROR: (data) => {
+      console.error('Plugin error:', data.message);
     }
   });
 
-  // Send messages to the main thread
-  const handleScan = () => {
-    sendMessage('SCAN');
-  };
+  return (
+    <div>
+      {progress > 0 && <ProgressBar value={progress} />}
+      {results && <DisplayResults data={results} />}
+    </div>
+  );
+}
+```
 
-  const handleProcess = () => {
-    sendMessage('PROCESS', {
-      action: 'export',
-      format: 'json',
-      includeMetadata: true
-    });
-  };
+### Complete Example: Node Analysis
 
-  const handleCustomAction = () => {
-    sendMessage('CUSTOM_ACTION', {
-      actionType: 'batch_rename',
-      pattern: 'Layer_{index}',
-      startIndex: 1
+#### UI Component
+```tsx
+function NodeAnalyzer() {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState(null);
+  const [progress, setProgress] = useState(0);
+
+  usePluginMessages({
+    ANALYSIS_COMPLETE: (data) => {
+      setResults(data);
+      setIsAnalyzing(false);
+      setProgress(0);
+    },
+
+    ANALYSIS_PROGRESS: (data) => {
+      setProgress(data.percentage);
+    },
+
+    ERROR: (data) => {
+      console.error('Analysis failed:', data.message);
+      setIsAnalyzing(false);
+      setProgress(0);
+    }
+  });
+
+  const startAnalysis = () => {
+    setIsAnalyzing(true);
+    setResults(null);
+    setProgress(0);
+
+    sendToMain('ANALYZE_SELECTION', {
+      includeHidden: false,
+      analyzeText: true,
+      analyzeComponents: true
     });
   };
 
   return (
     <div>
-      <Button onClick={handleScan}>Start Scan</Button>
-      <Button onClick={handleProcess}>Process Data</Button>
-      <Button onClick={handleCustomAction}>Custom Action</Button>
+      <Button
+        onClick={startAnalysis}
+        disabled={isAnalyzing}
+      >
+        {isAnalyzing ? 'Analyzing...' : 'Analyze Selection'}
+      </Button>
 
-      {scanProgress > 0 && (
-        <div>Progress: {scanProgress}%</div>
+      {isAnalyzing && (
+        <ProgressBar
+          value={progress}
+          label={`Processing... ${progress}%`}
+        />
+      )}
+
+      {results && (
+        <Panel title="Analysis Results">
+          <div>
+            <p>Total Nodes: {results.summary.totalNodes}</p>
+            <p>Components: {results.summary.componentCount}</p>
+            <p>Text Layers: {results.summary.textNodes}</p>
+          </div>
+
+          <Code language="json">
+            {JSON.stringify(results.nodes, null, 2)}
+          </Code>
+        </Panel>
       )}
     </div>
   );
 }
 ```
+
+#### Main Thread Handler
+```typescript
+// src/main/index.ts
+async function handleAnalyzeSelection(data: any) {
+  try {
+    const selection = figma.currentPage.selection;
+
+    if (selection.length === 0) {
+      figma.ui.postMessage({
+        type: 'ERROR',
+        message: 'No nodes selected'
+      });
+      return;
+    }
+
+    // Send initial progress
+    figma.ui.postMessage({
+      type: 'ANALYSIS_PROGRESS',
+      percentage: 0
+    });
+
+    const results = {
+      summary: {
+        totalNodes: 0,
+        componentCount: 0,
+        textNodes: 0
+      },
+      nodes: []
+    };
+
+    // Process each selected node
+    for (let i = 0; i < selection.length; i++) {
+      const node = selection[i];
+
+      // Analyze node
+      const nodeData = analyzeNode(node, data);
+      results.nodes.push(nodeData);
+
+      // Update counters
+      results.summary.totalNodes++;
+      if (node.type === 'COMPONENT') results.summary.componentCount++;
+      if (node.type === 'TEXT') results.summary.textNodes++;
+
+      // Send progress update
+      const percentage = Math.round(((i + 1) / selection.length) * 100);
+      figma.ui.postMessage({
+        type: 'ANALYSIS_PROGRESS',
+        percentage: percentage
+      });
+    }
+
+    // Send final results
+    figma.ui.postMessage({
+      type: 'ANALYSIS_COMPLETE',
+      summary: results.summary,
+      nodes: results.nodes,
+      timestamp: Date.now()
+    });
+
+  } catch (error) {
+    figma.ui.postMessage({
+      type: 'ERROR',
+      message: error.message
+    });
+  }
+}
+
+function analyzeNode(node: SceneNode, options: any) {
+  return {
+    id: node.id,
+    name: node.name,
+    type: node.type,
+    x: node.x,
+    y: node.y,
+    width: node.width,
+    height: node.height,
+    visible: node.visible,
+    // Add more analysis based on options
+    textContent: options.analyzeText && node.type === 'TEXT' ? node.characters : null,
+    componentInfo: options.analyzeComponents && node.type === 'COMPONENT' ? {
+      mainComponent: node.mainComponent?.name,
+      variantProperties: node.variantProperties
+    } : null
+  };
+}
+```
+
+### Message Patterns
+
+#### Request-Response Pattern
+```tsx
+// UI: Send request
+sendToMain('GET_LAYER_STYLES', { nodeId: 'selected' });
+
+// Main: Process and respond
+figma.ui.postMessage({
+  type: 'LAYER_STYLES_RESULT',
+  nodeId: data.nodeId,
+  styles: extractedStyles
+});
+
+// UI: Handle response
+usePluginMessages({
+  LAYER_STYLES_RESULT: (data) => {
+    setLayerStyles(data.styles);
+  }
+});
+```
+
+#### Progress Updates Pattern
+```tsx
+// Main: Send periodic progress
+for (let i = 0; i < items.length; i++) {
+  processItem(items[i]);
+
+  figma.ui.postMessage({
+    type: 'PROCESS_PROGRESS',
+    current: i + 1,
+    total: items.length,
+    percentage: Math.round(((i + 1) / items.length) * 100)
+  });
+}
+```
+
+#### Error Handling Pattern
+```tsx
+// Main: Consistent error reporting
+try {
+  const result = await dangerousOperation();
+  figma.ui.postMessage({
+    type: 'OPERATION_SUCCESS',
+    result: result
+  });
+} catch (error) {
+  figma.ui.postMessage({
+    type: 'ERROR',
+    operation: 'dangerousOperation',
+    message: error.message,
+    timestamp: Date.now()
+  });
+}
+
+// UI: Handle all errors consistently
+usePluginMessages({
+  ERROR: (data) => {
+    console.error(`Error in ${data.operation}:`, data.message);
+    showToast(`Error: ${data.message}`, 'error');
+  }
+});
+```
+
+### Best Practices
+
+#### Data Safety
+- Extract only primitive values from Figma nodes to avoid memory leaks
+- Use `String()`, `Number()`, and `Boolean()` to ensure primitive types
+- Avoid passing complex Figma objects directly to UI
+
+```typescript
+// ✅ Good: Extract primitives
+const nodeData = {
+  id: String(node.id),
+  name: String(node.name),
+  width: Number(node.width),
+  visible: Boolean(node.visible)
+};
+
+// ❌ Bad: Passing complex objects
+const nodeData = node; // May cause memory issues
+```
+
+#### Message Structure
+- Use consistent message types with clear, descriptive names
+- Include metadata like timestamps and operation IDs for debugging
+- Structure data consistently across different message types
+
+```typescript
+// ✅ Good: Structured message
+figma.ui.postMessage({
+  type: 'EXPORT_COMPLETE',
+  operationId: 'export-001',
+  timestamp: Date.now(),
+  result: {
+    format: 'PNG',
+    fileCount: 5,
+    totalSize: '2.4MB'
+  }
+});
+```
+
+#### Error Handling
+- Always wrap main thread operations in try-catch blocks
+- Provide meaningful error messages with context
+- Include operation identifiers for debugging
+
+```typescript
+// ✅ Good: Comprehensive error handling
+try {
+  const result = await complexOperation(data);
+  figma.ui.postMessage({
+    type: 'OPERATION_SUCCESS',
+    operationId: data.operationId,
+    result: result
+  });
+} catch (error) {
+  figma.ui.postMessage({
+    type: 'ERROR',
+    operationId: data.operationId,
+    operation: 'complexOperation',
+    message: error.message,
+    stack: error.stack
+  });
+}
+```
+
+### Common Message Types
+
+Here are standard message types used throughout the plugin:
+
+#### UI to Main
+- `PING` - Test connectivity
+- `GET_SELECTION` - Request current selection info
+- `SCAN_NODES` - Analyze nodes in document
+- `EXPORT_SELECTION` - Export selected nodes
+- `RESIZE` - Resize plugin window
+
+#### Main to UI
+- `PONG` - Response to ping
+- `SELECTION_RESULT` - Selection analysis results
+- `SCAN_COMPLETE` - Node scan results
+- `EXPORT_COMPLETE` - Export operation results
+- `PROGRESS` - Operation progress updates
+- `ERROR` - Error notifications
+
 ---

@@ -268,17 +268,17 @@ function App() {
               )
             },
             {
-              id: 'messaging',
-              label: 'Communications',
-              content: (
-                <MessagingView />
-              )
-            },
-            {
               id: 'modals',
               label: 'Modal Dialogs',
               content: (
                 <ModalsView />
+              )
+            },
+            {
+              id: 'messaging',
+              label: 'Messaging',
+              content: (
+                <MessagingView />
               )
             },
             {
@@ -381,15 +381,15 @@ function App() {
 }
 
 /**
- * Root application component wrapped with theme provider.
+ * Root application component wrapped with providers.
  *
- * Provides the theme context to the entire application and renders
- * the main App component. This is the entry point for the plugin UI
+ * Provides the theme context and message context to the entire application
+ * and renders the main App component. This is the entry point for the plugin UI
  * that gets rendered by the Figma plugin system.
  *
- * @returns The themed application component
+ * @returns The app with all necessary providers
  */
-function AppWithTheme() {
+function AppWithProviders() {
   return (
     <ThemeProvider>
       <App />
@@ -403,4 +403,4 @@ function AppWithTheme() {
  * This is the main export that gets called by the Figma plugin system
  * to initialize and render the plugin's user interface.
  */
-export default render(AppWithTheme);
+export default render(AppWithProviders);

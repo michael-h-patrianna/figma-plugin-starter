@@ -14,12 +14,12 @@ export function DatePicker({
   value,
   onChange,
   label,
-  width = '160px',
+  width = '100%',
   min,
   max,
   disabled = false
 }: DatePickerProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   return (
     <div style={{ width }}>
       {label && (
@@ -28,7 +28,7 @@ export function DatePicker({
           color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
-          marginBottom: 6
+          marginBottom: spacing.xs
         }}>
           {label}
         </label>
@@ -43,7 +43,7 @@ export function DatePicker({
         disabled={disabled}
         style={{
           width: '100%',
-          padding: '8px 12px',
+          padding: `${spacing.sm}px ${spacing.md - 4}px`,
           fontSize: 12,
           color: disabled ? colors.textDisabled : colors.textColor,
           background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,

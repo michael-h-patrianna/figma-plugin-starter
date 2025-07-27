@@ -32,7 +32,7 @@ export function Input({
   step
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   const inputProps: any = {
     type,
@@ -45,7 +45,7 @@ export function Input({
     onBlur: () => setIsFocused(false),
     style: {
       width: '100%',
-      padding: '8px 12px',
+      padding: `${spacing.sm}px ${spacing.md - 4}px`,
       background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
       border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
       borderRadius: BORDER_RADIUS,
@@ -72,7 +72,7 @@ export function Input({
           color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
-          marginBottom: 4
+          marginBottom: spacing.xs
         }}>
           {label}
           {required && <span style={{ color: colors.error }}>*</span>}
@@ -83,7 +83,7 @@ export function Input({
         <div style={{
           color: colors.error,
           fontSize: 11,
-          marginTop: 4
+          marginTop: spacing.xs
         }}>
           {error}
         </div>
@@ -120,7 +120,7 @@ export function Textarea({
   rows = 3
 }: TextareaProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   return (
     <div style={{ width }}>
@@ -130,7 +130,7 @@ export function Textarea({
           color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
-          marginBottom: 4
+          marginBottom: spacing.xs
         }}>
           {label}
           {required && <span style={{ color: colors.error }}>*</span>}
@@ -149,7 +149,7 @@ export function Textarea({
         style={{
           width: '100%',
           height,
-          padding: '8px 12px',
+          padding: `${spacing.sm}px ${spacing.md - 4}px`,
           background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
           border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
           borderRadius: BORDER_RADIUS,
@@ -168,7 +168,7 @@ export function Textarea({
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        marginTop: 4
+        marginTop: spacing.xs
       }}>
         {error && (
           <div style={{

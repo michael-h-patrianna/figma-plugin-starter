@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useRef, useState } from 'preact/hooks';
 
 /**
  * Interface for a toast notification object.
@@ -38,6 +38,7 @@ export interface Toast {
  */
 export function useToast() {
   const [toast, setToast] = useState<Toast | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   /**
    * Shows a toast notification with the specified message and type.
@@ -54,15 +55,18 @@ export function useToast() {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = { message, type, id };
 
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     setToast(newToast);
 
     // Auto-dismiss after duration
-    const timeout = setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setToast(current => current?.id === id ? null : current);
+      timeoutRef.current = null;
     }, duration);
-
-    // Store timeout for manual dismissal
-    (window as any).__toastTimeout = timeout;
 
     return id;
   }, []);
@@ -74,9 +78,9 @@ export function useToast() {
    */
   const dismissToast = useCallback(() => {
     setToast(null);
-    if ((window as any).__toastTimeout) {
-      clearTimeout((window as any).__toastTimeout);
-      delete (window as any).__toastTimeout;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }, []);
 

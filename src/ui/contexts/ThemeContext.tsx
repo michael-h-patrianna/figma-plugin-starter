@@ -7,6 +7,22 @@ import { useContext, useEffect, useState } from 'preact/hooks';
 export type Theme = 'dark' | 'light';
 
 /**
+ * Spacing system for consistent layout throughout the application.
+ */
+interface ThemeSpacing {
+  /** 4px - micro spacing for tight layouts */
+  xs: number;
+  /** 8px - small spacing for compact elements */
+  sm: number;
+  /** 16px - medium spacing for standard layouts */
+  md: number;
+  /** 24px - large spacing for section separation */
+  lg: number;
+  /** 32px - extra large spacing for major sections */
+  xl: number;
+}
+
+/**
  * Complete color palette interface for the plugin theming system.
  *
  * Provides all the color tokens needed for consistent theming across
@@ -78,6 +94,17 @@ interface ThemeColors {
   scrollbarThumb: string;
   scrollbarThumbHover: string;
 }
+
+/**
+ * Spacing system values following a consistent 4px base scale.
+ */
+const spacing: ThemeSpacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32
+};
 
 /**
  * Dark theme color palette.
@@ -227,6 +254,8 @@ interface ThemeContextType {
   theme: Theme;
   /** Color palette for the current theme */
   colors: ThemeColors;
+  /** Spacing system for consistent layout */
+  spacing: ThemeSpacing;
   /** Function to toggle between light and dark themes */
   toggleTheme: () => void;
   /** Function to set a specific theme */
@@ -350,7 +379,7 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, colors, spacing, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

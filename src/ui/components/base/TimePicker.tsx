@@ -13,11 +13,11 @@ export function TimePicker({
   value,
   onChange,
   label,
-  width = '120px',
+  width = '100%',
   step = 60, // Default to 1-minute steps
   disabled = false
 }: TimePickerProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   return (
     <div style={{ width }}>
@@ -27,7 +27,7 @@ export function TimePicker({
           color: colors.textColor,
           fontSize: 12,
           fontWeight: 500,
-          marginBottom: 6
+          marginBottom: spacing.xs
         }}>
           {label}
         </label>
@@ -41,7 +41,7 @@ export function TimePicker({
         disabled={disabled}
         style={{
           width: '100%',
-          padding: '8px 12px',
+          padding: `${spacing.sm}px ${spacing.md - 4}px`,
           fontSize: 12,
           color: disabled ? colors.textDisabled : colors.textColor,
           background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,

@@ -37,6 +37,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "src/ui/hooks/usePluginMessages.backup"
   ]
 }
