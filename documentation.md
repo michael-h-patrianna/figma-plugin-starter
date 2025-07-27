@@ -1,25 +1,12 @@
-# Figma Plugin Starter - Complete Component & Feature Guide
+# Figma Plugin Starter - Feature Guide
 
-Welcome to the complete guide for your Figma plugin starter! 🎨
-
-This documentation covers all the custom components, hooks, and features in your plugin. Everything is designed to work seamlessly with the theming system, providing a consistent and professional look that adapts to both light and dark themes.
-
-## 🌟 What's Included
-
-✅ **Complete UI Component Library** - 15+ themeable components ready to use
-✅ **Settings System** - Automatic save/load with persistence in real Figma plugins
-✅ **Theme System** - Light/dark mode with smooth transitions
-✅ **Plugin Communication** - Easy messaging between UI and main thread
-✅ **Toast Notifications** - User-friendly alerts and confirmations
-✅ **Context Menus** - Right-click functionality with settings dropdown
-✅ **Error Handling** - Graceful error boundaries and user feedback
-✅ **TypeScript Support** - Full type safety throughout
+This documentation covers all the custom components, hooks, and features in this plugin template.
 
 ---
 
-## Quick Start Guide
+## TL&DR
 
-1. **Import any component** using the clean alias paths:
+1. **Import Components** using the @ui alias:
    ```tsx
    import { Button } from '@ui/components/base/Button';
    ```
@@ -29,24 +16,15 @@ This documentation covers all the custom components, hooks, and features in your
    <Button onClick={() => alert('Hello!')}>Click Me</Button>
    ```
 
-3. **The theme is applied automatically** - no extra setup needed!
+### Import Paths
 
-### Import Paths Explained
-
-Your project uses TypeScript path aliases for clean, consistent imports:
+The project uses TypeScript path aliases for clean, consistent imports:
 
 ✅ **Use aliases** (recommended):
 ```tsx
 import { Button } from '@ui/components/base/Button';
 import { Textbox } from '@ui/components/base/Textbox';
 import { CustomDropdown } from '@ui/components/base/CustomDropdown';
-```
-
-❌ **Avoid relative paths** (confusing and error-prone):
-```tsx
-import { Button } from '../base/Button';           // From views folder
-import { Button } from './components/base/Button'; // From ui folder
-import { Button } from '../../base/Button';        // From nested folders
 ```
 
 ### Available Aliases
@@ -58,23 +36,19 @@ import { Button } from '../../base/Button';        // From nested folders
 
 ## Table of Contents
 
-### 🎯 Core Components
+### Components
 - [Button](#button) - Clickable actions with primary/secondary/danger variants
 - [Textbox](#textbox) - Text input fields with icons and validation
 - [CustomDropdown](#customdropdown) - Select menus and option pickers
 - [Checkbox](#checkbox) - Toggle options and boolean settings
 - [ToggleSwitch](#toggleswitch) - Modern on/off switches
 - [RadioButton](#radiobutton) - Single choice from multiple options
-
-### 🎨 UI & Layout
 - [Alert](#alert) - Notification banners with info/success/warning/error types
 - [InfoBox](#infobox) - Contextual information boxes with theming
 - [Panel](#panel) - Container components with consistent styling
 - [Modal](#modal) - Overlay dialogs and popups
 - [Toast](#toast) - Temporary notifications and feedback
 - [ContextMenu](#contextmenu) - Right-click menus and dropdowns
-
-### 🔧 Advanced Components
 - [DataTable](#datatable) - Sortable tables with theming
 - [Accordion](#accordion) - Expandable content sections
 - [Tabs](#tabs) - Tabbed interfaces
@@ -82,17 +56,17 @@ import { Button } from '../../base/Button';        // From nested folders
 - [DatePicker](#datepicker) - Date selection components
 - [Spinner](#spinner) - Loading indicators
 
-### ⚙️ Settings & Configuration
+### Settings & Configuration
 - [SettingsDropdown](#settingsdropdown) - Settings menu with cog icon
 - [useSettings Hook](#usesettings-hook) - Automatic settings persistence
 - [Theme System](#theme-system) - Light/dark mode management
 
-### 💬 Communication & State
+### Communication & State
 - [usePluginMessages Hook](#usepluginmessages-hook) - UI ↔ Main thread communication
 - [useToast Hook](#usetoast-hook) - Toast notification management
 - [Plugin Storage](#plugin-storage) - Persistent data storage
 
-### 📚 Patterns & Examples
+### Patterns & Examples
 - [Common Patterns](#common-patterns) - Real-world usage examples
 - [Error Handling](#error-handling) - Error boundaries and user feedback
 - [Troubleshooting](#troubleshooting) - Solutions to common issues
@@ -1777,7 +1751,7 @@ Your starter includes many more components beyond those documented above. Check 
 
 Each component includes TypeScript types and example usage in the component file.
 
-### 📚 **See Real Examples**:
+### **See Real Examples**:
 - Check out `src/ui/components/views/FigmaView.tsx` for complete working examples
 - View `src/ui/components/views/FormsView.tsx` for InfoBox demonstrations
 - See `src/ui/components/examples/PluginCommunicationExample.tsx` for the new usePluginMessages pattern
