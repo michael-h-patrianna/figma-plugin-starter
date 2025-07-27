@@ -56,6 +56,28 @@ interface ThemeBorderRadius {
 }
 
 /**
+ * Shadow system for consistent elevation and depth.
+ */
+interface ThemeShadows {
+  /** Light shadow for subtle elevation */
+  toast: string;
+  /** Enhanced shadow for hover states */
+  toastHover: string;
+  /** Light shadow for secondary elements */
+  queue: string;
+}
+
+/**
+ * Animation durations for consistent timing.
+ */
+interface ThemeAnimations {
+  /** Standard transition duration */
+  transition: string;
+  /** Quick hover transition */
+  hover: string;
+}
+
+/**
  * Typography system for consistent text styling throughout the application.
  * Based on Inter font family optimized for desktop UI.
  */
@@ -136,6 +158,13 @@ interface ThemeColors {
   buttonDisabled: string;
   buttonDisabledText: string;
 
+  /** Toast notification colors */
+  toastCountBadge: string;
+  toastPersistIndicator: string;
+  toastQueueBackground: string;
+  toastQueueBackgroundHover: string;
+  toastQueueText: string;
+
   /** Data visualization */
   dataRow: string;
   dataRowAlt: string;
@@ -178,6 +207,23 @@ const borderRadius: ThemeBorderRadius = {
   small: 3,
   medium: 4,
   round: '50%'
+};
+
+/**
+ * Shadow system values for consistent elevation.
+ */
+const shadows: ThemeShadows = {
+  toast: '0 4px 24px rgba(0, 0, 0, 0.2)',
+  toastHover: '0 6px 32px rgba(0, 0, 0, 0.3)',
+  queue: '0 2px 12px rgba(0, 0, 0, 0.15)'
+};
+
+/**
+ * Animation timing values for consistent motion.
+ */
+const animations: ThemeAnimations = {
+  transition: 'all 0.3s ease',
+  hover: 'all 0.2s ease'
 };
 
 /**
@@ -241,6 +287,13 @@ const darkTheme: ThemeColors = {
   buttonSecondaryText: '#ffffff',
   buttonDisabled: '#383b44',
   buttonDisabledText: '#6c757d',
+
+  // Toast notification colors
+  toastCountBadge: 'rgba(255, 255, 255, 0.2)',
+  toastPersistIndicator: '#ffffff',
+  toastQueueBackground: '#202329',
+  toastQueueBackgroundHover: '#2a2d35',
+  toastQueueText: '#ffffff',
 
   // Data visualization
   dataRow: 'transparent',
@@ -309,6 +362,13 @@ const lightTheme: ThemeColors = {
   buttonDisabled: '#e8eaed',
   buttonDisabledText: '#95a5a6',
 
+  // Toast notification colors
+  toastCountBadge: 'rgba(0, 0, 0, 0.15)',
+  toastPersistIndicator: '#ffffff',
+  toastQueueBackground: '#f8f9fa',
+  toastQueueBackgroundHover: '#f1f3f4',
+  toastQueueText: '#2c3e50',
+
   // Data visualization
   dataRow: 'transparent',
   dataRowAlt: 'rgba(0, 0, 0, 0.02)',
@@ -334,6 +394,10 @@ interface ThemeContextType {
   typography: ThemeTypography;
   /** Border radius system for consistent rounded corners */
   borderRadius: ThemeBorderRadius;
+  /** Shadow system for consistent elevation */
+  shadows: ThemeShadows;
+  /** Animation timing for consistent motion */
+  animations: ThemeAnimations;
   /** Function to toggle between light and dark themes */
   toggleTheme: () => void;
   /** Function to set a specific theme */
@@ -457,7 +521,7 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, spacing, typography, borderRadius, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, colors, spacing, typography, borderRadius, shadows, animations, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -46,7 +46,7 @@ function copyFiles(source, target) {
   for (const file of files) {
     const sourcePath = path.join(source, file);
     const targetPath = path.join(target, file);
-    
+
     const stat = fs.statSync(sourcePath);
     if (stat.isFile()) {
       fs.copyFileSync(sourcePath, targetPath);
@@ -58,10 +58,10 @@ function copyFiles(source, target) {
 try {
   // Empty the target directory or create it
   emptyDirectory(targetDir);
-  
+
   // Copy all files from source to target
   copyFiles(sourceDir, targetDir);
-  
+
   // List what was copied
   console.log('✅ Files in public/fonts:');
   const copiedFiles = fs.readdirSync(targetDir);
@@ -70,7 +70,7 @@ try {
     const stats = fs.statSync(filePath);
     console.log(`   ${file} (${Math.round(stats.size / 1024)}KB)`);
   });
-  
+
   console.log('🎉 Font copy complete!');
 } catch (error) {
   console.error('❌ Error copying fonts:', error.message);

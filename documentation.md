@@ -906,7 +906,7 @@ function MyComponent() {
 
 ## Toast
 
-**What it's for**: Temporary notifications that appear and disappear automatically with stacking support.
+**What it's for**: Temporary notifications that appear and disappear automatically with smart stacking, consolidation, and queuing.
 
 **When to use**: For confirmations, quick feedback, or non-critical messages that don't require user action.
 
@@ -937,38 +937,109 @@ function MyComponent() {
 ```
 
 ### Toast Types
+Different types with automatic styling and durations:
 
 ```tsx
-// Different message types
-Toast.info('Information message');
-Toast.success('Operation completed!');
-Toast.warning('Please check your input');
-Toast.error('Something went wrong');
+// Basic message types
+Toast.info('Information message');          // Blue, 5s duration
+Toast.success('Operation completed!');      // Green, 5s duration
+Toast.warning('Please check your input');   // Orange, 5s duration
+Toast.error('Something went wrong');        // Red, 10s duration
 
-// Custom durations
-Toast.showToast('Custom message', 'info', 5000); // 5 seconds
-
-// Quick actions
-Toast.quickSuccess('Saved!'); // 2 seconds
-Toast.persistentError('Critical error'); // Stays until dismissed
-
-// Single toast (dismisses others)
-Toast.single('Only this message will show');
+// Quick convenience methods
+Toast.quickSuccess('Saved!');               // Green, 2s duration
+Toast.persistentError('Critical error');    // Red, manual dismiss
+Toast.single('Only this message');          // Dismisses all others
+Toast.priority('Urgent message');           // High priority, bypasses queue
 ```
 
-### Advanced Usage
+### Smart Features
+
+#### Message Consolidation
+Similar messages within 2 seconds are automatically consolidated:
+```tsx
+// These will be grouped into one toast with count badge
+Toast.info('Processing file 1');
+Toast.info('Processing file 2');
+Toast.info('Processing file 3');
+// Result: "Processing file #" with count badge "3"
+```
+
+#### Priority System
+Higher priority messages can replace lower priority ones:
+```tsx
+Toast.info('Low priority message');
+Toast.error('High priority error');  // Will replace info message if needed
+```
+
+#### Queuing System
+Maximum 3 toasts visible at once, others queue automatically:
+```tsx
+// If 3 toasts already showing, this goes to queue
+Toast.success('Will show when space available');
+```
+
+### Bulk Operations
+Efficient handling of multiple messages:
 
 ```tsx
-// Manual control
-const toastId = Toast.showToast('Processing...', 'info');
-// Later...
-Toast.dismissToast(toastId);
+// Multiple messages with consolidation
+Toast.bulk(['File 1 processed', 'File 2 processed'], 'success');
 
-// Dismiss all toasts
+// Summary for multiple operations
+Toast.summary(5, 'file processed');  // "5 file processeds completed"
+Toast.summary(1, 'item deleted');    // "item deleted"
+```
+
+### Manual Control
+Direct control over individual toasts:
+
+```tsx
+// Get toast ID for later control
+const toastId = Toast.info('Processing...');
+
+// Dismiss specific toast
+Toast.dismiss(toastId);
+
+// Dismiss all toasts and clear queue
 Toast.dismissAll();
 
-// Custom options
-Toast.showToast('Message', 'success', 3000, true); // 3s, allow stacking
+// Get current state (for debugging)
+const state = Toast.getState();
+console.log(state.toasts, state.queue);
+```
+
+### Advanced Options
+Full control with showToast function:
+
+```tsx
+import { showToast } from '@ui/services/toast';
+
+// Custom duration
+showToast('Custom message', 'info', { duration: 8000 });
+
+// Persistent until manually dismissed
+showToast('Important notice', 'warning', { persist: true });
+
+// Disable consolidation
+showToast('Unique message', 'info', { consolidate: false });
+
+// Custom priority (1=low, 2=medium, 3=high)
+showToast('Custom priority', 'error', { priority: 2 });
+
+// Single mode (dismisses others)
+showToast('Only this shows', 'success', { allowMultiple: false });
+```
+
+### Configuration
+Adjust global behavior:
+
+```tsx
+Toast.configure({
+  maxVisible: 5,           // Show up to 5 toasts at once
+  consolidationWindow: 3000, // Group similar messages within 3s
+  defaultDuration: 6000    // Default 6s duration
+});
 ```
 
 ### Setup
@@ -989,12 +1060,11 @@ function App() {
 ### Common Examples
 
 ```tsx
+// Basic success/error handling
 function SettingsForm() {
-  const [settings, setSettings] = useState({});
-
   const handleSave = async () => {
     try {
-      await saveSettings(settings);
+      await saveSettings();
       Toast.success('Settings saved successfully!');
     } catch (error) {
       Toast.error('Failed to save settings');
@@ -1002,19 +1072,54 @@ function SettingsForm() {
   };
 
   const handleReset = () => {
-    setSettings(DEFAULT_SETTINGS);
     Toast.info('Settings reset to defaults');
   };
+}
 
-  return (
-    <div>
-      {/* Your form here */}
-      <Button onClick={handleSave}>Save</Button>
-      <Button onClick={handleReset} variant="secondary">Reset</Button>
-    </div>
-  );
+// Bulk file processing with consolidation
+function FileProcessor() {
+  const processFiles = async (files) => {
+    for (const file of files) {
+      try {
+        await processFile(file);
+        Toast.success(`Processed ${file.name}`);  // Auto-consolidates
+      } catch (error) {
+        Toast.error(`Failed to process ${file.name}`);
+      }
+    }
+
+    // Summary message
+    Toast.summary(files.length, 'file processed');
+  };
+}
+
+// Critical error that needs attention
+function CriticalOperation() {
+  const handleCritical = () => {
+    Toast.persistentError('Connection lost. Please reconnect manually.');
+  };
+}
+
+// Progress updates that don't overwhelm
+function ProgressUpdates() {
+  const updateProgress = (step) => {
+    // Only show priority updates to avoid spam
+    if (step % 10 === 0) {
+      Toast.info(`Progress: ${step}/100 completed`);
+    }
+  };
 }
 ```
+
+### Features Summary
+- **Smart Consolidation**: Similar messages group automatically with count badges
+- **Priority Queue**: Important messages can bypass or replace lower priority ones
+- **Automatic Timing**: Error messages stay longer (10s vs 5s)
+- **Hover Pause**: Toasts pause auto-dismiss when hovered
+- **Theme Integration**: Colors automatically adapt to light/dark themes
+- **Accessibility**: Text colors automatically adjust for contrast
+- **Queue Management**: Shows queue indicator and "Dismiss All" button when needed
+- **Persistent Mode**: Critical messages stay until manually dismissed
 
 ---
 

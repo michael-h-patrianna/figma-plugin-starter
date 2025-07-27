@@ -232,3 +232,97 @@ export async function retry<T>(
   }
   throw new Error('Retry failed'); // This should never be reached
 }
+
+// ===== Color Contrast Utilities =====
+
+/**
+ * Convert hex color to RGB values
+ *
+ * @param hex - Hex color string (with or without #)
+ * @returns RGB object or null if invalid hex
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+/**
+ * Calculate relative luminance according to WCAG guidelines
+ *
+ * @param r - Red component (0-255)
+ * @param g - Green component (0-255)
+ * @param b - Blue component (0-255)
+ * @returns Relative luminance value (0-1)
+ */
+export function getLuminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+/**
+ * Calculate contrast ratio between two colors according to WCAG guidelines
+ *
+ * @param color1 - First color (hex string)
+ * @param color2 - Second color (hex string)
+ * @returns Contrast ratio (1-21)
+ */
+export function getContrastRatio(color1: string, color2: string): number {
+  const rgb1 = hexToRgb(color1);
+  const rgb2 = hexToRgb(color2);
+
+  if (!rgb1 || !rgb2) return 1; // Fallback if color parsing fails
+
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+
+  const brightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+/**
+ * Determine the best text color for a given background color based on contrast ratio
+ *
+ * @param backgroundColor - Background color (hex string)
+ * @param textColor - Primary text color option (hex string)
+ * @param textInverse - Alternative text color option (hex string)
+ * @returns The text color with better contrast
+ */
+export function getBestTextColor(backgroundColor: string, textColor: string, textInverse: string): string {
+  const contrastWithNormal = getContrastRatio(backgroundColor, textColor);
+  const contrastWithInverse = getContrastRatio(backgroundColor, textInverse);
+
+  return contrastWithInverse > contrastWithNormal ? textInverse : textColor;
+}
+
+/**
+ * Check if a color combination meets WCAG contrast requirements
+ *
+ * @param backgroundColor - Background color (hex string)
+ * @param textColor - Text color (hex string)
+ * @param level - WCAG level ('AA' or 'AAA')
+ * @param size - Text size ('normal' or 'large')
+ * @returns True if contrast meets requirements
+ */
+export function meetsContrastRequirement(
+  backgroundColor: string,
+  textColor: string,
+  level: 'AA' | 'AAA' = 'AA',
+  size: 'normal' | 'large' = 'normal'
+): boolean {
+  const ratio = getContrastRatio(backgroundColor, textColor);
+
+  if (level === 'AAA') {
+    return size === 'large' ? ratio >= 4.5 : ratio >= 7;
+  } else {
+    return size === 'large' ? ratio >= 3 : ratio >= 4.5;
+  }
+}
