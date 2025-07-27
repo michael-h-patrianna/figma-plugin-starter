@@ -54,7 +54,8 @@ export function Input({
       outline: 'none',
       transition: 'border-color 0.2s ease',
       fontFamily: 'inherit',
-      cursor: disabled ? 'not-allowed' : 'text'
+      cursor: disabled ? 'not-allowed' : 'text',
+      colorScheme: type === 'number' ? (colors.textColor.includes('#') && parseInt(colors.textColor.slice(1), 16) > 0x888888 ? 'dark' : 'light') : undefined
     }
   };
 

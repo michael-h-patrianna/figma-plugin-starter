@@ -51,7 +51,8 @@ export function TimePicker({
           boxSizing: 'border-box',
           cursor: disabled ? 'not-allowed' : 'pointer',
           fontFamily: 'inherit',
-          transition: 'border-color 0.2s ease'
+          transition: 'border-color 0.2s ease',
+          colorScheme: colors.textColor.includes('#') && parseInt(colors.textColor.slice(1), 16) > 0x888888 ? 'dark' : 'light'
         }}
         onFocus={(e) => {
           if (!disabled) {
