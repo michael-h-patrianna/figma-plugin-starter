@@ -12,8 +12,6 @@ interface InfoBoxProps {
   children: ReactNode;
   /** The type/variant of the info box which determines the color scheme */
   variant?: 'info' | 'success' | 'warning' | 'error' | 'accent' | 'tip' | 'plain';
-  /** Custom icon or emoji to display before the title */
-  icon?: string;
   /** Optional custom background color */
   backgroundColor?: string;
   /** Optional custom border color */
@@ -41,7 +39,7 @@ interface InfoBoxProps {
  * @example
  * ```tsx
  * // Basic usage with predefined variant
- * <InfoBox title="Pro Tip" variant="tip" icon="💡">
+ * <InfoBox title="Pro Tip" variant="tip">
  *   This is helpful information for users.
  * </InfoBox>
  *
@@ -50,7 +48,6 @@ interface InfoBoxProps {
  *   title="Custom Info"
  *   borderColor="#ff6b6b"
  *   titleColor="#ff6b6b"
- *   icon="🔥"
  * >
  *   Custom styled info box content.
  * </InfoBox>
@@ -74,7 +71,6 @@ export function InfoBox({
   title,
   children,
   variant = 'info',
-  icon,
   backgroundColor,
   borderColor,
   titleColor,
@@ -132,18 +128,6 @@ export function InfoBox({
   const finalBackgroundColor = backgroundColor || variantTheme.background;
   const finalContentColor = contentColor || colors.textSecondary;
 
-  // Default icons for variants
-  const defaultIcons = {
-    info: 'ℹ️',
-    success: '✅',
-    warning: '⚠️',
-    error: '❌',
-    accent: '🎯',
-    tip: '💡',
-    plain: ''
-  };
-
-  const finalIcon = icon !== undefined ? icon : defaultIcons[variant];
 
   return (
     <div
@@ -157,7 +141,7 @@ export function InfoBox({
         ...style
       }}
     >
-      {/* Title with icon */}
+      {/* Title  */}
       <div style={{
         color: finalTitleColor,
         fontSize: 12,
@@ -167,7 +151,6 @@ export function InfoBox({
         alignItems: 'center',
         gap: 6
       }}>
-        {finalIcon && <span>{finalIcon}</span>}
         <span>{title}</span>
       </div>
 

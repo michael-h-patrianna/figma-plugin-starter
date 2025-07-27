@@ -1,4 +1,5 @@
 // Export/Import utilities for plugin data
+import { copyToClipboard } from './utils';
 
 
 /**
@@ -152,8 +153,7 @@ export function exportToCSV(data: any[], filename?: string): void {
 export async function copyToClipboardAsJSON(data: any): Promise<boolean> {
   try {
     const jsonString = JSON.stringify(data, null, 2);
-    await navigator.clipboard.writeText(jsonString);
-    return true;
+    return await copyToClipboard(jsonString);
   } catch (error) {
     console.error('Failed to copy to clipboard:', error);
     return false;

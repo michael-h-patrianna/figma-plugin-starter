@@ -5,15 +5,13 @@ import { Panel } from '@ui/components/base/Panel';
 import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { ProgressModal } from '@ui/components/base/ProgressModal';
 import { Spinner } from '@ui/components/base/Spinner';
-import { Toast } from '@ui/components/base/Toast';
 import { useTheme } from '@ui/contexts/ThemeContext';
-import { useToast } from '@ui/hooks/useToast';
 import { sendToMain, usePluginMessages } from '@ui/messaging-simple';
+import { Toast as ToastService } from '@ui/services/toast';
 import { useState } from 'preact/hooks';
 
 export function MessagingView() {
   const { colors } = useTheme();
-  const { toast, showToast, dismissToast } = useToast();
   const [lastMessage, setLastMessage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -25,32 +23,32 @@ export function MessagingView() {
   usePluginMessages({
     PONG: (data) => {
       setLastMessage(data);
-      showToast('Received PONG!', 'success');
+      ToastService.success('Received PONG!');
     },
     SELECTION_RESULT: (data) => {
       setLastMessage(data);
-      showToast(`Selection: ${data.count} items`, 'success');
+      ToastService.success(`Selection: ${data.count} items`);
     },
   });
 
   const handlePing = () => {
     sendToMain('PING', { message: 'Hello from UI!' });
-    showToast('Sent PING', 'info');
+    ToastService.info('Sent PING');
   };
 
   const handleGetSelection = () => {
     sendToMain('GET_SELECTION');
-    showToast('Requested selection', 'info');
+    ToastService.info('Requested selection');
   };
 
 
 
   const handleSpinnerDemo = () => {
     setIsLoading(true);
-    showToast('Loading started...', 'info');
+    ToastService.info('Loading started...');
     setTimeout(() => {
       setIsLoading(false);
-      showToast('Loading completed!', 'success');
+      ToastService.success('Loading completed!');
     }, 3000);
   };
 
@@ -64,7 +62,7 @@ export function MessagingView() {
           clearInterval(interval);
           setTimeout(() => {
             setShowProgressModal(false);
-            showToast('Process completed!', 'success');
+            ToastService.success('Process completed!');
           }, 500);
           return 100;
         }
@@ -76,7 +74,7 @@ export function MessagingView() {
   const handleInlineProgressDemo = () => {
     setInlineProgress(0);
     setShowInlineProgress(true);
-    showToast('Starting inline progress...', 'info');
+    ToastService.info('Starting inline progress...');
 
     const interval = setInterval(() => {
       setInlineProgress(prev => {
@@ -84,7 +82,7 @@ export function MessagingView() {
           clearInterval(interval);
           setTimeout(() => {
             setShowInlineProgress(false);
-            showToast('Inline process completed!', 'success');
+            ToastService.success('Inline process completed!');
           }, 1000);
           return 100;
         }
@@ -130,32 +128,101 @@ export function MessagingView() {
       )}
 
       <Panel title="Toast Notifications">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Button
-              onClick={() => showToast('This is an info message', 'info')}
-              size="small"
-            >
-              Info Toast
-            </Button>
-            <Button
-              onClick={() => showToast('Operation completed successfully!', 'success')}
-              size="small"
-            >
-              Success Toast
-            </Button>
-            <Button
-              onClick={() => showToast('Warning: Please check your settings', 'warning')}
-              size="small"
-            >
-              Warning Toast
-            </Button>
-            <Button
-              onClick={() => showToast('Error: Something went wrong', 'error')}
-              size="small"
-            >
-              Error Toast
-            </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Basic Toast Types</h4>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button
+                onClick={() => ToastService.info('This is an info message')}
+                size="small"
+              >
+                Info Toast
+              </Button>
+              <Button
+                onClick={() => ToastService.success('Operation completed successfully!')}
+                size="small"
+              >
+                Success Toast
+              </Button>
+              <Button
+                onClick={() => ToastService.warning('Warning: Please check your settings')}
+                size="small"
+              >
+                Warning Toast
+              </Button>
+              <Button
+                onClick={() => ToastService.error('Error: Something went wrong')}
+                size="small"
+              >
+                Error Toast
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Special Toast Features</h4>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button
+                onClick={() => ToastService.quickSuccess('Quick success (2s duration)!')}
+                size="small"
+              >
+                Quick Success
+              </Button>
+              <Button
+                onClick={() => ToastService.persistentError('Persistent error - click to dismiss')}
+                size="small"
+                variant="secondary"
+              >
+                Persistent Error
+              </Button>
+              <Button
+                onClick={() => ToastService.single('Single toast (replaces others)')}
+                size="small"
+                variant="secondary"
+              >
+                Single Toast
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Multiple Toasts Demo</h4>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button
+                onClick={() => {
+                  ToastService.info('First toast message');
+                  setTimeout(() => ToastService.success('Second toast message'), 500);
+                  setTimeout(() => ToastService.warning('Third toast message'), 1000);
+                  setTimeout(() => ToastService.error('Fourth toast message'), 1500);
+                }}
+                size="small"
+              >
+                Show Multiple
+              </Button>
+              <Button
+                onClick={() => ToastService.dismissAll()}
+                size="small"
+                variant="secondary"
+              >
+                Dismiss All
+              </Button>
+            </div>
+          </div>
+
+          <div style={{
+            padding: 12,
+            background: colors.backgroundSecondary,
+            borderRadius: 6,
+            border: `1px solid ${colors.border}`
+          }}>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Singleton Toast Benefits</h4>
+            <p style={{ color: colors.textSecondary, margin: 0, fontSize: 12, lineHeight: 1.4 }}>
+              • <strong>Global Access:</strong> Call from anywhere without component state<br />
+              • <strong>Multiple Toasts:</strong> Stack multiple notifications automatically<br />
+              • <strong>Rich API:</strong> Special methods for common scenarios<br />
+              • <strong>No Prop Drilling:</strong> Zero boilerplate in components<br />
+              • <strong>Reactive State:</strong> Powered by Preact signals
+            </p>
           </div>
         </div>
       </Panel>
@@ -233,7 +300,7 @@ export function MessagingView() {
           <ErrorBoundary
             onError={(error, errorInfo) => {
               console.error('Demo Error Boundary:', error, errorInfo);
-              showToast('Error boundary caught an error!', 'error');
+              ToastService.error('Error boundary caught an error!');
             }}
           >
             <div style={{
@@ -247,12 +314,6 @@ export function MessagingView() {
           </ErrorBoundary>
         </div>
       </Panel>
-
-
-
-      {toast && (
-        <Toast toast={toast} onDismiss={dismissToast} />
-      )}
 
       {showProgressModal && (
         <ProgressModal

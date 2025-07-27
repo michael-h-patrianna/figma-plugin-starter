@@ -76,19 +76,6 @@ export function ContentView({ accordionItems }: ContentViewProps) {
               <strong>Error:</strong> Subtle error styling for form validation or minor issues.
             </Alert>
 
-            <h4 style={{ color: colors.textColor, margin: '16px 0 8px 0', fontSize: 14 }}>Custom Icons</h4>
-
-            <Alert type="success" icon="🎉">
-              <strong>Celebration:</strong> Custom icon for special achievements and milestones!
-            </Alert>
-
-            <Alert type="info" icon="💡">
-              <strong>Pro Tip:</strong> Use custom icons to make your alerts more engaging and contextual.
-            </Alert>
-
-            <Alert type="warning" icon="🔔" variant="subtle">
-              <strong>Reminder:</strong> Don't forget to save your work before closing the application.
-            </Alert>
           </div>
         </div>
       </Panel>
@@ -107,7 +94,7 @@ export function ContentView({ accordionItems }: ContentViewProps) {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
             </InfoBox>
 
-            <InfoBox title="Dolor Sit Amet" variant="success" icon="🎉">
+            <InfoBox title="Dolor Sit Amet" variant="success">
               Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.
             </InfoBox>
 
@@ -118,7 +105,6 @@ export function ContentView({ accordionItems }: ContentViewProps) {
             <InfoBox
               title="Custom Styled Lorem"
               variant="tip"
-              icon="🎨"
               borderColor="#9b59b6"
               titleColor="#9b59b6"
             >

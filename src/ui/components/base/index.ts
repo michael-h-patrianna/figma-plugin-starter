@@ -21,7 +21,7 @@ export { MessageBox } from './MessageBox';
 export { NotificationBanner } from './NotificationBanner';
 export { ProgressBar } from './ProgressBar';
 export { Spinner } from './Spinner';
-export { Toast } from './Toast';
+export { GlobalToastContainer } from './Toast';
 
 // Export container components
 export { Accordion } from './Accordion';

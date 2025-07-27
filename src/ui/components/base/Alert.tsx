@@ -8,8 +8,6 @@ interface AlertProps {
   type: AlertType;
   /** The main content of the alert */
   children: ComponentChildren;
-  /** Optional icon to display (defaults based on type) */
-  icon?: string;
   /** Whether to show the alert (for conditional rendering) */
   visible?: boolean;
   /** Additional CSS styles */
@@ -26,7 +24,6 @@ interface AlertProps {
  * Features:
  * - Multiple types (info, warning, error, success) with appropriate colors
  * - Automatic theming that adapts to light/dark mode
- * - Default icons for each alert type
  * - Flexible content support (text, JSX, etc.)
  * - Conditional visibility
  * - Two variants: subtle (light background) or solid (colored background)
@@ -57,7 +54,6 @@ interface AlertProps {
 export const Alert: React.FC<AlertProps> = ({
   type,
   children,
-  icon,
   visible = true,
   style = {},
   className = '',
@@ -125,24 +121,8 @@ export const Alert: React.FC<AlertProps> = ({
     return base[type][variant];
   };
 
-  /**
-   * Gets the default icon for the alert type
-   */
-  const getDefaultIcon = () => {
-    switch (type) {
-      case 'error':
-        return '❌';
-      case 'success':
-        return '✅';
-      case 'info':
-        return 'ℹ️';
-      default: // warning
-        return '⚠️';
-    }
-  };
 
   const typeStyles = getTypeStyles();
-  const displayIcon = icon !== undefined ? icon : getDefaultIcon();
 
   const alertStyle = {
     ...typeStyles,
@@ -160,18 +140,7 @@ export const Alert: React.FC<AlertProps> = ({
 
   return (
     <div className={`alert alert--${type} alert--${variant} ${className}`} style={alertStyle}>
-      {displayIcon && (
-        <span
-          style={{
-            fontSize: '16px',
-            lineHeight: '1',
-            flexShrink: 0,
-            marginTop: '1px'
-          }}
-        >
-          {displayIcon}
-        </span>
-      )}
+
       <div style={{ flex: 1, minWidth: 0 }}>
         {children}
       </div>

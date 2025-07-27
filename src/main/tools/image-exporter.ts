@@ -8,6 +8,7 @@
  * - Multiple state export for components
  */
 
+import { sleep } from '@shared/utils';
 import { UIHelpers } from './ui-helpers';
 
 export interface ExportOptions {
@@ -296,7 +297,7 @@ export class ImageExporter {
         try {
           // Set component state
           instance.setProperties({ State: state });
-          await new Promise(resolve => setTimeout(resolve, 100)); // Wait for Figma to update
+          await sleep(100); // Wait for Figma to update
 
           // Export current state
           const imageUrl = await this.exportNodeSafely(instance, {

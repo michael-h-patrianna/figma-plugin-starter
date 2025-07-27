@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'preact/hooks';
+import { debounce } from '@shared/utils';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 
 /**
  * Plugin settings interface - keep it simple!
@@ -92,6 +93,16 @@ export function useSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Create debounced save function
+  const debouncedSave = useMemo(
+    () => debounce(async (settingsToSave: PluginSettings) => {
+      setIsSaving(true);
+      await SettingsStorage.save(settingsToSave);
+      setIsSaving(false);
+    }, 500),
+    []
+  );
+
   // Auto-load settings on mount
   useEffect(() => {
     async function loadSettings() {
@@ -105,15 +116,8 @@ export function useSettings() {
   // Auto-save when settings change (debounced)
   useEffect(() => {
     if (isLoading) return; // Don't save during initial load
-
-    const saveTimeout = setTimeout(async () => {
-      setIsSaving(true);
-      await SettingsStorage.save(settings);
-      setIsSaving(false);
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(saveTimeout);
-  }, [settings, isLoading]);
+    debouncedSave(settings);
+  }, [settings, isLoading, debouncedSave]);
 
   // Auto-save on window unload (only works in real Figma plugins)
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { clamp } from '@shared/utils';
 import { useEffect, useRef } from 'preact/hooks';
 import { sendToMain } from '../messaging-simple';
 
@@ -51,8 +52,8 @@ export function useWindowResize(
         const { width, height } = entry.contentRect;
 
         // Calculate total dimensions with padding
-        const totalWidth = Math.max(minWidth, Math.min(maxWidth, width + extraPadding));
-        const totalHeight = Math.max(minHeight, Math.min(maxHeight, height + extraPadding));
+        const totalWidth = clamp(width + extraPadding, minWidth, maxWidth);
+        const totalHeight = clamp(height + extraPadding, minHeight, maxHeight);
 
         // Send resize message using simple direct format
         sendToMain('RESIZE', { width: totalWidth, height: totalHeight });

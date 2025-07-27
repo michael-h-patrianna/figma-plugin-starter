@@ -4,6 +4,7 @@
  * This module provides a completely WASM-safe messaging system for Figma plugins.
  * It handles all the complexities of message passing while ensuring memory safety.
  */
+import { clamp, sleep } from './utils';
 
 /**
  * Standard message format for all plugin communications
@@ -100,7 +101,7 @@ export function sendToUI<T = any>(type: string, data?: T): void {
  */
 export function sendProgress(progress: number, message?: string, current?: number, total?: number, currentItem?: string): void {
   const progressData: ProgressMessage = {
-    progress: Math.max(0, Math.min(100, progress)),
+    progress: clamp(progress, 0, 100),
     message,
     current,
     total,
@@ -235,7 +236,7 @@ export class SafeBatchProcessor<T, R> {
       }
 
       // Yield control to prevent blocking
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await sleep(1);
     }
 
     return results;

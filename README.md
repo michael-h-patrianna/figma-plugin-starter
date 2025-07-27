@@ -52,23 +52,29 @@ src/
 ├── main/
 │   ├── index.ts          # Plugin entry point
 │   ├── types.ts          # Shared types
-│   ├── messaging.ts      # Main thread messaging
 │   ├── errors.ts         # Error handling
 │   └── tools/            # Plugin tools and utilities
+│       ├── content-creator.ts
+│       ├── image-exporter.ts
+│       ├── node-scanner.ts
+│       └── ui-helpers.ts
 ├── ui/
 │   ├── components/       # UI components
-│   │   ├── base/         # Base UI components
-│   │   ├── panels/       # Panel components
-│   │   └── views/        # View components
-│   ├── hooks/            # Custom hooks
-│   ├── contexts/         # React contexts
-│   ├── state/            # State management
+│   │   ├── base/         # Base UI components (buttons, inputs, modals)
+│   │   ├── panels/       # Panel components (debug, help)
+│   │   └── views/        # View components (content, data, forms)
+│   ├── contexts/         # React contexts (theme)
+│   ├── hooks/            # Custom hooks (settings, window resize)
+│   ├── services/         # Global services (toast, messageBox)
 │   ├── messaging-simple.ts # UI messaging system
+│   ├── styles.css        # Global styles
 │   └── index.tsx         # UI entry point
 └── shared/               # Shared utilities
     ├── constants.ts      # App constants
     ├── utils.ts          # Utility functions
-    └── messaging.ts      # Shared messaging types
+    ├── messaging.ts      # Shared messaging types
+    ├── exportUtils.ts    # Export utilities
+    └── selectionUtils.ts # Selection utilities
 ```
 
 ## Development

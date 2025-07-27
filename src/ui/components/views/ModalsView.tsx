@@ -1,12 +1,11 @@
 import { Button } from '@ui/components/base/Button';
 import { InfoBox } from '@ui/components/base/InfoBox';
 import { Input } from '@ui/components/base/Input';
-import { ConfirmBox, MessageBox } from '@ui/components/base/MessageBox';
 import { Modal } from '@ui/components/base/Modal';
 import { Panel } from '@ui/components/base/Panel';
-import { Toast } from '@ui/components/base/Toast';
 import { useTheme } from '@ui/contexts/ThemeContext';
-import { useToast } from '@ui/hooks/useToast';
+import { showConfirmBox, showMessageBox, showYesNoBox, showYesNoCancelBox } from '@ui/services/messageBox';
+import { Toast as ToastService } from '@ui/services/toast';
 import { useState } from 'preact/hooks';
 /**
  * Props for the ModalsView component.
@@ -27,10 +26,7 @@ interface ModalsViewProps {
  */
 export function ModalsView({ }: ModalsViewProps) {
   const { colors } = useTheme();
-  const { toast, showToast, dismissToast } = useToast();
   const [showModal, setShowModal] = useState(false);
-  const [showMessageBox, setShowMessageBox] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
   return (
@@ -46,25 +42,79 @@ export function ModalsView({ }: ModalsViewProps) {
           </div>
 
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Message Box</h4>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>MessageBox Types</h4>
             <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
-              Simple message dialog with OK button. Perfect for alerts and notifications.
+              Windows-style MessageBox with different button configurations.
             </p>
-            <Button onClick={() => setShowMessageBox(true)} variant="secondary">Show Message Box</Button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button
+                onClick={async () => {
+                  await showMessageBox('Information', 'This is a simple message box with only an OK button.');
+                  ToastService.info('Message box closed!');
+                }}
+                variant="secondary"
+                size="small"
+              >
+                OK
+              </Button>
+              <Button
+                onClick={async () => {
+                  const confirmed = await showConfirmBox('Confirm Action', 'Do you want to proceed with this action?');
+                  if (confirmed) {
+                    ToastService.success('User clicked OK!');
+                  } else {
+                    ToastService.warning('User clicked Cancel!');
+                  }
+                }}
+                variant="secondary"
+                size="small"
+              >
+                OK/Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  const result = await showYesNoBox('Question', 'Do you like this feature?');
+                  if (result) {
+                    ToastService.success('User clicked Yes!');
+                  } else {
+                    ToastService.info('User clicked No!');
+                  }
+                }}
+                variant="secondary"
+                size="small"
+              >
+                Yes/No
+              </Button>
+              <Button
+                onClick={async () => {
+                  const result = await showYesNoCancelBox('Save Changes', 'Do you want to save your changes before closing?');
+                  switch (result) {
+                    case 'yes':
+                      ToastService.success('User clicked Yes - saving!');
+                      break;
+                    case 'no':
+                      ToastService.warning('User clicked No - discarding changes!');
+                      break;
+                    case 'cancel':
+                      ToastService.info('User clicked Cancel - staying in document!');
+                      break;
+                  }
+                }}
+                variant="secondary"
+                size="small"
+              >
+                Yes/No/Cancel
+              </Button>
+            </div>
           </div>
 
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Confirm Box</h4>
-            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
-              Confirmation dialog with OK/Cancel buttons. Ideal for destructive actions.
-            </p>
-            <Button onClick={() => setShowConfirmBox(true)} variant="secondary">Show Confirmation</Button>
-          </div>
-
-          <InfoBox title="Easy Message Boxes" variant="plain">
-            • MessageBox - Simple OK dialog<br />
-            • ConfirmBox - OK/Cancel dialog<br />
-            • Modal - Custom content with full control
+          <InfoBox title="Windows MessageBox API Style" variant="plain">
+            • <strong>OK Only:</strong> Simple information messages<br />
+            • <strong>OK/Cancel:</strong> Confirmation dialogs<br />
+            • <strong>Yes/No:</strong> Binary choice questions<br />
+            • <strong>Yes/No/Cancel:</strong> Save/Discard/Cancel scenarios<br />
+            • <strong>Close Behavior:</strong> X button follows Windows conventions<br />
+            • <strong>Callbacks:</strong> Optional handlers for each button
           </InfoBox>
         </div>
       </Panel>
@@ -95,7 +145,7 @@ export function ModalsView({ }: ModalsViewProps) {
               Cancel
             </Button>
             <Button onClick={() => {
-              showToast('Custom modal action completed!', 'success');
+              ToastService.success('Custom modal action completed!');
               setShowModal(false);
             }}>
               Save
@@ -104,40 +154,6 @@ export function ModalsView({ }: ModalsViewProps) {
         </div>
       </Modal>
 
-      {/* Message Box Demo */}
-      <MessageBox
-        isVisible={showMessageBox}
-        title="Information"
-        message="This is a simple message box. Perfect for showing information, alerts, or confirmations with just an OK button."
-        onOk={() => {
-          setShowMessageBox(false);
-          showToast('Message box closed!', 'info');
-        }}
-      />
-
-      {/* Confirm Box Demo */}
-      <ConfirmBox
-        isVisible={showConfirmBox}
-        title="Confirm Action"
-        message="Are you sure you want to perform this action? This is a confirm dialog with OK and Cancel buttons."
-        onOk={() => {
-          setShowConfirmBox(false);
-          showToast('Action confirmed!', 'success');
-        }}
-        onCancel={() => {
-          setShowConfirmBox(false);
-          showToast('Action cancelled!', 'warning');
-        }}
-        okText="Yes, do it"
-        cancelText="No, cancel"
-      />
-
-      {/* Toast Notification */}
-      {toast && (
-        <Toast toast={toast} onDismiss={dismissToast} />
-      )}
     </div>
   );
-
-
 }

@@ -8,10 +8,8 @@ import { Input, Textarea } from '@ui/components/base/Input';
 import { Panel } from '@ui/components/base/Panel';
 import { RadioButton } from '@ui/components/base/RadioButton';
 import { TimePicker } from '@ui/components/base/TimePicker';
-import { Toast } from '@ui/components/base/Toast';
 import { ToggleSwitch } from '@ui/components/base/ToggleSwitch';
 import { useTheme } from '@ui/contexts/ThemeContext';
-import { useToast } from '@ui/hooks/useToast';
 import { useMemo, useState } from 'preact/hooks';
 
 /**
@@ -33,7 +31,6 @@ interface FormsViewProps {
  */
 export function FormsView({ }: FormsViewProps) {
   const { colors, spacing } = useTheme();
-  const { toast, showToast, dismissToast } = useToast();
 
   // Form state
   const [inputValue, setInputValue] = useState('');
@@ -248,11 +245,6 @@ export function FormsView({ }: FormsViewProps) {
           </FormSection>
         </Form>
       </Panel>
-
-      {/* Toast Notification */}
-      {toast && (
-        <Toast toast={toast} onDismiss={dismissToast} />
-      )}
     </div>
   );
 }

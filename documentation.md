@@ -53,7 +53,7 @@ This documentation covers all the custom components, hooks, and features in this
 - [InfoBox](#infobox) - Contextual information boxes with theming
 - [Toast](#toast) - Temporary notifications and feedback
 - [NotificationBanner](#notificationbanner) - Banner notifications
-- [MessageBox](#messagebox) - Message display component
+- [MessageBox](#messagebox) - Modal dialogs with Windows-style button configurations
 - [Code](#code) - Code display with syntax highlighting
 - [Spinner](#spinner) - Loading indicators
 - [ProgressBar](#progressbar) - Loading and progress indicators
@@ -75,6 +75,10 @@ This documentation covers all the custom components, hooks, and features in this
 - [Theme System](#theme-system) - Light/dark mode management
 - [useSettings Hook](#usesettings-hook) - Automatic settings persistence
 - [Plugin Messaging System](#plugin-messaging-system) - UI ↔ Main thread communication
+
+### Global Services
+- [Toast Service](#toast) - Global toast notification system
+- [MessageBox Service](#messagebox) - Global modal dialog system
 
 ---
 
@@ -905,68 +909,104 @@ function MyComponent() {
 
 ## Toast
 
-**What it's for**: Temporary notifications that appear and disappear automatically.
+**What it's for**: Temporary notifications that appear and disappear automatically with stacking support.
 
 **When to use**: For confirmations, quick feedback, or non-critical messages that don't require user action.
 
 ### Import
 ```tsx
-import { Toast } from '@ui/components/base/Toast';
-import { useToast } from '@ui/hooks/useToast';
+import { Toast } from '@ui/services/toast';
 ```
 
-### Basic Usage with useToast Hook
+### Basic Usage
 ```tsx
 function MyComponent() {
-  const { showToast } = useToast();
-
   const handleSave = () => {
     // Your save logic here
-    showToast('Settings saved successfully!', 'success');
+    Toast.success('Settings saved successfully!');
+  };
+
+  const handleError = () => {
+    Toast.error('Something went wrong');
   };
 
   return (
-    <Button onClick={handleSave}>Save Settings</Button>
+    <div>
+      <Button onClick={handleSave}>Save Settings</Button>
+      <Button onClick={handleError}>Trigger Error</Button>
+    </div>
   );
 }
 ```
 
-### useToast Hook
-
-The `useToast` hook provides an easy way to show toast notifications:
+### Toast Types
 
 ```tsx
-const { toast, showToast, dismissToast } = useToast();
+// Different message types
+Toast.info('Information message');
+Toast.success('Operation completed!');
+Toast.warning('Please check your input');
+Toast.error('Something went wrong');
 
-// Show different types of toasts
-showToast('Info message', 'info');
-showToast('Success!', 'success');
-showToast('Warning!', 'warning');
-showToast('Error occurred', 'error');
+// Custom durations
+Toast.showToast('Custom message', 'info', 5000); // 5 seconds
 
-// Dismiss current toast
-dismissToast();
+// Quick actions
+Toast.quickSuccess('Saved!'); // 2 seconds
+Toast.persistentError('Critical error'); // Stays until dismissed
+
+// Single toast (dismisses others)
+Toast.single('Only this message will show');
+```
+
+### Advanced Usage
+
+```tsx
+// Manual control
+const toastId = Toast.showToast('Processing...', 'info');
+// Later...
+Toast.dismissToast(toastId);
+
+// Dismiss all toasts
+Toast.dismissAll();
+
+// Custom options
+Toast.showToast('Message', 'success', 3000, true); // 3s, allow stacking
+```
+
+### Setup
+Add the toast container to your app root:
+```tsx
+import { GlobalToastContainer } from '@ui/components/base/Toast';
+
+function App() {
+  return (
+    <div>
+      {/* Your app content */}
+      <GlobalToastContainer />
+    </div>
+  );
+}
 ```
 
 ### Common Examples
 
 ```tsx
 function SettingsForm() {
-  const { showToast } = useToast();
   const [settings, setSettings] = useState({});
 
   const handleSave = async () => {
     try {
       await saveSettings(settings);
-      showToast('Settings saved successfully!', 'success');
+      Toast.success('Settings saved successfully!');
     } catch (error) {
-      showToast('Failed to save settings', 'error');
+      Toast.error('Failed to save settings');
     }
   };
 
   const handleReset = () => {
     setSettings(DEFAULT_SETTINGS);
-    showToast('Settings reset to defaults', 'info');
+    Toast.info('Settings reset to defaults');
   };
 
   return (
@@ -1007,22 +1047,92 @@ function MyComponent() {
 
 ## MessageBox
 
-**What it's for**: Displaying messages with consistent styling and theming.
+**What it's for**: Displaying modal dialogs with standardized button configurations following Windows MessageBox patterns.
 
-**When to use**: For status messages, confirmations, or informational content.
+**When to use**: For confirmations, alerts, questions, and user decisions that require modal interaction.
 
 ### Import
 ```tsx
-import { MessageBox } from '@ui/components/base/MessageBox';
+import { showMessageBox, showConfirmBox, showYesNoBox, showYesNoCancelBox } from '@ui/services/messageBox';
 ```
 
-### Basic Usage
+### Button Configurations
+
+#### OK Only - Simple Information
 ```tsx
-function MyComponent() {
+async function showInfo() {
+  await showMessageBox('Information', 'Operation completed successfully.');
+  console.log('User acknowledged the message');
+}
+```
+
+#### OK/Cancel - Confirmation Dialog
+```tsx
+async function confirmAction() {
+  const confirmed = await showConfirmBox('Confirm', 'Do you want to proceed?');
+  if (confirmed) {
+    console.log('User confirmed');
+  } else {
+    console.log('User cancelled');
+  }
+}
+```
+
+#### Yes/No - Binary Choice
+```tsx
+async function askQuestion() {
+  const result = await showYesNoBox('Question', 'Do you like this feature?');
+  if (result) {
+    console.log('User said Yes');
+  } else {
+    console.log('User said No');
+  }
+}
+```
+
+#### Yes/No/Cancel - Save Dialog
+```tsx
+async function savePrompt() {
+  const result = await showYesNoCancelBox('Save Changes', 'Save before closing?');
+  switch (result) {
+    case 'yes':
+      console.log('Save and close');
+      break;
+    case 'no':
+      console.log('Close without saving');
+      break;
+    case 'cancel':
+      console.log('Cancel close operation');
+      break;
+  }
+}
+```
+
+### Close Button Behavior
+- **OK Only**: Close button acts as OK
+- **OK/Cancel**: Close button acts as Cancel
+- **Yes/No**: Close button acts as No
+- **Yes/No/Cancel**: Close button acts as Cancel
+
+### Optional Callbacks
+```tsx
+await showConfirmBox('Delete File', 'Are you sure?', {
+  onOk: () => console.log('Delete confirmed'),
+  onCancel: () => console.log('Delete cancelled')
+});
+```
+
+### Setup
+Add the MessageBox component to your app root:
+```tsx
+import { MessageBox } from '@ui/components/base/MessageBox';
+
+function App() {
   return (
-    <MessageBox title="Success" type="success">
-      Your changes have been saved successfully.
-    </MessageBox>
+    <div>
+      {/* Your app content */}
+      <MessageBox />
+    </div>
   );
 }
 ```

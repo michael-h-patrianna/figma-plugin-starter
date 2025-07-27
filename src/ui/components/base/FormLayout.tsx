@@ -24,10 +24,10 @@ interface FormProps {
  * to prevent excessive whitespace at the bottom of forms.
  */
 export function Form({
-  title,
-  description,
-  children,
-  onSubmit,
+  title = '',
+  description = '',
+  children = [],
+  onSubmit = () => { },
   spacing = 'lg'
 }: FormProps) {
   const { colors, spacing: themeSpacing } = useTheme();

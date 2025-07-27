@@ -9,6 +9,7 @@
  */
 
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from '@shared/constants';
+import { clamp } from '@shared/utils';
 
 export class UIHelpers {
 
@@ -67,10 +68,10 @@ export class UIHelpers {
   async handleResize(data: { width?: number; height?: number } = {}): Promise<void> {
     try {
       const width = typeof data.width === 'number'
-        ? Math.max(200, Math.min(800, data.width))
+        ? clamp(data.width, 200, 800)
         : DEFAULT_WIDTH;
       const height = typeof data.height === 'number'
-        ? Math.max(150, Math.min(600, data.height))
+        ? clamp(data.height, 150, 600)
         : DEFAULT_HEIGHT;
 
       figma.ui.resize(width, height);

@@ -3,10 +3,9 @@ import { Button } from '@ui/components/base/Button';
 import { Code } from '@ui/components/base/Code';
 import { Panel } from '@ui/components/base/Panel';
 import { Textbox } from '@ui/components/base/Textbox';
-import { Toast } from '@ui/components/base/Toast';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { PluginSettings } from '@ui/hooks/useSettings';
-import { useToast } from '@ui/hooks/useToast';
+import { Toast as ToastService } from '@ui/services/toast';
 import { useState } from 'preact/hooks';
 
 interface DataViewProps {
@@ -27,29 +26,28 @@ export const DataView: React.FC<DataViewProps> = ({
   isPersistent
 }) => {
   const { theme, colors } = useTheme();
-  const { toast, showToast, dismissToast } = useToast();
   const [localText, setLocalText] = useState(settings.userText || '');
 
   const handleSave = () => {
     onSettingsChange({ userText: localText });
-    showToast('Text saved successfully!', 'success');
+    ToastService.success('Text saved successfully!');
   };
 
   const handleLoad = () => {
     setLocalText(settings.userText || '');
-    showToast('Text loaded from settings', 'info');
+    ToastService.info('Text loaded from settings');
   };
 
   const handleClear = () => {
     setLocalText('');
     onSettingsChange({ userText: '' });
-    showToast('Text cleared', 'info');
+    ToastService.info('Text cleared');
   };
 
   const handleExportSettings = () => {
     const exportData = JSON.stringify(settings, null, 2);
     console.log('Settings exported:', exportData);
-    showToast('Settings exported to console', 'success');
+    ToastService.success('Settings exported to console');
 
     // In a real plugin, you might use figma.showUI or other Figma APIs
     // For now, we'll just log to console
@@ -109,10 +107,6 @@ export const DataView: React.FC<DataViewProps> = ({
           </div>
         </>
       </Panel>
-
-      {toast && (
-        <Toast toast={toast} onDismiss={dismissToast} />
-      )}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { BORDER_RADIUS } from '@shared/constants';
+import { clamp } from '@shared/utils';
 import { useTheme } from '@ui/contexts/ThemeContext';
 interface ProgressBarProps {
   progress: number; // 0-100
@@ -17,7 +18,7 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const { colors } = useTheme();
   const progressColor = color || colors.accent;
-  const clampedProgress = Math.max(0, Math.min(100, progress));
+  const clampedProgress = clamp(progress, 0, 100);
 
   return (
     <div style={{ width: '100%' }}>

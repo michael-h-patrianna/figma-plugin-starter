@@ -3,10 +3,11 @@ import { OperationResult } from '@main/types';
 import { PLUGIN_NAME } from '@shared/constants';
 import { copyToClipboard } from '@shared/utils';
 import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { MessageBox } from '@ui/components/base/MessageBox';
 import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { SettingsDropdown } from '@ui/components/base/SettingsDropdown';
 import { Tabs } from '@ui/components/base/Tabs';
-import { Toast } from '@ui/components/base/Toast';
+import { GlobalToastContainer } from '@ui/components/base/Toast';
 import { DebugPanel } from '@ui/components/panels/DebugPanel';
 import { HelpPopup } from '@ui/components/panels/HelpPopup';
 import { ContentView } from '@ui/components/views/ContentView';
@@ -17,8 +18,8 @@ import { ModalsView } from '@ui/components/views/ModalsView';
 import { SectionsView } from '@ui/components/views/SectionsView';
 import { ThemeProvider, useTheme } from '@ui/contexts/ThemeContext';
 import { useSettings } from '@ui/hooks/useSettings';
-import { useToast } from '@ui/hooks/useToast';
 import { useWindowResize } from '@ui/hooks/useWindowResize';
+import { Toast as ToastService } from '@ui/services/toast';
 import { useEffect, useState } from 'preact/hooks';
 
 /**
@@ -63,7 +64,6 @@ function App() {
   // Component demo states
   const [activeTab, setActiveTab] = useState('sections');
 
-  const { toast, showToast, dismissToast } = useToast();
   const containerRef = useWindowResize(600, 400, 1200, 800);
 
   // Handle debug mode toggle (update both local state and settings)
@@ -81,12 +81,13 @@ function App() {
   async function handleCopyData() {
     if (processResult && processResult.data) {
       const success = await copyToClipboard(JSON.stringify(processResult.data, null, 2));
-      showToast(
-        success ? 'Data copied to clipboard!' : 'Copy failed - try again',
-        success ? 'success' : 'error'
-      );
+      if (success) {
+        ToastService.success('Data copied to clipboard!');
+      } else {
+        ToastService.error('Copy failed - try again');
+      }
     } else {
-      showToast('No processed data available', 'warning');
+      ToastService.warning('No processed data available');
     }
   }
 
@@ -126,7 +127,7 @@ function App() {
 
     setScanResult(demoScanResult);
     setProcessResult(demoProcessResult);
-    showToast('Demo data loaded successfully!', 'success');
+    ToastService.success('Demo data loaded successfully!');
   }
 
   function simulateProgress() {
@@ -138,7 +139,7 @@ function App() {
         if (prev >= 100) {
           clearInterval(progressInterval);
           setIsScanning(false);
-          showToast('Progress simulation completed!', 'success');
+          ToastService.success('Progress simulation completed!');
           return 100;
         }
         return prev + 10;
@@ -179,7 +180,7 @@ function App() {
   return (
     <ErrorBoundary onError={(error, errorInfo) => {
       console.error('App Error:', error, errorInfo);
-      showToast('An unexpected error occurred', 'error');
+      ToastService.error('An unexpected error occurred');
     }}>
       <div ref={containerRef} style={{
         background: colors.darkBg,
@@ -333,11 +334,6 @@ function App() {
           </div>
         )}
 
-        {/* Toast Notification */}
-        {toast && (
-          <Toast toast={toast} onDismiss={dismissToast} />
-        )}
-
         {/* Help Button */}
         <button
           onClick={() => setShowHelp(true)}
@@ -367,6 +363,12 @@ function App() {
 
         {/* Help Popup */}
         <HelpPopup isVisible={showHelp} onClose={() => setShowHelp(false)} />
+
+        {/* Global MessageBox */}
+        <MessageBox />
+
+        {/* Global Toast Container */}
+        <GlobalToastContainer />
       </div>
     </ErrorBoundary>
   );
