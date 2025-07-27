@@ -19,8 +19,6 @@ This documentation covers all the custom components, hooks, and features in this
 ### Import Paths
 
 The project uses TypeScript path aliases for clean, consistent imports:
-
-✅ **Use aliases** (recommended):
 ```tsx
 import { Button } from '@ui/components/base/Button';
 import { Textbox } from '@ui/components/base/Textbox';
