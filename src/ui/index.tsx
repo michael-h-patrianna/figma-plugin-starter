@@ -22,6 +22,11 @@ import { useWindowResize } from '@ui/hooks/useWindowResize';
 import { Toast as ToastService } from '@ui/services/toast';
 import { useEffect, useState } from 'preact/hooks';
 
+// Import messaging for debug mode sync
+function sendToMain(type: string, data?: any) {
+  parent.postMessage({ pluginMessage: { type, ...data } }, '*');
+}
+
 /**
  * Main application component for the Figma plugin UI.
  *
@@ -69,6 +74,8 @@ function App() {
   // Handle debug mode toggle (update both local state and settings)
   const handleDebugToggle = (enabled: boolean) => {
     updateSettings({ debugMode: enabled });
+    // Send message to main thread to sync debug mode
+    sendToMain('SET_DEBUG_MODE', { enabled });
   };
 
   // Handle theme toggle (update both theme context and settings)

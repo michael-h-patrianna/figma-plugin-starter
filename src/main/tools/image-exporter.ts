@@ -8,6 +8,7 @@
  * - Multiple state export for components
  */
 
+import { isDebugMode } from '@main/debug';
 import { sleep } from '@shared/utils';
 import { UIHelpers } from './ui-helpers';
 
@@ -219,7 +220,9 @@ export class ImageExporter {
         resolve(bytes);
       }).catch(err => {
         if (settled) return;
-        console.log('exportAsync error:', err);
+        if (isDebugMode) {
+          console.log('exportAsync error:', err);
+        }
         settled = true;
         resolve(null);
       });
@@ -227,7 +230,9 @@ export class ImageExporter {
       // Timeout handler
       setTimeout(() => {
         if (settled) return;
-        console.log('exportAsync timed out');
+        if (isDebugMode) {
+          console.log('exportAsync timed out');
+        }
         settled = true;
         resolve(null);
       }, timeoutMs);
@@ -246,7 +251,9 @@ export class ImageExporter {
       }
       return btoa(binary);
     } catch (e) {
-      console.log('btoa failed, using alternative base64 encoding');
+      if (isDebugMode) {
+        console.log('btoa failed, using alternative base64 encoding');
+      }
       // Fallback base64 encoding
       const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
       let result = '';

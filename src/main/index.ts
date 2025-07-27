@@ -1,5 +1,9 @@
 import { showUI } from '@create-figma-plugin/utilities';
+import { isDebugMode, setDebugMode } from '@main/debug';
+import { UIHelpers } from '@main/tools/ui-helpers';
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from '@shared/constants';
+
+const uiHelpers = new UIHelpers();
 
 export default function () {
   showUI({
@@ -13,13 +17,12 @@ export default function () {
 
     switch (type) {
       case 'PING':
-        figma.ui.postMessage({ type: 'PONG', message: 'Hello from main thread!' });
+        uiHelpers.sendToUI('PONG', { message: 'Hello from main thread!' });
         break;
 
       case 'GET_SELECTION':
         const selection = figma.currentPage.selection;
-        figma.ui.postMessage({
-          type: 'SELECTION_RESULT',
+        uiHelpers.sendToUI('SELECTION_RESULT', {
           count: selection.length,
           nodes: selection.map(node => ({
             id: node.id,
@@ -33,8 +36,14 @@ export default function () {
         figma.ui.resize(Math.floor(data.width) || DEFAULT_WIDTH, Math.floor(data.height) || DEFAULT_HEIGHT);
         break;
 
+      case 'SET_DEBUG_MODE':
+        setDebugMode(data.enabled);
+        break;
+
       default:
-        console.log('Unknown message type:', type);
+        if (isDebugMode) {
+          console.log('Unknown message type:', type);
+        }
     }
   };
 }
