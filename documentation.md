@@ -60,14 +60,8 @@ import { CustomDropdown } from '@ui/components/base/CustomDropdown';
 - [Theme System](#theme-system) - Light/dark mode management
 
 ### Communication & State
-- [usePluginMessages Hook](#usepluginmessages-hook) - UI ↔ Main thread communication
-- [useToast Hook](#usetoast-hook) - Toast notification management
-- [Plugin Storage](#plugin-storage) - Persistent data storage
-
-### Patterns & Examples
-- [Common Patterns](#common-patterns) - Real-world usage examples
-- [Error Handling](#error-handling) - Error boundaries and user feedback
-- [Troubleshooting](#troubleshooting) - Solutions to common issues
+- [usePluginMessages Hook](#plugin-communication-hook) - UI ↔ Main thread communication
+- [Toast Hook](#toast) - Toast notification management (see Toast section)
 
 ---
 
@@ -948,6 +942,236 @@ function MyComponent() {
           </Button>
         </div>
       </Modal>
+    </div>
+  );
+}
+```
+
+---
+
+## DataTable
+
+**What it's for**: Displaying tabular data with sorting, filtering, and theming support.
+
+**When to use**: For displaying structured data like lists of layers, settings, or any data that benefits from a table format.
+
+### Import
+```tsx
+import { DataTable } from '@ui/components/base/DataTable';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const columns = [
+    { key: 'name', title: 'Name', sortable: true },
+    { key: 'type', title: 'Type', sortable: true },
+    { key: 'visible', title: 'Visible', sortable: false }
+  ];
+
+  const data = [
+    { id: 1, name: 'Button Component', type: 'Component', visible: true },
+    { id: 2, name: 'Header Text', type: 'Text', visible: true },
+    { id: 3, name: 'Background', type: 'Rectangle', visible: false }
+  ];
+
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      onRowClick={(row) => console.log('Selected:', row)}
+    />
+  );
+}
+```
+
+---
+
+## Accordion
+
+**What it's for**: Organizing content into collapsible sections to save space and improve navigation.
+
+**When to use**: For FAQ sections, settings groups, or any content that can be logically grouped and shown/hidden.
+
+### Import
+```tsx
+import { Accordion } from '@ui/components/base/Accordion';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const sections = [
+    {
+      title: 'Getting Started',
+      content: 'Learn the basics of using this plugin...'
+    },
+    {
+      title: 'Advanced Features',
+      content: 'Explore more powerful capabilities...'
+    },
+    {
+      title: 'Troubleshooting',
+      content: 'Common issues and solutions...'
+    }
+  ];
+
+  return (
+    <Accordion
+      sections={sections}
+      allowMultiple={true}
+      defaultExpanded={[0]}
+    />
+  );
+}
+```
+
+---
+
+## Tabs
+
+**What it's for**: Organizing content into tabbed interfaces for easy navigation between related sections.
+
+**When to use**: For settings panels, different views of the same data, or organizing related functionality.
+
+### Import
+```tsx
+import { Tabs } from '@ui/components/base/Tabs';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [activeTab, setActiveTab] = useState('layers');
+
+  const tabs = [
+    { id: 'layers', label: 'Layers', content: <LayerPanel /> },
+    { id: 'styles', label: 'Styles', content: <StylePanel /> },
+    { id: 'assets', label: 'Assets', content: <AssetPanel /> }
+  ];
+
+  return (
+    <Tabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    />
+  );
+}
+```
+
+---
+
+## ProgressBar
+
+**What it's for**: Showing progress of long-running operations like exports, imports, or processing.
+
+**When to use**: For any operation that takes time and you want to provide visual feedback to users.
+
+### Import
+```tsx
+import { ProgressBar } from '@ui/components/base/ProgressBar';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [progress, setProgress] = useState(0);
+
+  const handleStart = () => {
+    // Simulate progress
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+  };
+
+  return (
+    <div>
+      <ProgressBar
+        value={progress}
+        max={100}
+        label={`Processing... ${progress}%`}
+      />
+      <Button onClick={handleStart}>Start Process</Button>
+    </div>
+  );
+}
+```
+
+---
+
+## DatePicker
+
+**What it's for**: Selecting dates for scheduling, filtering, or any date-related input.
+
+**When to use**: For date selection in forms, filters, or scheduling features.
+
+### Import
+```tsx
+import { DatePicker } from '@ui/components/base/DatePicker';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  return (
+    <DatePicker
+      value={selectedDate}
+      onChange={setSelectedDate}
+      placeholder="Select a date"
+      format="MM/dd/yyyy"
+    />
+  );
+}
+```
+
+---
+
+## Spinner
+
+**What it's for**: Indicating loading states for operations without specific progress information.
+
+**When to use**: For loading states, API calls, or any time you need to show that something is happening.
+
+### Import
+```tsx
+import { Spinner } from '@ui/components/base/Spinner';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLoad = async () => {
+    setIsLoading(true);
+    try {
+      await someAsyncOperation();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <Button onClick={handleLoad} disabled={isLoading}>
+        {isLoading ? <Spinner size="small" /> : 'Load Data'}
+      </Button>
+      
+      {isLoading && (
+        <div style={{ textAlign: 'center', padding: 20 }}>
+          <Spinner size="large" />
+          <p>Loading...</p>
+        </div>
+      )}
     </div>
   );
 }
