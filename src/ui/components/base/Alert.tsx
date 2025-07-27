@@ -51,7 +51,7 @@ interface AlertProps {
  * </Alert>
  * ```
  */
-export function Alert({ type, children, visible = true, style, className = '', variant = 'subtle' }: AlertProps) {
+export function Alert({ type, children, visible = true, style, className = '', variant = 'solid' }: AlertProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
 
   if (!visible) return null;
@@ -120,13 +120,14 @@ export function Alert({ type, children, visible = true, style, className = '', v
   const alertStyle = {
     ...typeStyles,
     padding: `${spacing.md}px ${spacing.md}px`,
-    borderRadius: borderRadius.default,
-    fontSize: typography.body,
+    borderRadius: '6px',
+    fontSize: '14px',
     lineHeight: '1.4',
     border: `1px solid ${typeStyles.borderColor}`,
     display: 'flex',
     alignItems: 'flex-start',
     gap: `${spacing.sm}px`,
+    fontFamily: 'Inter, sans-serif',
     ...style
   };
 

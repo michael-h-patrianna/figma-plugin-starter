@@ -16,7 +16,7 @@ interface AccordionProps {
 }
 
 export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: AccordionProps) {
-  const { colors, borderRadius } = useTheme();
+  const { colors, borderRadius, spacing, typography } = useTheme();
   const [openItems, setOpenItems] = useState<string[]>(defaultOpen);
 
   const toggleItem = (itemId: string) => {
@@ -45,7 +45,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
             style={{
               border: `1px solid ${colors.border}`,
               borderRadius: borderRadius.default,
-              marginBottom: isLast ? 0 : 8,
+              marginBottom: isLast ? 0 : spacing.sm,
               overflow: 'hidden'
             }}
           >
@@ -55,11 +55,11 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
               disabled={item.disabled}
               style={{
                 width: '100%',
-                padding: '12px 16px',
+                padding: `${spacing.sm + spacing.xs}px ${spacing.md}px`,
                 background: item.disabled ? colors.darkBg : colors.darkPanel,
                 border: 'none',
                 color: item.disabled ? colors.textSecondary : colors.textColor,
-                fontSize: 14,
+                fontSize: typography.body,
                 fontWeight: 500,
                 textAlign: 'left',
                 cursor: item.disabled ? 'not-allowed' : 'pointer',
@@ -83,7 +83,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
               <span style={{
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease',
-                fontSize: 12
+                fontSize: typography.body
               }}>
                 ▼
               </span>
@@ -93,7 +93,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
             {isOpen && (
               <div
                 style={{
-                  padding: '16px',
+                  padding: `${spacing.md}px`,
                   borderTop: `1px solid ${colors.border}`,
                   background: colors.darkBg,
                   animation: 'accordionSlideDown 0.2s ease-out'
