@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
 import { useEffect } from 'preact/hooks';
@@ -54,7 +53,7 @@ export function Modal({
   size = 'medium',
   showCloseButton = true
 }: ModalProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   // Handle escape key
   useEffect(() => {
@@ -111,7 +110,7 @@ export function Modal({
       <div
         style={{
           background: colors.darkPanel,
-          borderRadius: BORDER_RADIUS,
+          borderRadius: borderRadius.default,
           border: `1px solid ${colors.border}`,
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
           display: 'flex',
@@ -123,7 +122,7 @@ export function Modal({
         {/* Header */}
         <div
           style={{
-            padding: '20px 24px',
+            padding: `${spacing.lg - 4}px ${spacing.lg}px`,
             borderBottom: `1px solid ${colors.border}`,
             display: 'flex',
             alignItems: 'center',
@@ -134,7 +133,7 @@ export function Modal({
             style={{
               margin: 0,
               color: colors.textColor,
-              fontSize: 16,
+              fontSize: typography.subheading,
               fontWeight: 600
             }}
           >
@@ -147,10 +146,10 @@ export function Modal({
                 background: 'transparent',
                 border: 'none',
                 color: colors.textSecondary,
-                fontSize: 18,
+                fontSize: typography.heading,
                 cursor: 'pointer',
-                padding: 4,
-                borderRadius: 4,
+                padding: spacing.xs,
+                borderRadius: borderRadius.medium,
                 transition: 'color 0.2s ease'
               }}
               onMouseEnter={(e) => e.currentTarget.style.color = colors.textColor}
@@ -164,7 +163,7 @@ export function Modal({
         {/* Content */}
         <div
           style={{
-            padding: 24,
+            padding: spacing.lg,
             flex: 1,
             overflow: 'auto'
           }}

@@ -22,9 +22,13 @@
     "typescript": ">=5"
   },
   "scripts": {
+    "prebuild": "node scripts/copy-fonts.js",
     "build": "build-figma-plugin --typecheck --minify",
+    "prewatch": "node scripts/copy-fonts.js",
     "watch": "build-figma-plugin --typecheck --watch",
+    "predev": "node scripts/copy-fonts.js",
     "dev": "build-figma-plugin --typecheck --watch --minify",
+    "copy-fonts": "node scripts/copy-fonts.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx,css,json,md}'"
   },

@@ -77,7 +77,7 @@ export function Textbox({
   onFocus,
   onBlur
 }: TextboxProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   /**
@@ -106,9 +106,9 @@ export function Textbox({
     borderBottom: variant === 'underline'
       ? `1px solid ${isFocused ? colors.inputBorderFocus : colors.inputBorder}`
       : undefined,
-    borderRadius: variant === 'border' ? '6px' : '0',
+    borderRadius: variant === 'border' ? borderRadius.default : '0',
     color: disabled ? colors.textDisabled : colors.textColor,
-    fontSize: '13px',
+    fontSize: typography.bodySmall,
     outline: 'none',
     transition: 'border-color 0.2s ease',
     fontFamily: 'inherit',

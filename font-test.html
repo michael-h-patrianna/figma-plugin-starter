@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Inter Font Weight Test</title>
+    <link rel="stylesheet" href="src/ui/assets/fonts/inter.css">
+    <style>
+        body {
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .font-test {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .weight-400 { font-weight: 400; }
+        .weight-500 { font-weight: 500; }
+        .weight-600 { font-weight: 600; }
+        .weight-700 { font-weight: 700; }
+        .weight-900 { font-weight: 900; }
+    </style>
+</head>
+<body>
+    <h1>Inter Font Weight Test</h1>
+
+    <div class="font-test weight-400">
+        Font Weight 400 (Regular) - Used for body text
+    </div>
+
+    <div class="font-test weight-500">
+        Font Weight 500 (Medium) - Used for form inputs, labels, secondary content
+    </div>
+
+    <div class="font-test weight-600">
+        Font Weight 600 (Semi-Bold) - Used for headings, titles, emphasis
+    </div>
+
+    <div class="font-test weight-700">
+        Font Weight 700 (Bold) - Used for main headings
+    </div>
+
+    <div class="font-test weight-900">
+        Font Weight 900 (Black) - Available for strong emphasis
+    </div>
+
+    <h2>Variable Font Test</h2>
+    <p>The Inter variable fonts support smooth weight transitions from 100 to 900.</p>
+
+    <div style="font-variation-settings: 'wght' 350; font-size: 16px; margin: 10px 0;">
+        Custom weight 350 (Variable font feature)
+    </div>
+
+    <div style="font-variation-settings: 'wght' 550; font-size: 16px; margin: 10px 0;">
+        Custom weight 550 (Variable font feature)
+    </div>
+</body>
+</html>

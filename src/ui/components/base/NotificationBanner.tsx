@@ -1,10 +1,9 @@
 import { getErrors, getInfos, getWarnings } from '@main/errors';
 import { Issue } from '@main/types';
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 
 export function NotificationBanner({ issues }: { issues: Issue[] }) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   if (!issues || issues.length === 0) return null;
 
@@ -24,9 +23,9 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
         : warnings.length > 0
           ? 'rgba(243, 156, 18, 0.3)'
           : 'rgba(52, 152, 219, 0.3)'}`,
-      borderRadius: BORDER_RADIUS,
-      padding: 16,
-      marginBottom: 16
+      borderRadius: borderRadius.default,
+      padding: spacing.md,
+      marginBottom: spacing.md
     }}>
       <div style={{
         color: errors.length > 0
@@ -35,28 +34,28 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
             ? colors.warning
             : colors.info,
         fontWeight: 600,
-        marginBottom: 12,
-        fontSize: 14
+        marginBottom: spacing.md,
+        fontSize: typography.body
       }}>
         {errors.length > 0 ? 'Issues Found' : warnings.length > 0 ? 'Warnings' : 'Information'} ({issues.length})
       </div>
 
       {errors.length > 0 && (
-        <div style={{ marginBottom: (warnings.length > 0 || infos.length > 0) ? 12 : 0 }}>
+        <div style={{ marginBottom: (warnings.length > 0 || infos.length > 0) ? spacing.md : 0 }}>
           <div style={{
             color: colors.error,
             fontWeight: 600,
-            marginBottom: 8,
-            fontSize: 13
+            marginBottom: spacing.sm,
+            fontSize: typography.bodySmall
           }}>
             ❌ {errors.length} Error{errors.length > 1 ? 's' : ''}:
           </div>
           {errors.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
               color: colors.textColor,
-              fontSize: 12,
+              fontSize: typography.caption,
               marginBottom: 4,
-              paddingLeft: 12
+              paddingLeft: spacing.md
             }}>
               {index + 1}. {issue.message}
             </div>
@@ -65,21 +64,21 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
       )}
 
       {warnings.length > 0 && (
-        <div style={{ marginBottom: infos.length > 0 ? 12 : 0 }}>
+        <div style={{ marginBottom: infos.length > 0 ? spacing.md : 0 }}>
           <div style={{
             color: colors.warning,
             fontWeight: 600,
-            marginBottom: 8,
-            fontSize: 13
+            marginBottom: spacing.sm,
+            fontSize: typography.bodySmall
           }}>
             ⚠️ {warnings.length} Warning{warnings.length > 1 ? 's' : ''}:
           </div>
           {warnings.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
               color: colors.textColor,
-              fontSize: 12,
+              fontSize: typography.caption,
               marginBottom: 4,
-              paddingLeft: 12
+              paddingLeft: spacing.md
             }}>
               {index + 1}. {issue.message}
             </div>
@@ -92,17 +91,17 @@ export function NotificationBanner({ issues }: { issues: Issue[] }) {
           <div style={{
             color: colors.info,
             fontWeight: 600,
-            marginBottom: 8,
-            fontSize: 13
+            marginBottom: spacing.sm,
+            fontSize: typography.bodySmall
           }}>
             ℹ️ {infos.length} Info{infos.length > 1 ? 's' : ''}:
           </div>
           {infos.map((issue: Issue, index: number) => (
             <div key={issue.code + (issue.nodeId || index)} style={{
               color: colors.textColor,
-              fontSize: 12,
+              fontSize: typography.caption,
               marginBottom: 4,
-              paddingLeft: 12
+              paddingLeft: spacing.md
             }}>
               {index + 1}. {issue.message}
             </div>

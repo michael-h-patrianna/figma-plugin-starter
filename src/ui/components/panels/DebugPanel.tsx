@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 
 /**
@@ -24,7 +23,7 @@ interface DebugPanelProps {
  * ```
  */
 export function DebugPanel({ isVisible = false }: DebugPanelProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   if (!isVisible) return null;
 
@@ -32,24 +31,24 @@ export function DebugPanel({ isVisible = false }: DebugPanelProps) {
     <div style={{
       background: 'rgba(255, 193, 7, 0.1)',
       border: '1px solid rgba(255, 193, 7, 0.3)',
-      borderRadius: BORDER_RADIUS,
-      padding: 16,
+      borderRadius: borderRadius.default,
+      padding: spacing.md,
       marginBottom: 0
     }}>
       <div style={{
         color: '#ffc107',
         fontWeight: 600,
-        marginBottom: 12,
-        fontSize: 14,
+        marginBottom: spacing.sm,
+        fontSize: typography.body,
         display: 'flex',
         alignItems: 'center',
-        gap: 8
+        gap: spacing.sm
       }}>
         Debug
       </div>
       <div style={{
         color: colors.textColor,
-        fontSize: 13,
+        fontSize: typography.bodySmall,
         lineHeight: 1.5
       }}>
         Add your debug functions here

@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -17,7 +16,7 @@ interface AccordionProps {
 }
 
 export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: AccordionProps) {
-  const { colors } = useTheme();
+  const { colors, borderRadius } = useTheme();
   const [openItems, setOpenItems] = useState<string[]>(defaultOpen);
 
   const toggleItem = (itemId: string) => {
@@ -45,7 +44,7 @@ export function Accordion({ items, allowMultiple = false, defaultOpen = [] }: Ac
             key={item.id}
             style={{
               border: `1px solid ${colors.border}`,
-              borderRadius: BORDER_RADIUS,
+              borderRadius: borderRadius.default,
               marginBottom: isLast ? 0 : 8,
               overflow: 'hidden'
             }}

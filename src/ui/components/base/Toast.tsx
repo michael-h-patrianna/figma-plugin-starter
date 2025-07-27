@@ -13,7 +13,7 @@ interface SingleToastProps {
  * @param props - The toast props including the toast data and dismiss callback
  */
 function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   const getToastColor = (type: string) => {
     switch (type) {
@@ -30,9 +30,9 @@ function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
     <div
       style={{
         background: getToastColor(toast.type),
-        color: '#fff',
-        padding: '12px 24px',
-        borderRadius: 8,
+        color: colors.textInverse,
+        padding: `${spacing.md}px ${spacing.lg}px`,
+        borderRadius: spacing.sm,
         fontWeight: 600,
         fontSize: 14,
         boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
@@ -41,10 +41,10 @@ function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
+        gap: spacing.sm,
         maxWidth: '400px',
         wordWrap: 'break-word',
-        marginBottom: index > 0 ? 8 : 0
+        marginBottom: index > 0 ? spacing.sm : 0
       }}
       onClick={() => onDismiss(toast.id)}
     >

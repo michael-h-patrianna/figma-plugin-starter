@@ -51,15 +51,8 @@ interface AlertProps {
  * </Alert>
  * ```
  */
-export const Alert: React.FC<AlertProps> = ({
-  type,
-  children,
-  visible = true,
-  style = {},
-  className = '',
-  variant = 'solid'
-}) => {
-  const { colors } = useTheme();
+export function Alert({ type, children, visible = true, style, className = '', variant = 'subtle' }: AlertProps) {
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   if (!visible) return null;
 
@@ -126,15 +119,14 @@ export const Alert: React.FC<AlertProps> = ({
 
   const alertStyle = {
     ...typeStyles,
-    padding: '12px 16px',
-    borderRadius: '6px',
-    fontSize: '14px',
+    padding: `${spacing.md}px ${spacing.md}px`,
+    borderRadius: borderRadius.default,
+    fontSize: typography.body,
     lineHeight: '1.4',
     border: `1px solid ${typeStyles.borderColor}`,
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '8px',
-    fontFamily: 'Inter, sans-serif',
+    gap: `${spacing.sm}px`,
     ...style
   };
 

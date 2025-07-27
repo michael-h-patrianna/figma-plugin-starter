@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { clamp } from '@shared/utils';
 import { useTheme } from '@ui/contexts/ThemeContext';
 interface ProgressBarProps {
@@ -16,7 +15,7 @@ export function ProgressBar({
   height = 8,
   color
 }: ProgressBarProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
   const progressColor = color || colors.accent;
   const clampedProgress = clamp(progress, 0, 100);
 
@@ -27,8 +26,8 @@ export function ProgressBar({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 8,
-          fontSize: 13,
+          marginBottom: spacing.sm,
+          fontSize: typography.bodySmall,
           color: colors.textColor
         }}>
           {label && <span>{label}</span>}
@@ -40,7 +39,7 @@ export function ProgressBar({
         width: '100%',
         height,
         background: colors.darkBg,
-        borderRadius: BORDER_RADIUS,
+        borderRadius: borderRadius.default,
         overflow: 'hidden',
         border: `1px solid ${colors.border}`
       }}>
@@ -49,7 +48,7 @@ export function ProgressBar({
           height: '100%',
           background: progressColor,
           transition: 'width 0.3s ease',
-          borderRadius: BORDER_RADIUS
+          borderRadius: borderRadius.default
         }} />
       </div>
     </div>

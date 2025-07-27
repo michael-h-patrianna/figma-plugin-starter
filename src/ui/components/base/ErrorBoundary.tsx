@@ -1,6 +1,32 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { getThemeColors } from '@ui/contexts/ThemeContext';
 import { Component, h } from 'preact';
+
+// Get spacing values from theme - fallback to manual spacing for error boundary
+const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32
+};
+
+// Border radius values from theme - fallback for error boundary
+const borderRadius = {
+  default: 6,
+  small: 3,
+  medium: 4,
+  round: '50%'
+};
+
+// Typography values from theme - fallback for error boundary
+const typography = {
+  heading: 18,
+  subheading: 16,
+  body: 14,
+  bodySmall: 13,
+  caption: 12,
+  tiny: 11
+};
 
 /**
  * State interface for the ErrorBoundary component.
@@ -89,24 +115,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div style={{
           background: colors.darkPanel,
           border: `1px solid ${colors.error}`,
-          borderRadius: BORDER_RADIUS,
-          padding: 24,
-          margin: 16,
+          borderRadius: borderRadius.default,
+          padding: spacing.lg,
+          margin: spacing.md,
           textAlign: 'center'
         }}>
           <div style={{
             color: colors.error,
-            fontSize: 18,
+            fontSize: typography.heading,
             fontWeight: 600,
-            marginBottom: 12
+            marginBottom: spacing.md
           }}>
             Something went wrong
           </div>
 
           <div style={{
             color: colors.textSecondary,
-            fontSize: 14,
-            marginBottom: 16,
+            fontSize: typography.body,
+            marginBottom: spacing.md,
             lineHeight: 1.5
           }}>
             An unexpected error occurred in this component. Please try refreshing the plugin.
@@ -115,23 +141,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           {this.state.error && (
             <details style={{
               background: colors.darkBg,
-              borderRadius: BORDER_RADIUS,
-              padding: 12,
-              marginBottom: 16,
+              borderRadius: borderRadius.default,
+              padding: spacing.md,
+              marginBottom: spacing.md,
               textAlign: 'left'
             }}>
               <summary style={{
                 color: colors.textColor,
                 cursor: 'pointer',
-                fontSize: 13,
+                fontSize: typography.bodySmall,
                 fontWeight: 500,
-                marginBottom: 8
+                marginBottom: spacing.sm
               }}>
                 Error details
               </summary>
               <pre style={{
                 color: colors.error,
-                fontSize: 11,
+                fontSize: typography.tiny,
                 fontFamily: 'Monaco, monospace',
                 overflow: 'auto',
                 margin: 0,
@@ -150,10 +176,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             style={{
               background: colors.accent,
               border: 'none',
-              borderRadius: BORDER_RADIUS,
-              color: '#fff',
-              padding: '8px 16px',
-              fontSize: 13,
+              borderRadius: borderRadius.default,
+              color: colors.textInverse,
+              padding: `${spacing.sm}px ${spacing.md}px`,
+              fontSize: typography.bodySmall,
               fontWeight: 500,
               cursor: 'pointer',
               transition: 'opacity 0.2s ease'

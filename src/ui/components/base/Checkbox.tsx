@@ -17,7 +17,7 @@ export function Checkbox({
   className = '',
   style = {}
 }: CheckboxProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   const handleChange = () => {
     if (!disabled) {
@@ -32,7 +32,7 @@ export function Checkbox({
       ? colors.accent
       : (disabled ? colors.inputBackgroundDisabled : colors.inputBackground),
     border: `1px solid ${checked ? colors.accent : colors.inputBorder}`,
-    borderRadius: '3px',
+    borderRadius: borderRadius.small,
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -44,7 +44,7 @@ export function Checkbox({
   const containerStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: spacing.sm,
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.6 : 1,
     ...style
@@ -52,7 +52,7 @@ export function Checkbox({
 
   const labelStyle = {
     color: disabled ? colors.textDisabled : colors.textColor,
-    fontSize: '13px',
+    fontSize: typography.bodySmall,
     fontWeight: 500,
     userSelect: 'none' as const
   };

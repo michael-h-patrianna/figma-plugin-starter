@@ -33,7 +33,7 @@ This documentation covers all the custom components, hooks, and features in this
 ### Basic Form Components
 - [Button](#button) - Clickable actions with primary/secondary/danger variants
 - [Input](#input) - Native HTML input elements with theming
-- [Textbox](#textbox) - Enhanced text input fields with icons and validation
+- [Textbox](#textbox) - Enhanced text input fields with validation
 - [Dropdown](#dropdown) - Select menus and option pickers
 - [Checkbox](#checkbox) - Toggle options and boolean settings
 - [ToggleSwitch](#toggleswitch) - Modern on/off switches
@@ -710,7 +710,6 @@ function MyComponent() {
 | `title` | String | ✅ Yes | The header text for the info box | `"Important Notice"` |
 | `children` | ReactNode | ✅ Yes | The main content of the info box | `"Your message here"` |
 | `variant` | String | No | Style variant: `'info'`, `'success'`, `'warning'`, `'error'`, `'accent'`, `'tip'` | `"warning"` |
-| `icon` | String | No | Custom icon or emoji to display | `"🔥"`, `"⚠️"` |
 | `backgroundColor` | String | No | Custom background color override | `"#f0f8ff"` |
 | `borderColor` | String | No | Custom border color override | `"#ff6b6b"` |
 | `titleColor` | String | No | Custom title text color override | `"#2c3e50"` |
@@ -720,14 +719,14 @@ function MyComponent() {
 
 ### Variants Explained
 
-Each variant automatically applies appropriate colors and default icons:
+Each variant automatically applies appropriate colors:
 
-- **`info`** (default): Blue theme, information icon ℹ️
-- **`success`**: Green theme, checkmark icon ✅
-- **`warning`**: Orange theme, warning icon ⚠️
-- **`error`**: Red theme, error icon ❌
-- **`accent`**: Uses your theme's accent color, target icon 🎯
-- **`tip`**: Uses your theme's accent color, lightbulb icon 💡
+- **`info`** (default): Blue theme for informational content
+- **`success`**: Green theme for positive messages
+- **`warning`**: Orange theme for warnings and cautions
+- **`error`**: Red theme for errors and problems
+- **`accent`**: Uses your theme's accent color
+- **`tip`**: Uses your theme's accent color for helpful tips
 
 ### Common Examples
 
@@ -752,8 +751,8 @@ Each variant automatically applies appropriate colors and default icons:
   Could not connect to the server. Please check your internet connection and try again.
 </InfoBox>
 
-// Tip with custom icon
-<InfoBox title="Pro Tip" variant="tip" icon="🚀">
+// Helpful tip
+<InfoBox title="Pro Tip" variant="tip">
   Use keyboard shortcuts Cmd+S to save your progress quickly!
 </InfoBox>
 
@@ -761,7 +760,6 @@ Each variant automatically applies appropriate colors and default icons:
 <InfoBox
   title="Custom Styled Message"
   variant="info"
-  icon="🎨"
   borderColor="#9b59b6"
   titleColor="#9b59b6"
 >
@@ -799,7 +797,6 @@ function MyComponent() {
 | `type` | String | ✅ Yes | Alert type: `'info'`, `'success'`, `'warning'`, `'error'` | `"success"` |
 | `children` | ReactNode | ✅ Yes | The alert message content | `"Operation completed"` |
 | `variant` | String | No | Style variant: `'solid'` (default) or `'subtle'` | `"subtle"` |
-| `icon` | String | No | Custom icon override | `"🎉"` |
 
 ### Alert Types
 
@@ -818,22 +815,22 @@ function MyComponent() {
 ```tsx
 // Success message
 <Alert type="success">
-  ✅ Your design tokens have been exported successfully!
+  Your design tokens have been exported successfully!
 </Alert>
 
 // Error message with subtle styling
 <Alert type="error" variant="subtle">
-  ❌ Failed to connect to the API. Please try again.
+  Failed to connect to the API. Please try again.
 </Alert>
 
-// Warning with custom icon
-<Alert type="warning" icon="⚠️">
+// Warning message
+<Alert type="warning">
   Large files may take longer to process.
 </Alert>
 
 // Info message
 <Alert type="info">
-  💡 Tip: Use Cmd+Z to undo your last action.
+  Tip: Use Cmd+Z to undo your last action.
 </Alert>
 ```
 

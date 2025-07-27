@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
 
@@ -65,7 +64,7 @@ export function Panel({
   status,
   variant = 'standard'
 }: PanelProps) {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   /**
    * Gets the color for a status type.
@@ -97,7 +96,7 @@ export function Panel({
   return (
     <div style={{
       background,
-      borderRadius: BORDER_RADIUS,
+      borderRadius: borderRadius.default,
       border,
       display: 'flex',
       flexDirection: 'column',
@@ -111,7 +110,7 @@ export function Panel({
         fontWeight: 600,
         padding: `${padding}px ${padding}px`,
         borderBottom: `1px solid ${colors.border}`,
-        fontSize: 14,
+        fontSize: typography.body,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -125,8 +124,8 @@ export function Panel({
               background: `${getStatusColor(status.type)}20`,
               color: getStatusColor(status.type),
               padding: `${spacing.xs / 2}px ${spacing.sm}px`,
-              borderRadius: 4,
-              fontSize: 12,
+              borderRadius: borderRadius.medium,
+              fontSize: typography.body,
               fontWeight: 500
             }}>
               {status.label}
@@ -140,7 +139,7 @@ export function Panel({
       {subtitle && (
         <div style={{
           color: colors.textSecondary,
-          fontSize: 12,
+          fontSize: typography.caption,
           padding: `${spacing.sm}px ${padding}px 0 ${padding}px`,
           borderBottom: `1px solid ${colors.border}`,
           paddingBottom: spacing.sm

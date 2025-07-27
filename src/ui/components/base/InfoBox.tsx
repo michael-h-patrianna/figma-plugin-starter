@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { ReactNode } from 'preact/compat';
 
@@ -78,7 +77,7 @@ export function InfoBox({
   className,
   style
 }: InfoBoxProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   // Define variant color mappings
   const variantColors = {
@@ -136,17 +135,17 @@ export function InfoBox({
         background: finalBackgroundColor,
         border: `1px solid ${variant === 'plain' ? finalBorderColor : finalBorderColor + '20'}`,
         borderLeft: variant === 'plain' ? `1px solid ${finalBorderColor}` : `4px solid ${finalBorderColor}`,
-        borderRadius: BORDER_RADIUS,
-        padding: 12,
+        borderRadius: borderRadius.default,
+        padding: spacing.md,
         ...style
       }}
     >
       {/* Title  */}
       <div style={{
         color: finalTitleColor,
-        fontSize: 12,
+        fontSize: typography.body,
         fontWeight: 600,
-        marginBottom: 8,
+        marginBottom: spacing.sm,
         display: 'flex',
         alignItems: 'center',
         gap: 6
@@ -157,7 +156,7 @@ export function InfoBox({
       {/* Content */}
       <div style={{
         color: finalContentColor,
-        fontSize: 11,
+        fontSize: typography.body,
         lineHeight: 1.4
       }}>
         {children}

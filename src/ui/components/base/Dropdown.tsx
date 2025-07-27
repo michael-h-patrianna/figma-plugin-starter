@@ -69,7 +69,7 @@ export function Dropdown({
   className = '',
   style = {}
 }: DropdownProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -113,12 +113,12 @@ export function Dropdown({
 
   const buttonStyle = {
     width: '100%',
-    padding: '8px 12px',
+    padding: `${spacing.sm}px ${spacing.md}px`,
     background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
     border: `1px solid ${colors.inputBorder}`,
-    borderRadius: '6px',
+    borderRadius: borderRadius.default,
     color: disabled ? colors.textDisabled : colors.textColor,
-    fontSize: '13px',
+    fontSize: typography.bodySmall,
     textAlign: 'left' as const,
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'flex',
@@ -137,8 +137,8 @@ export function Dropdown({
     right: 0,
     background: colors.inputBackground,
     border: `1px solid ${colors.inputBorder}`,
-    borderRadius: '6px',
-    marginTop: '4px',
+    borderRadius: borderRadius.default,
+    marginTop: `${spacing.xs}px`,
     maxHeight: '200px',
     overflowY: 'auto' as const,
     zIndex: 1000,
@@ -179,7 +179,7 @@ export function Dropdown({
           color: colors.textSecondary,
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s ease',
-          fontSize: '12px'
+          fontSize: typography.caption
         }}>
           ▼
         </span>
@@ -195,15 +195,14 @@ export function Dropdown({
               disabled={option.disabled}
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: `${spacing.sm}px ${spacing.md}px`,
                 background: 'transparent',
                 border: 'none',
                 color: option.disabled ? colors.textDisabled : colors.textColor,
-                fontSize: '13px',
+                fontSize: typography.bodySmall,
                 textAlign: 'left',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease',
-                fontFamily: 'inherit'
+                transition: 'background-color 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 if (!option.disabled) {

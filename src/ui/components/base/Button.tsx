@@ -59,7 +59,7 @@ export function Button({
   className = '',
   style = {}
 }: ButtonProps) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   /**
    * Gets the style object for the current button variant.
@@ -107,20 +107,20 @@ export function Button({
     switch (size) {
       case 'small':
         return {
-          padding: '6px 12px',
-          fontSize: '12px',
+          padding: `${spacing.xs + 2}px ${spacing.md}px`,
+          fontSize: typography.caption,
           minHeight: '28px'
         };
       case 'large':
         return {
-          padding: '12px 24px',
-          fontSize: '14px',
+          padding: `${spacing.md}px ${spacing.lg}px`,
+          fontSize: typography.body,
           minHeight: '40px'
         };
       default: // medium
         return {
-          padding: '8px 16px',
-          fontSize: '13px',
+          padding: `${spacing.sm}px ${spacing.md}px`,
+          fontSize: typography.bodySmall,
           minHeight: '32px'
         };
     }
@@ -133,16 +133,15 @@ export function Button({
     ...variantStyles,
     ...sizeStyles,
     width: fullWidth ? '100%' : 'auto',
-    borderRadius: '6px',
+    borderRadius: borderRadius.default,
     cursor: disabled ? 'not-allowed' : 'pointer',
-    fontFamily: 'inherit',
     fontWeight: 500,
     outline: 'none',
     transition: 'all 0.2s ease',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '6px',
+    gap: `${spacing.xs + 2}px`,
     opacity: disabled ? 0.6 : 1,
     ...style
   };

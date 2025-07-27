@@ -1,4 +1,3 @@
-import { BORDER_RADIUS } from '@shared/constants';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { useState } from 'preact/hooks';
 
@@ -32,7 +31,7 @@ export function Input({
   step
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   const inputProps: any = {
     type,
@@ -48,9 +47,9 @@ export function Input({
       padding: `${spacing.sm}px ${spacing.md - 4}px`,
       background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
       border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
-      borderRadius: BORDER_RADIUS,
+      borderRadius: borderRadius.default,
       color: disabled ? colors.textDisabled : colors.textColor,
-      fontSize: 13,
+      fontSize: typography.bodySmall,
       outline: 'none',
       transition: 'border-color 0.2s ease',
       fontFamily: 'inherit',
@@ -71,7 +70,7 @@ export function Input({
         <label style={{
           display: 'block',
           color: colors.textColor,
-          fontSize: 12,
+          fontSize: typography.caption,
           fontWeight: 500,
           marginBottom: spacing.xs
         }}>
@@ -121,7 +120,7 @@ export function Textarea({
   rows = 3
 }: TextareaProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
 
   return (
     <div style={{ width }}>
@@ -129,7 +128,7 @@ export function Textarea({
         <label style={{
           display: 'block',
           color: colors.textColor,
-          fontSize: 12,
+          fontSize: typography.caption,
           fontWeight: 500,
           marginBottom: spacing.xs
         }}>
@@ -153,9 +152,9 @@ export function Textarea({
           padding: `${spacing.sm}px ${spacing.md - 4}px`,
           background: disabled ? colors.inputBackgroundDisabled : colors.inputBackground,
           border: `1px solid ${error ? colors.inputBorderError : isFocused ? colors.inputBorderFocus : colors.inputBorder}`,
-          borderRadius: BORDER_RADIUS,
+          borderRadius: borderRadius.default,
           color: disabled ? colors.textDisabled : colors.textColor,
-          fontSize: 13,
+          fontSize: typography.bodySmall,
           outline: 'none',
           transition: 'border-color 0.2s ease',
           fontFamily: 'inherit',

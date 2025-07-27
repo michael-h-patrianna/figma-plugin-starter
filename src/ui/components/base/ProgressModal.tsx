@@ -19,7 +19,7 @@ export function ProgressModal({
   description = 'Please wait while we process your request',
   showCloseButton = false
 }: ProgressModalProps) {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
 
   const handleClose = () => {
     if (showCloseButton || progress >= 100) {
@@ -34,14 +34,14 @@ export function ProgressModal({
       title={title}
       showCloseButton={showCloseButton || progress >= 100}
     >
-      <div style={{ padding: '16px 0' }}>
+      <div style={{ padding: `${spacing.md}px 0` }}>
         <ProgressBar
           progress={progress}
           label={`Processing... ${Math.round(progress)}%`}
         />
         {description && (
           <div style={{
-            marginTop: 12,
+            marginTop: spacing.md,
             color: colors.textSecondary,
             fontSize: 12,
             textAlign: 'center'

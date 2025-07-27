@@ -23,6 +23,58 @@ interface ThemeSpacing {
 }
 
 /**
+ * Typography system for consistent text styling throughout the application.
+ * Based on Inter font family optimized for desktop UI.
+ */
+interface ThemeTypography {
+  /** 18px - Large headings and titles */
+  heading: number;
+  /** 16px - Secondary headings and modal titles */
+  subheading: number;
+  /** 14px - Base body text and default UI text */
+  body: number;
+  /** 13px - Form inputs and secondary content */
+  bodySmall: number;
+  /** 12px - Labels, captions, and metadata */
+  caption: number;
+  /** 11px - Fine print and helper text (minimum readable size) */
+  tiny: number;
+}
+
+/**
+ * Border radius system for consistent rounded corners.
+ */
+interface ThemeBorderRadius {
+  /** 6px - Standard border radius for most UI elements */
+  default: number;
+  /** 3px - Small border radius for checkboxes and small elements */
+  small: number;
+  /** 4px - Slightly larger than small for buttons and inputs */
+  medium: number;
+  /** 50% - Circular elements like avatars and radio buttons */
+  round: string;
+}
+
+/**
+ * Typography system for consistent text styling throughout the application.
+ * Based on Inter font family optimized for desktop UI.
+ */
+interface ThemeTypography {
+  /** 18px - Large headings and titles */
+  heading: number;
+  /** 16px - Secondary headings and modal titles */
+  subheading: number;
+  /** 14px - Base body text and default UI text */
+  body: number;
+  /** 13px - Form inputs and secondary content */
+  bodySmall: number;
+  /** 12px - Labels, captions, and metadata */
+  caption: number;
+  /** 11px - Fine print and helper text (minimum readable size) */
+  tiny: number;
+}
+
+/**
  * Complete color palette interface for the plugin theming system.
  *
  * Provides all the color tokens needed for consistent theming across
@@ -104,6 +156,28 @@ const spacing: ThemeSpacing = {
   md: 16,
   lg: 24,
   xl: 32
+};
+
+/**
+ * Typography system values optimized for Inter font on desktop.
+ */
+const typography: ThemeTypography = {
+  heading: 18,
+  subheading: 16,
+  body: 14,
+  bodySmall: 13,
+  caption: 12,
+  tiny: 11
+};
+
+/**
+ * Border radius system values for consistent rounded corners.
+ */
+const borderRadius: ThemeBorderRadius = {
+  default: 6,
+  small: 3,
+  medium: 4,
+  round: '50%'
 };
 
 /**
@@ -256,6 +330,10 @@ interface ThemeContextType {
   colors: ThemeColors;
   /** Spacing system for consistent layout */
   spacing: ThemeSpacing;
+  /** Typography system for consistent text styling */
+  typography: ThemeTypography;
+  /** Border radius system for consistent rounded corners */
+  borderRadius: ThemeBorderRadius;
   /** Function to toggle between light and dark themes */
   toggleTheme: () => void;
   /** Function to set a specific theme */
@@ -379,7 +457,7 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, spacing, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, colors, spacing, typography, borderRadius, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
