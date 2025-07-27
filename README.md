@@ -59,20 +59,20 @@ src/
 │       ├── node-scanner.ts
 │       └── ui-helpers.ts
 ├── ui/
+│   ├── assets/           # UI assets
 │   ├── components/       # UI components
-│   │   ├── base/         # Base UI components (buttons, inputs, modals)
-│   │   ├── panels/       # Panel components (debug, help)
-│   │   └── views/        # View components (content, data, forms)
+│   │   ├── base/         # UI components
+│   │   ├── panels/       # Special panel components (debug, help)
+│   │   └── views/        # Demo components
 │   ├── contexts/         # React contexts (theme)
-│   ├── hooks/            # Custom hooks (settings, window resize)
+│   ├── hooks/            # Custom hooks
 │   ├── services/         # Global services (toast, messageBox)
-│   ├── messaging-simple.ts # UI messaging system
+│   ├── messaging.ts      # UI messaging system
 │   ├── styles.css        # Global styles
 │   └── index.tsx         # UI entry point
 └── shared/               # Shared utilities
     ├── constants.ts      # App constants
     ├── utils.ts          # Utility functions
-    ├── messaging.ts      # Shared messaging types
     ├── exportUtils.ts    # Export utilities
     └── selectionUtils.ts # Selection utilities
 ```

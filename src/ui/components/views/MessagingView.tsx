@@ -6,7 +6,7 @@ import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { ProgressModal } from '@ui/components/base/ProgressModal';
 import { Spinner } from '@ui/components/base/Spinner';
 import { useTheme } from '@ui/contexts/ThemeContext';
-import { sendToMain, usePluginMessages } from '@ui/messaging-simple';
+import { sendToMain, usePluginMessages } from '@ui/messaging';
 import { Toast as ToastService } from '@ui/services/toast';
 import { useState } from 'preact/hooks';
 

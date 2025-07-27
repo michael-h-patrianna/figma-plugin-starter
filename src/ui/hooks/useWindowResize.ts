@@ -1,6 +1,6 @@
 import { clamp } from '@shared/utils';
 import { useEffect, useRef } from 'preact/hooks';
-import { sendToMain } from '../messaging-simple';
+import { sendToMain } from '../messaging';
 
 /**
  * Custom hook for automatically resizing the Figma plugin window based on content size.

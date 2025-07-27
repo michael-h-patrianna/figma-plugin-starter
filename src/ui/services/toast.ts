@@ -53,7 +53,7 @@ export interface ToastConfig {
 const DEFAULT_CONFIG: ToastConfig = {
   maxVisible: 3,
   consolidationWindow: 2000,
-  defaultDuration: 5000
+  defaultDuration: 3000
 };
 
 /**
