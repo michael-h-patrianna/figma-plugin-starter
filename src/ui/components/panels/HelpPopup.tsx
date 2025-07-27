@@ -1,10 +1,34 @@
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
+/**
+ * Props for the HelpPopup component.
+ */
 interface HelpPopupProps {
+  /** Whether the help popup is visible */
   isVisible: boolean;
+  /** Function to call when popup should be closed */
   onClose: () => void;
 }
 
+/**
+ * A help popup component that displays plugin usage instructions and keyboard shortcuts.
+ *
+ * Provides a modal overlay with comprehensive help information including
+ * component usage, keyboard shortcuts, and common troubleshooting tips.
+ *
+ * @param props - The help popup props
+ * @returns A modal help overlay or null if not visible
+ *
+ * @example
+ * ```tsx
+ * const [showHelp, setShowHelp] = useState(false);
+ *
+ * <HelpPopup
+ *   isVisible={showHelp}
+ *   onClose={() => setShowHelp(false)}
+ * />
+ * ```
+ */
 export function HelpPopup({ isVisible, onClose }: HelpPopupProps) {
   const { colors } = useTheme();
 

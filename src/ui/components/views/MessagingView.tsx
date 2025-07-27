@@ -1,28 +1,86 @@
-import { LoadingIndicator } from '@create-figma-plugin/ui';
-import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from '../base/Button';
-import { NotificationBanner } from '../base/NotificationBanner';
-import { Panel } from '../base/Panel';
-import { ProgressBar } from '../base/ProgressBar';
 
+import { LoadingIndicator } from '@create-figma-plugin/ui';
+import { Button } from '@ui/components/base/Button';
+import { NotificationBanner } from '@ui/components/base/NotificationBanner';
+import { Panel } from '@ui/components/base/Panel';
+import { ProgressBar } from '@ui/components/base/ProgressBar';
+import { Toast } from '@ui/components/base/Toast';
+import { PluginCommunicationExample } from '@ui/components/examples/PluginCommunicationExample';
+import { useTheme } from '@ui/contexts/ThemeContext';
+import { useToast } from '@ui/hooks/useToast';
+import { useState } from 'preact/hooks';
+
+/**
+ * Props for the MessagingView component.
+ */
 interface MessagingViewProps {
-  onShowNotifications: () => void;
-  onSimulateProgress: () => void;
-  isScanning: boolean;
-  scanProgress: number;
-  isLoading: boolean;
-  onDemoLoading: () => void;
+  // No external dependencies - fully self-contained
 }
 
-export function MessagingView({
-  onShowNotifications,
-  onSimulateProgress,
-  isScanning,
-  scanProgress,
-  isLoading,
-  onDemoLoading
-}: MessagingViewProps) {
+/**
+ * Renders a demonstration view for messaging components, including progress indicators, loading states, and notifications.
+ *
+ * This view showcases various messaging and feedback components including toast notifications,
+ * notification banners, progress bars, and loading indicators. All interactions and state
+ * management are self-contained within this view.
+ *
+ * @param props - {@link MessagingViewProps} for configuring the view
+ * @returns The rendered messaging view React element
+ */
+export function MessagingView({ }: MessagingViewProps) {
   const { colors } = useTheme();
+  const { toast, showToast, dismissToast } = useToast();
+
+  // Messaging demo state
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  /**
+   * Shows demo toast notifications in sequence.
+   */
+  const showDemoNotifications = () => {
+    showToast('This is a success message!', 'success');
+    setTimeout(() => showToast('This is a warning message!', 'warning'), 1000);
+    setTimeout(() => showToast('This is an error message!', 'error'), 2000);
+    setTimeout(() => showToast('This is an info message!', 'info'), 3000);
+  };
+
+  /**
+   * Simulates a progress operation.
+   */
+  const simulateProgress = () => {
+    setIsScanning(true);
+    setScanProgress(0);
+
+    const progressInterval = setInterval(() => {
+      setScanProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          setIsScanning(false);
+          showToast('Progress simulation completed!', 'success');
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+  };
+
+  /**
+   * Simulates a loading state.
+   */
+  const demoLoadingState = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      showToast('Loading simulation completed!', 'success');
+    }, 2000);
+  };
+
+  /**
+   * Demo issues for the notification banner.
+   * Used to showcase error, warning, and info banners in the UI.
+   */
   // Demo issues for notification banner
   const demoIssues = [
     { code: 'DEMO_ERROR', level: 'error' as const, message: 'This is a demo error message' },
@@ -48,7 +106,7 @@ export function MessagingView({
                 height={12}
               />
             </div>
-            <Button onClick={onSimulateProgress} disabled={isScanning}>
+            <Button onClick={simulateProgress} disabled={isScanning}>
               {isScanning ? 'Scanning...' : 'Simulate Progress'}
             </Button>
           </div>
@@ -75,7 +133,7 @@ export function MessagingView({
             </p>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               {isLoading && <LoadingIndicator />}
-              <Button onClick={onDemoLoading} disabled={isLoading}>
+              <Button onClick={demoLoadingState} disabled={isLoading}>
                 {isLoading ? 'Loading...' : 'Demo Loading'}
               </Button>
             </div>
@@ -101,7 +159,7 @@ export function MessagingView({
             <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
               Temporary toast messages for user feedback (success, error, warning, info).
             </p>
-            <Button onClick={onShowNotifications}>
+            <Button onClick={showDemoNotifications}>
               Demo Toast Sequence
             </Button>
           </div>
@@ -115,6 +173,14 @@ export function MessagingView({
           </div>
         </div>
       </Panel>
+
+      {/* Plugin Communication Example */}
+      <PluginCommunicationExample />
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast toast={toast} onDismiss={dismissToast} />
+      )}
     </div>
   );
 }

@@ -1,21 +1,20 @@
-// Constants for Figma plugin starter
 
+/**
+ * The display name of the Figma plugin.
+ */
 export const PLUGIN_NAME = 'Figma Plugin Starter';
+
+/**
+ * The default width of the plugin UI window.
+ */
 export const DEFAULT_WIDTH = 800;
+
+/**
+ * The default height of the plugin UI window.
+ */
 export const DEFAULT_HEIGHT = 600;
 
-// UI Theme Constants
-export const COLORS = {
-  darkBg: '#181A20',
-  darkPanel: '#23262F',
-  accent: '#3772FF',
-  textColor: '#F4F4F4',
-  textSecondary: '#A3A3A3',
-  border: '#23262F',
-  success: '#1ecb7a',
-  error: '#e74c3c',
-  warning: '#f39c12',
-  info: '#3498db'
-} as const;
-
+/**
+ * The default border radius for UI elements.
+ */
 export const BORDER_RADIUS = 8;

@@ -1,17 +1,53 @@
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
+/**
+ * Props for the Button component.
+ */
 interface ButtonProps {
+  /** Content to display inside the button (text, icons, etc.) */
   children: any;
+  /** Function to call when button is clicked */
   onClick?: () => void;
+  /** Visual style variant of the button */
   variant?: 'primary' | 'secondary' | 'danger';
+  /** Size of the button */
   size?: 'small' | 'medium' | 'large';
+  /** Whether the button is disabled */
   disabled?: boolean;
+  /** Whether the button should take full width of its container */
   fullWidth?: boolean;
+  /** HTML button type attribute */
   type?: 'button' | 'submit' | 'reset';
+  /** Additional CSS class names */
   className?: string;
+  /** Additional inline styles */
   style?: any;
 }
 
+/**
+ * A themed button component with multiple variants and sizes.
+ *
+ * Provides consistent styling across the plugin with support for primary,
+ * secondary, and danger variants. Includes hover states and disabled styling.
+ *
+ * @param props - The button props
+ * @returns A styled button element
+ *
+ * @example
+ * ```tsx
+ * // Primary button
+ * <Button onClick={handleSave}>Save</Button>
+ *
+ * // Secondary button
+ * <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+ *
+ * // Danger button
+ * <Button variant="danger" onClick={handleDelete}>Delete</Button>
+ *
+ * // Disabled button
+ * <Button disabled onClick={handleSubmit}>Submit</Button>
+ * ```
+ */
 export function Button({
   children,
   onClick,
@@ -25,6 +61,11 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
 
+  /**
+   * Gets the style object for the current button variant.
+   *
+   * @returns Style object with colors and hover states for the variant
+   */
   const getVariantStyles = () => {
     switch (variant) {
       case 'secondary':
@@ -57,6 +98,11 @@ export function Button({
     }
   };
 
+  /**
+   * Gets the style object for the current button size.
+   *
+   * @returns Style object with padding, font size, and min height for the size
+   */
   const getSizeStyles = () => {
     switch (size) {
       case 'small':

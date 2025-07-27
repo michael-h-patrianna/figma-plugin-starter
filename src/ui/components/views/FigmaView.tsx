@@ -2,19 +2,35 @@ import {
   MiddleAlign,
   VerticalSpace
 } from '@create-figma-plugin/ui';
+import { Button } from '@ui/components/base/Button';
+import { CustomDropdown } from '@ui/components/base/CustomDropdown';
+import { Panel } from '@ui/components/base/Panel';
+import { Textbox } from '@ui/components/base/Textbox';
+import { Toast } from '@ui/components/base/Toast';
+import { useTheme } from '@ui/contexts/ThemeContext';
+import { useToast } from '@ui/hooks/useToast';
 import { useState } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from '../base/Button';
-import { CustomDropdown } from '../base/CustomDropdown';
-import { Panel } from '../base/Panel';
-import { Textbox } from '../base/Textbox';
 
+/**
+ * Props for the FigmaView component.
+ */
 interface FigmaViewProps {
-  onShowToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
+  // No external dependencies - fully self-contained
 }
 
-export function FigmaView({ onShowToast }: FigmaViewProps) {
+/**
+ * FigmaView component that demonstrates Figma-native components, color management, and layout tools.
+ *
+ * This view showcases Figma's native UI components and provides examples of color utilities,
+ * file operations, and design token management. All interactions and notifications are
+ * self-contained within this view.
+ *
+ * @param props - {@link FigmaViewProps} for configuring the view
+ * @returns The rendered FigmaView React element
+ */
+export function FigmaView({ }: FigmaViewProps) {
   const { colors } = useTheme();
+  const { toast, showToast, dismissToast } = useToast();
 
   // Figma native component states
   const [searchValue, setSearchValue] = useState('');
@@ -54,7 +70,7 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
 
   const handleFileUpload = (files: File[]) => {
     if (files.length > 0) {
-      onShowToast(`Uploaded: ${files[0].name}`, 'success');
+      showToast(`Uploaded: ${files[0].name}`, 'success');
     }
   };
 
@@ -83,7 +99,7 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
       setSelectedColor(token.color);
       setHexColor(token.color);
       setRgbaColor(hexToRgba(token.color));
-      onShowToast(`Applied ${token.text} token`, 'success');
+      showToast(`Applied ${token.text} token`, 'success');
     }
   };
 
@@ -91,12 +107,12 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      onShowToast('Process completed!', 'success');
+      showToast('Process completed!', 'success');
     }, 2000);
   };
 
   const handleIconAction = (action: string) => {
-    onShowToast(`${action} clicked!`, 'info');
+    showToast(`${action} clicked!`, 'info');
   };
 
   return (
@@ -251,7 +267,7 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
                   variant="secondary"
                   onClick={() => {
                     navigator.clipboard?.writeText(selectedColor);
-                    onShowToast(`Copied ${selectedColor} to clipboard`, 'success');
+                    showToast(`Copied ${selectedColor} to clipboard`, 'success');
                   }}
                 >
                   Copy Hex
@@ -261,7 +277,7 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
                   onClick={() => {
                     const rgbaString = `rgba(${rgbaColor.r}, ${rgbaColor.g}, ${rgbaColor.b}, ${rgbaColor.a})`;
                     navigator.clipboard?.writeText(rgbaString);
-                    onShowToast(`Copied RGBA to clipboard`, 'success');
+                    showToast(`Copied RGBA to clipboard`, 'success');
                   }}
                 >
                   Copy RGBA
@@ -408,6 +424,11 @@ export function FigmaView({ onShowToast }: FigmaViewProps) {
           </div>
         </div>
       </Panel>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast toast={toast} onDismiss={dismissToast} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { useState } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface InputProps {
   value: string;

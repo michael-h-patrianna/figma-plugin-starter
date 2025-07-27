@@ -91,6 +91,10 @@ var init_errors = __esm({
       NETWORK_ERROR: "NETWORK_ERROR"
     };
     ErrorHelpers = {
+      /**
+       * Returns an issue for when no selection is made in Figma.
+       * @returns {Issue} Warning-level issue for no selection.
+       */
       noSelection() {
         return {
           code: ERROR_CODES.NO_SELECTION,
@@ -98,6 +102,11 @@ var init_errors = __esm({
           level: "warning"
         };
       },
+      /**
+       * Returns an error issue for invalid selection.
+       * @param reason - Optional reason for invalid selection.
+       * @returns {Issue} Error-level issue for invalid selection.
+       */
       invalidSelection(reason) {
         return {
           code: ERROR_CODES.INVALID_SELECTION,
@@ -105,6 +114,12 @@ var init_errors = __esm({
           level: "error"
         };
       },
+      /**
+       * Returns an error issue for unsupported node types.
+       * @param nodeType - The unsupported node type.
+       * @param nodeId - Optional node ID.
+       * @returns {Issue} Error-level issue for unsupported node type.
+       */
       unsupportedNodeType(nodeType, nodeId) {
         return {
           code: ERROR_CODES.UNSUPPORTED_NODE_TYPE,
@@ -113,6 +128,11 @@ var init_errors = __esm({
           nodeId
         };
       },
+      /**
+       * Returns an error issue for processing failures.
+       * @param details - Optional details about the failure.
+       * @returns {Issue} Error-level issue for processing failure.
+       */
       processingFailed(details) {
         return {
           code: ERROR_CODES.PROCESSING_FAILED,
@@ -120,6 +140,12 @@ var init_errors = __esm({
           level: "error"
         };
       },
+      /**
+       * Returns an error issue for missing required properties.
+       * @param propertyName - The missing property name.
+       * @param nodeId - Optional node ID.
+       * @returns {Issue} Error-level issue for missing property.
+       */
       missingProperty(propertyName, nodeId) {
         return {
           code: ERROR_CODES.MISSING_PROPERTY,
@@ -128,6 +154,11 @@ var init_errors = __esm({
           nodeId
         };
       },
+      /**
+       * Returns an error issue for unknown errors.
+       * @param error - The unknown error object.
+       * @returns {Issue} Error-level issue for unknown error.
+       */
       unknownError(error) {
         const message = error instanceof Error ? error.message : "An unknown error occurred";
         return {
@@ -136,6 +167,11 @@ var init_errors = __esm({
           level: "error"
         };
       },
+      /**
+       * Returns an error issue for permission denied actions.
+       * @param action - Optional action description.
+       * @returns {Issue} Error-level issue for permission denied.
+       */
       permissionDenied(action) {
         return {
           code: ERROR_CODES.PERMISSION_DENIED,
@@ -144,6 +180,11 @@ var init_errors = __esm({
         };
       },
       // Success/info messages
+      /**
+       * Returns an info issue for successful operations.
+       * @param message - Success message.
+       * @returns {Issue} Info-level issue for success.
+       */
       success(message) {
         return {
           code: "SUCCESS",
@@ -151,6 +192,11 @@ var init_errors = __esm({
           level: "info"
         };
       },
+      /**
+       * Returns an info issue for informational messages.
+       * @param message - Info message.
+       * @returns {Issue} Info-level issue for info.
+       */
       info(message) {
         return {
           code: "INFO",
@@ -158,6 +204,11 @@ var init_errors = __esm({
           level: "info"
         };
       },
+      /**
+       * Returns a warning issue for warning messages.
+       * @param message - Warning message.
+       * @returns {Issue} Warning-level issue for warning.
+       */
       warning(message) {
         return {
           code: "WARNING",

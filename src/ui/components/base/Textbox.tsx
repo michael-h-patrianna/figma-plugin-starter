@@ -1,20 +1,69 @@
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { useState } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
 
+/**
+ * Props for the Textbox component.
+ */
 interface TextboxProps {
+  /** Current value of the textbox */
   value: string;
+  /** Callback function called when the input value changes */
   onValueInput: (value: string) => void;
+  /** Placeholder text shown when input is empty */
   placeholder?: string;
+  /** Whether the textbox is disabled */
   disabled?: boolean;
+  /** Visual style variant - 'border' shows full border, 'underline' shows bottom border only */
   variant?: 'border' | 'underline';
+  /** Optional icon element to display on the left side */
   icon?: any;
+  /** Optional suffix element to display on the right side (e.g., unit labels) */
   suffix?: any;
+  /** Additional CSS class names */
   className?: string;
+  /** Additional inline styles */
   style?: any;
+  /** Callback function called when input gains focus */
   onFocus?: () => void;
+  /** Callback function called when input loses focus */
   onBlur?: () => void;
 }
 
+/**
+ * A themed text input component with support for icons, suffixes, and different visual styles.
+ *
+ * Provides consistent styling across the plugin with focus states, disabled states,
+ * and optional icons/suffixes for enhanced user experience.
+ *
+ * @param props - The textbox props
+ * @returns A styled text input element with optional decorations
+ *
+ * @example
+ * ```tsx
+ * // Basic textbox
+ * <Textbox
+ *   value={name}
+ *   onValueInput={setName}
+ *   placeholder="Enter your name"
+ * />
+ *
+ * // Textbox with underline style
+ * <Textbox
+ *   value={searchTerm}
+ *   onValueInput={setSearchTerm}
+ *   variant="underline"
+ *   placeholder="Search..."
+ * />
+ *
+ * // Textbox with suffix
+ * <Textbox
+ *   value={width}
+ *   onValueInput={setWidth}
+ *   placeholder="100"
+ *   suffix={<span>px</span>}
+ * />
+ * ```
+ */
 export function Textbox({
   value,
   onValueInput,
@@ -31,11 +80,17 @@ export function Textbox({
   const { colors } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
+  /**
+   * Handles focus event and updates focus state.
+   */
   const handleFocus = () => {
     setIsFocused(true);
     onFocus?.();
   };
 
+  /**
+   * Handles blur event and updates focus state.
+   */
   const handleBlur = () => {
     setIsFocused(false);
     onBlur?.();

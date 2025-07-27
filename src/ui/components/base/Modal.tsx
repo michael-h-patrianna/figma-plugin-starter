@@ -1,17 +1,51 @@
 import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
 import { useEffect } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
 
+/**
+ * Props for the Modal component.
+ */
 interface ModalProps {
+  /** Whether the modal is visible */
   isVisible: boolean;
+  /** Function to call when modal should be closed */
   onClose: () => void;
+  /** Title text to display in the modal header */
   title: string;
+  /** Content to display in the modal body */
   children: h.JSX.Element | h.JSX.Element[];
+  /** Size of the modal - affects width and max height */
   size?: 'small' | 'medium' | 'large';
+  /** Whether to show the close button in the header */
   showCloseButton?: boolean;
 }
 
+/**
+ * A modal dialog component with backdrop, keyboard navigation, and customizable sizing.
+ *
+ * Provides a centered overlay modal with backdrop blur, escape key handling,
+ * and click-outside-to-close functionality. Includes a header with title and
+ * optional close button.
+ *
+ * @param props - The modal props
+ * @returns A modal dialog overlay or null if not visible
+ *
+ * @example
+ * ```tsx
+ * const [showModal, setShowModal] = useState(false);
+ *
+ * <Modal
+ *   isVisible={showModal}
+ *   onClose={() => setShowModal(false)}
+ *   title="Settings"
+ *   size="medium"
+ * >
+ *   <p>Modal content goes here</p>
+ *   <Button onClick={() => setShowModal(false)}>Close</Button>
+ * </Modal>
+ * ```
+ */
 export function Modal({
   isVisible,
   onClose,
@@ -26,6 +60,10 @@ export function Modal({
   useEffect(() => {
     if (!isVisible) return;
 
+    /**
+     * Handles keyboard events for modal navigation.
+     * Closes modal when Escape key is pressed.
+     */
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -38,6 +76,11 @@ export function Modal({
 
   if (!isVisible) return null;
 
+  /**
+   * Gets the size-specific styles for the modal.
+   *
+   * @returns Style object with width and max height for the selected size
+   */
   const getSizeStyles = () => {
     switch (size) {
       case 'small': return { width: '320px', maxHeight: '400px' };

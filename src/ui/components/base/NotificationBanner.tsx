@@ -1,7 +1,7 @@
 import { getErrors, getInfos, getWarnings } from '@main/errors';
 import { Issue } from '@main/types';
 import { BORDER_RADIUS } from '@shared/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
 export function NotificationBanner({ issues }: { issues: Issue[] }) {
   const { colors } = useTheme();

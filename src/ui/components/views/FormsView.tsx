@@ -1,61 +1,62 @@
-import { useMemo } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
-import { Accordion } from '../base/Accordion';
-import { DataTable } from '../base/DataTable';
-import { DatePicker } from '../base/DatePicker';
-import { Dropdown } from '../base/Dropdown';
-import { Input, Textarea } from '../base/Input';
-import { Panel } from '../base/Panel';
-import { RadioButton } from '../base/RadioButton';
-import { TimePicker } from '../base/TimePicker';
-import { ToggleSwitch } from '../base/ToggleSwitch';
+import { DataTable } from '@ui/components/base/DataTable';
+import { DatePicker } from '@ui/components/base/DatePicker';
+import { Dropdown } from '@ui/components/base/Dropdown';
+import { Input, Textarea } from '@ui/components/base/Input';
+import { Panel } from '@ui/components/base/Panel';
+import { RadioButton } from '@ui/components/base/RadioButton';
+import { TimePicker } from '@ui/components/base/TimePicker';
+import { Toast } from '@ui/components/base/Toast';
+import { ToggleSwitch } from '@ui/components/base/ToggleSwitch';
+import { useTheme } from '@ui/contexts/ThemeContext';
+import { useToast } from '@ui/hooks/useToast';
+import { useMemo, useState } from 'preact/hooks';
 
+/**
+ * Props for the FormsView component.
+ */
 interface FormsViewProps {
-  inputValue: string;
-  onInputChange: (value: string) => void;
-  textareaValue: string;
-  onTextareaChange: (value: string) => void;
-  selectedDropdown: string;
-  onDropdownChange: (value: string) => void;
-  selectedRadio: string;
-  onRadioChange: (value: string) => void;
-  toggleState: boolean;
-  onToggleChange: (value: boolean) => void;
-  isLoading: boolean;
-  onDemoLoading: () => void;
-  onShowToast: () => void;
-  accordionItems: Array<{
-    id: string;
-    title: string;
-    content: any;
-  }>;
-  selectedDate: string;
-  onDateChange: (value: string) => void;
-  selectedTime: string;
-  onTimeChange: (value: string) => void;
+  // No external dependencies - fully self-contained
 }
 
-export function FormsView({
-  inputValue,
-  onInputChange,
-  textareaValue,
-  onTextareaChange,
-  selectedDropdown,
-  onDropdownChange,
-  selectedRadio,
-  onRadioChange,
-  toggleState,
-  onToggleChange,
-  isLoading,
-  onDemoLoading,
-  onShowToast,
-  accordionItems,
-  selectedDate,
-  onDateChange,
-  selectedTime,
-  onTimeChange
-}: FormsViewProps) {
+/**
+ * FormsView component that demonstrates various form input components.
+ *
+ * This view showcases different types of form inputs including text inputs, dropdowns,
+ * radio buttons, toggles, date/time pickers, and data tables. All form state and
+ * interactions are self-contained within this view.
+ *
+ * @param props - {@link FormsViewProps} for configuring the view
+ * @returns The rendered FormsView React element
+ */
+export function FormsView({ }: FormsViewProps) {
   const { colors } = useTheme();
+  const { toast, showToast, dismissToast } = useToast();
+
+  // Form state
+  const [inputValue, setInputValue] = useState('');
+  const [textareaValue, setTextareaValue] = useState('');
+  const [selectedDropdown, setSelectedDropdown] = useState('');
+  const [selectedRadio, setSelectedRadio] = useState('medium');
+  const [toggleState, setToggleState] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  });
+  const [selectedTime, setSelectedTime] = useState('09:00');
+
+  /**
+   * Simulates a loading state for demonstration purposes.
+  /**
+   * Simulates a loading state for demonstration purposes.
+   */
+  const demoLoadingState = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      showToast('Loading simulation completed!', 'success');
+    }, 2000);
+  };
 
   const dropdownOptions = [
     { value: 'option1', label: 'First Option' },
@@ -115,14 +116,14 @@ export function FormsView({
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Input
               value={inputValue}
-              onChange={onInputChange}
+              onChange={setInputValue}
               placeholder="Enter text..."
               label="Text Input"
               width="180px"
             />
             <Input
               value={inputValue}
-              onChange={onInputChange}
+              onChange={setInputValue}
               type="number"
               placeholder="0"
               label="Number Input"
@@ -136,13 +137,13 @@ export function FormsView({
             <Dropdown
               options={dropdownOptions}
               value={selectedDropdown}
-              onChange={onDropdownChange}
+              onChange={setSelectedDropdown}
               placeholder="Select option"
               width="160px"
             />
             <ToggleSwitch
               checked={toggleState}
-              onChange={onToggleChange}
+              onChange={setToggleState}
               label="Enable Feature"
             />
           </div>
@@ -150,7 +151,7 @@ export function FormsView({
           <RadioButton
             options={radioOptions}
             value={selectedRadio}
-            onChange={onRadioChange}
+            onChange={setSelectedRadio}
             name="size"
             label="Size Options"
             direction="horizontal"
@@ -158,7 +159,7 @@ export function FormsView({
 
           <Textarea
             value={textareaValue}
-            onChange={onTextareaChange}
+            onChange={setTextareaValue}
             placeholder="Enter longer text..."
             label="Textarea (Scrollable)"
             maxLength={500}
@@ -179,7 +180,7 @@ export function FormsView({
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'end' }}>
             <DatePicker
               value={selectedDate}
-              onChange={onDateChange}
+              onChange={setSelectedDate}
               label="Start Date"
               min="2024-01-01"
               max="2025-12-31"
@@ -187,14 +188,14 @@ export function FormsView({
 
             <TimePicker
               value={selectedTime}
-              onChange={onTimeChange}
+              onChange={setSelectedTime}
               label="Start Time"
               step={300} // 5-minute intervals
             />
 
             <DatePicker
               value={selectedDate}
-              onChange={onDateChange}
+              onChange={setSelectedDate}
               label="End Date (Disabled)"
               disabled={true}
             />
@@ -235,12 +236,10 @@ export function FormsView({
         />
       </Panel>
 
-      {/* Interactive Elements Panel */}
-      <Panel title="Interactive Elements">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Accordion items={accordionItems} defaultOpen={['overview']} />
-        </div>
-      </Panel>
+      {/* Toast Notification */}
+      {toast && (
+        <Toast toast={toast} onDismiss={dismissToast} />
+      )}
     </div>
   );
 }

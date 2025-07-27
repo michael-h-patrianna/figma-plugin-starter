@@ -1,5 +1,5 @@
 import { BORDER_RADIUS } from '@shared/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 interface ProgressBarProps {
   progress: number; // 0-100
   label?: string;

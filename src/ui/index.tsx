@@ -1,89 +1,83 @@
 import { render } from '@create-figma-plugin/ui';
 import { OperationResult } from '@main/types';
 import { PLUGIN_NAME } from '@shared/constants';
-import { exportToCSV } from '@shared/exportUtils';
 import { copyToClipboard } from '@shared/utils';
-import { useState } from 'preact/hooks';
-import { Button } from './components/base/Button';
-import { ErrorBoundary } from './components/base/ErrorBoundary';
-import { Input } from './components/base/Input';
-import { ConfirmBox, MessageBox } from './components/base/MessageBox';
-import { Modal } from './components/base/Modal';
-import { ProgressBar } from './components/base/ProgressBar';
-import { Tabs } from './components/base/Tabs';
-import { Toast } from './components/base/Toast';
-import { ToggleSwitch } from './components/base/ToggleSwitch';
-import { DebugPanel } from './components/panels/DebugPanel';
-import { HelpPopup } from './components/panels/HelpPopup';
-import { DataView } from './components/views/DataView';
-import { FigmaView } from './components/views/FigmaView';
-import { FormsView } from './components/views/FormsView';
-import { MessagingView } from './components/views/MessagingView';
-import { ModalsView } from './components/views/ModalsView';
-import { SectionsView } from './components/views/SectionsView';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { commonShortcuts, useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { usePluginStorage } from './hooks/usePluginStorage';
-import { useToast } from './hooks/useToast';
-import { useWindowResize } from './hooks/useWindowResize';
+import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { ProgressBar } from '@ui/components/base/ProgressBar';
+import { SettingsDropdown } from '@ui/components/base/SettingsDropdown';
+import { Tabs } from '@ui/components/base/Tabs';
+import { Toast } from '@ui/components/base/Toast';
+import { DebugPanel } from '@ui/components/panels/DebugPanel';
+import { HelpPopup } from '@ui/components/panels/HelpPopup';
+import { ContentView } from '@ui/components/views/ContentView';
+import { DataView } from '@ui/components/views/DataView';
+import { FigmaView } from '@ui/components/views/FigmaView';
+import { FormsView } from '@ui/components/views/FormsView';
+import { MessagingView } from '@ui/components/views/MessagingView';
+import { ModalsView } from '@ui/components/views/ModalsView';
+import { SectionsView } from '@ui/components/views/SectionsView';
+import { ThemeProvider, useTheme } from '@ui/contexts/ThemeContext';
+import { useSettings } from '@ui/hooks/useSettings';
+import { useToast } from '@ui/hooks/useToast';
+import { useWindowResize } from '@ui/hooks/useWindowResize';
+import { useEffect, useState } from 'preact/hooks';
 
+/**
+ * Main application component for the Figma plugin UI.
+ *
+ * Provides a tabbed interface showcasing different UI component categories.
+ * Each view is self-contained and manages its own state and interactions.
+ * Settings (theme, debug mode, user preferences) are automatically loaded
+ * on startup and saved when changed.
+ *
+ * Features:
+ * - Auto-loading/saving settings with persistent storage
+ * - Theme switching (light/dark) that persists
+ * - Debug panel with persistent state
+ * - Help system
+ * - Progress overlay for scanning operations
+ * - Self-contained component views
+ */
 function App() {
-  const { colors, theme } = useTheme();
+  const { colors, theme, setTheme } = useTheme();
+  const { settings, updateSettings, isLoading: settingsLoading, isPersistent } = useSettings();
+
+  // Apply theme from settings when loaded
+  useEffect(() => {
+    if (!settingsLoading && settings.theme !== theme) {
+      setTheme(settings.theme);
+    }
+  }, [settings.theme, settingsLoading, theme, setTheme]);
 
   // Apply theme to document body for CSS targeting
   if (typeof document !== 'undefined') {
     document.body.setAttribute('data-theme', theme);
     document.body.className = `theme-${theme}`;
   }
+
   const [scanResult, setScanResult] = useState<OperationResult | null>(null);
   const [processResult, setProcessResult] = useState<OperationResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
-  const [debugMode, setDebugMode] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
   // Component demo states
-  const [showModal, setShowModal] = useState(false);
-  const [showMessageBox, setShowMessageBox] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [selectedDropdown, setSelectedDropdown] = useState('');
-  const [inputValue, setInputValue] = useState('');
-  const [textareaValue, setTextareaValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('sections');
-  const [toggleState, setToggleState] = useState(false);
-  const [selectedRadio, setSelectedRadio] = useState('medium');
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0]; // YYYY-MM-DD format
-  });
-  const [selectedTime, setSelectedTime] = useState('09:00');
 
   const { toast, showToast, dismissToast } = useToast();
   const containerRef = useWindowResize(600, 400, 1200, 800);
-  const { value: userPreference, setValue: setUserPreference } = usePluginStorage('demoPreference', 'default');
 
-  // Enhanced storage for demo settings
-  const { value: storedSettings, setValue: setStoredSettings } = usePluginStorage('userSettings', {
-    userName: '',
-    autoSave: false,
-    lastExportPath: '',
-    favoriteColor: '#3772FF'
-  });
+  // Handle debug mode toggle (update both local state and settings)
+  const handleDebugToggle = (enabled: boolean) => {
+    updateSettings({ debugMode: enabled });
+  };
 
-  // Keyboard shortcuts
-  useKeyboardShortcuts([
-    commonShortcuts.escape(() => {
-      setShowModal(false);
-      setShowHelp(false);
-    }),
-    {
-      key: 'd',
-      ctrlKey: true,
-      action: () => setDebugMode(!debugMode),
-      description: 'Toggle debug mode'
-    }
-  ]);
+  // Handle theme toggle (update both theme context and settings)
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    updateSettings({ theme: newTheme });
+  };
 
   async function handleCopyData() {
     if (processResult && processResult.data) {
@@ -95,14 +89,6 @@ function App() {
     } else {
       showToast('No processed data available', 'warning');
     }
-  }
-
-  // Demo functions for showcasing components
-  function showDemoNotifications() {
-    showToast('This is a success message!', 'success');
-    setTimeout(() => showToast('This is a warning message!', 'warning'), 1000);
-    setTimeout(() => showToast('This is an error message!', 'error'), 2000);
-    setTimeout(() => showToast('This is an info message!', 'info'), 3000);
   }
 
   function loadDemoData() {
@@ -159,38 +145,6 @@ function App() {
         return prev + 10;
       });
     }, 200);
-  }
-
-  function demoLoadingState() {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showToast('Loading simulation completed!', 'success');
-    }, 2000);
-  }
-
-  function demoExportData() {
-    const demoData = [
-      { id: 1, name: 'Item 1', type: 'Rectangle', color: '#FF5733' },
-      { id: 2, name: 'Item 2', type: 'Text', color: '#33FF57' },
-      { id: 3, name: 'Item 3', type: 'Ellipse', color: '#3357FF' }
-    ];
-
-    exportToCSV(demoData, 'demo-export.csv');
-
-    // Update last export path in storage
-    setStoredSettings({
-      ...storedSettings,
-      lastExportPath: 'demo-export.csv'
-    });
-
-    showToast('CSV export started!', 'success');
-  }
-
-  function demoStorageAction() {
-    const newValue = userPreference === 'default' ? 'custom' : 'default';
-    setUserPreference(newValue);
-    showToast(`Preference changed to: ${newValue}`, 'info');
   }
 
   const accordionItems = [
@@ -270,24 +224,24 @@ function App() {
 
             {/* Toggle Controls */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <ToggleSwitch
-                checked={debugMode}
-                onChange={setDebugMode}
-                label="Debug"
+              <SettingsDropdown
+                debugMode={settings.debugMode}
+                onDebugToggle={handleDebugToggle}
+                onThemeToggle={handleThemeToggle}
               />
             </div>
           </div>
         </div>
 
         {/* Debug Panel (positioned right after header) */}
-        {debugMode && <DebugPanel isVisible={true} />}
+        {settings.debugMode && <DebugPanel isVisible={true} />}
 
         {/* Main Content with Tabs */}
         <Tabs
           tabs={[
             {
               id: 'sections',
-              label: 'Sections',
+              label: 'Start',
               content: (
                 <SectionsView
                   scanResult={scanResult}
@@ -301,60 +255,37 @@ function App() {
               id: 'forms',
               label: 'Forms',
               content: (
-                <FormsView
-                  inputValue={inputValue}
-                  onInputChange={setInputValue}
-                  textareaValue={textareaValue}
-                  onTextareaChange={setTextareaValue}
-                  selectedDropdown={selectedDropdown}
-                  onDropdownChange={setSelectedDropdown}
-                  selectedRadio={selectedRadio}
-                  onRadioChange={setSelectedRadio}
-                  toggleState={toggleState}
-                  onToggleChange={setToggleState}
-                  isLoading={isLoading}
-                  onDemoLoading={demoLoadingState}
-                  onShowToast={() => showToast('Demo toast notification!', 'info')}
+                <FormsView />
+              )
+            },
+            {
+              id: 'content',
+              label: 'Content',
+              content: (
+                <ContentView
                   accordionItems={accordionItems}
-                  selectedDate={selectedDate}
-                  onDateChange={setSelectedDate}
-                  selectedTime={selectedTime}
-                  onTimeChange={setSelectedTime}
                 />
               )
             },
             {
               id: 'messaging',
-              label: 'Messaging',
+              label: 'Communications',
               content: (
-                <MessagingView
-                  onShowNotifications={showDemoNotifications}
-                  onSimulateProgress={simulateProgress}
-                  isScanning={isScanning}
-                  scanProgress={scanProgress}
-                  isLoading={isLoading}
-                  onDemoLoading={demoLoadingState}
-                />
+                <MessagingView />
               )
             },
             {
               id: 'modals',
-              label: 'Modals',
+              label: 'Modal Dialogs',
               content: (
-                <ModalsView
-                  onShowModal={() => setShowModal(true)}
-                  onShowMessageBox={() => setShowMessageBox(true)}
-                  onShowConfirmBox={() => setShowConfirmBox(true)}
-                />
+                <ModalsView />
               )
             },
             {
               id: 'figma',
               label: 'Figma',
               content: (
-                <FigmaView
-                  onShowToast={showToast}
-                />
+                <FigmaView />
               )
             },
             {
@@ -362,11 +293,12 @@ function App() {
               label: 'Data',
               content: (
                 <DataView
-                  onExportData={demoExportData}
-                  onStorageAction={demoStorageAction}
-                  userPreference={userPreference}
-                  storedSettings={storedSettings}
-                  onUpdateSettings={setStoredSettings}
+                  settings={settings}
+                  onSettingsChange={updateSettings}
+                  debugMode={settings.debugMode}
+                  onDebugToggle={() => handleDebugToggle(!settings.debugMode)}
+                  onThemeToggle={handleThemeToggle}
+                  isPersistent={isPersistent}
                 />
               )
             }
@@ -409,70 +341,6 @@ function App() {
           </div>
         )}
 
-        {/* Modal Demo */}
-        <Modal
-          isVisible={showModal}
-          onClose={() => setShowModal(false)}
-          title="Custom Modal Demo"
-          size="medium"
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <p style={{ color: colors.textColor, margin: 0, lineHeight: 1.5 }}>
-              This is a custom modal with full control over content and behavior. You can add any
-              components, forms, or content here.
-            </p>
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Input
-                value={inputValue}
-                onChange={setInputValue}
-                placeholder="Type something..."
-                label="Modal Input"
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-              <Button onClick={() => setShowModal(false)} variant="secondary">
-                Cancel
-              </Button>
-              <Button onClick={() => {
-                showToast('Custom modal action completed!', 'success');
-                setShowModal(false);
-              }}>
-                Save
-              </Button>
-            </div>
-          </div>
-        </Modal>
-
-        {/* Message Box Demo */}
-        <MessageBox
-          isVisible={showMessageBox}
-          title="Information"
-          message="This is a simple message box. Perfect for showing information, alerts, or confirmations with just an OK button."
-          onOk={() => {
-            setShowMessageBox(false);
-            showToast('Message box closed!', 'info');
-          }}
-        />
-
-        {/* Confirm Box Demo */}
-        <ConfirmBox
-          isVisible={showConfirmBox}
-          title="Confirm Action"
-          message="Are you sure you want to perform this action? This is a confirm dialog with OK and Cancel buttons."
-          onOk={() => {
-            setShowConfirmBox(false);
-            showToast('Action confirmed!', 'success');
-          }}
-          onCancel={() => {
-            setShowConfirmBox(false);
-            showToast('Action cancelled!', 'warning');
-          }}
-          okText="Yes, do it"
-          cancelText="No, cancel"
-        />
-
         {/* Toast Notification */}
         {toast && (
           <Toast toast={toast} onDismiss={dismissToast} />
@@ -512,6 +380,15 @@ function App() {
   );
 }
 
+/**
+ * Root application component wrapped with theme provider.
+ *
+ * Provides the theme context to the entire application and renders
+ * the main App component. This is the entry point for the plugin UI
+ * that gets rendered by the Figma plugin system.
+ *
+ * @returns The themed application component
+ */
 function AppWithTheme() {
   return (
     <ThemeProvider>
@@ -520,4 +397,10 @@ function AppWithTheme() {
   );
 }
 
+/**
+ * Renders the plugin UI using the Figma plugin utilities.
+ *
+ * This is the main export that gets called by the Figma plugin system
+ * to initialize and render the plugin's user interface.
+ */
 export default render(AppWithTheme);

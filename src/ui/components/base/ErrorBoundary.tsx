@@ -1,25 +1,64 @@
 import { BORDER_RADIUS } from '@shared/constants';
+import { getThemeColors } from '@ui/contexts/ThemeContext';
 import { Component, h } from 'preact';
-import { getThemeColors } from '../../contexts/ThemeContext';
 
+/**
+ * State interface for the ErrorBoundary component.
+ */
 interface ErrorBoundaryState {
+  /** Whether an error has been caught */
   hasError: boolean;
+  /** The caught error object */
   error?: Error;
+  /** Additional error information including component stack */
   errorInfo?: any;
 }
 
+/**
+ * Props interface for the ErrorBoundary component.
+ */
 interface ErrorBoundaryProps {
+  /** Child components to wrap with error boundary */
   children: h.JSX.Element | h.JSX.Element[];
+  /** Optional custom fallback UI function */
   fallback?: (error: Error, errorInfo: any) => h.JSX.Element;
+  /** Optional error handler callback */
   onError?: (error: Error, errorInfo: any) => void;
 }
 
+/**
+ * Error boundary component that catches JavaScript errors in child components.
+ *
+ * Provides a fallback UI when errors occur and prevents the entire plugin
+ * from crashing. Includes error details for debugging and a retry mechanism.
+ *
+ * @example
+ * ```tsx
+ * <ErrorBoundary
+ *   onError={(error, errorInfo) => {
+ *     console.error('App Error:', error, errorInfo);
+ *     showToast('An unexpected error occurred', 'error');
+ *   }}
+ * >
+ *   <MyComponent />
+ * </ErrorBoundary>
+ * ```
+ */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
+  /**
+   * Catches errors thrown by child components.
+   *
+   * Called when an error is thrown during rendering, in lifecycle methods,
+   * or in constructors of the whole tree below this component.
+   *
+   * @param error - The error that was thrown
+   * @param errorInfo - Additional error information including component stack
+   */
   componentDidCatch(error: Error, errorInfo: any) {
     this.setState({
       hasError: true,

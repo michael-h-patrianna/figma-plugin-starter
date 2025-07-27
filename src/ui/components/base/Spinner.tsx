@@ -1,5 +1,5 @@
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { useEffect, useState } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface SpinnerProps {
   size?: number;

@@ -1,11 +1,15 @@
 import { OperationResult } from '@main/types';
-import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from '../base/Button';
-import { DataTable } from '../base/DataTable';
-import { NotificationBanner } from '../base/NotificationBanner';
-import { Panel } from '../base/Panel';
-import { HowToUsePanel } from '../panels/HowToUsePanel';
+import { Button } from '@ui/components/base/Button';
+import { DataTable } from '@ui/components/base/DataTable';
+import { NotificationBanner } from '@ui/components/base/NotificationBanner';
+import { Panel } from '@ui/components/base/Panel';
+import { HowToUsePanel } from '@ui/components/panels/HowToUsePanel';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
+
+/**
+ * Props for the SectionsView component.
+ */
 interface SectionsViewProps {
   scanResult: OperationResult | null;
   processResult: OperationResult | null;
@@ -13,6 +17,13 @@ interface SectionsViewProps {
   onCopyData: () => void;
 }
 
+
+/**
+ * Renders a demonstration view for sectioned panels, including scan and process results, action buttons, and usage instructions.
+ *
+ * @param props - {@link SectionsViewProps} for controlling demo data and actions.
+ * @returns The rendered sections view React element.
+ */
 export function SectionsView({
   scanResult,
   processResult,

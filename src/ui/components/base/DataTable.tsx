@@ -1,5 +1,5 @@
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface DataTableProps {
   data: Array<Record<string, any>>;

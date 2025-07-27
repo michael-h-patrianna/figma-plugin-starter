@@ -1,5 +1,29 @@
 import { useEffect, useRef } from 'preact/hooks';
 
+/**
+ * Custom hook for automatically resizing the Figma plugin window based on content size.
+ *
+ * Uses ResizeObserver to monitor content changes and sends resize messages to the main thread
+ * when the content size changes. Respects minimum and maximum size constraints.
+ *
+ * @param minWidth - Minimum window width in pixels (default: 400)
+ * @param minHeight - Minimum window height in pixels (default: 300)
+ * @param maxWidth - Maximum window width in pixels (default: 1200)
+ * @param maxHeight - Maximum window height in pixels (default: 800)
+ * @param extraPadding - Additional padding to add to content size (default: 48)
+ * @returns Ref to attach to the container element that should control window size
+ *
+ * @example
+ * ```tsx
+ * const containerRef = useWindowResize(600, 400, 1000, 700);
+ *
+ * return (
+ *   <div ref={containerRef}>
+ *     Your plugin content
+ *   </div>
+ * );
+ * ```
+ */
 export function useWindowResize(
   minWidth = 400,
   minHeight = 300,
@@ -14,6 +38,9 @@ export function useWindowResize(
       return;
     }
 
+    /**
+     * Observes size changes and sends resize messages to Figma main thread.
+     */
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;

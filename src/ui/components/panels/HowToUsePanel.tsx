@@ -1,6 +1,17 @@
-import { Panel } from '../base/Panel';
-import { useTheme } from '../../contexts/ThemeContext';
+import { Panel } from '@ui/components/base/Panel';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
+/**
+ * A panel component that displays usage instructions for the Figma plugin.
+ *
+ * @returns A panel with plugin usage instructions
+ *
+ * @example
+ * ```tsx
+ * // Display usage instructions in a tab or modal
+ * <HowToUsePanel />
+ * ```
+ */
 export function HowToUsePanel() {
   const { colors } = useTheme();
 

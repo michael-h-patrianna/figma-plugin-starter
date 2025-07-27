@@ -1,4 +1,4 @@
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
 interface TimePickerProps {
   value: string;

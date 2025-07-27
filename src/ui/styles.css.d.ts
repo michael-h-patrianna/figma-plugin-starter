@@ -19,6 +19,7 @@ declare const styles: {
   readonly "slideUp": string;
   readonly "spin": string;
   readonly "tab": string;
+  readonly "tabs-scroll-container": string;
   readonly "textbox": string;
   readonly "theme-dark": string;
   readonly "theme-light": string;

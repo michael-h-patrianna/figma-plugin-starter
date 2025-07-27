@@ -1,22 +1,65 @@
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { useTheme } from '../../contexts/ThemeContext';
 
+/**
+ * Configuration for a dropdown option.
+ */
 interface DropdownOption {
+  /** Unique value for the option */
   value: string;
+  /** Display text for the option */
   text: string;
+  /** Whether the option is disabled and cannot be selected */
   disabled?: boolean;
 }
 
+/**
+ * Props for the CustomDropdown component.
+ */
 interface CustomDropdownProps {
+  /** Array of options to display in the dropdown */
   options: DropdownOption[];
+  /** Currently selected value */
   value: string;
+  /** Callback function called when selection changes */
   onValueChange: (value: string) => void;
+  /** Placeholder text shown when no option is selected */
   placeholder?: string;
+  /** Whether the dropdown is disabled */
   disabled?: boolean;
+  /** Additional CSS class names */
   className?: string;
+  /** Additional inline styles */
   style?: any;
 }
 
+/**
+ * A custom dropdown/select component with themed styling and keyboard navigation.
+ *
+ * Provides a styled dropdown menu with hover states, disabled options,
+ * click-outside-to-close functionality, and smooth animations.
+ *
+ * @param props - The dropdown props
+ * @returns A styled dropdown select component
+ *
+ * @example
+ * ```tsx
+ * const [selectedColor, setSelectedColor] = useState('');
+ *
+ * const colorOptions = [
+ *   { value: 'red', text: 'Red' },
+ *   { value: 'blue', text: 'Blue' },
+ *   { value: 'green', text: 'Green', disabled: true }
+ * ];
+ *
+ * <CustomDropdown
+ *   options={colorOptions}
+ *   value={selectedColor}
+ *   onValueChange={setSelectedColor}
+ *   placeholder="Choose a color"
+ * />
+ * ```
+ */
 export function CustomDropdown({
   options,
   value,
@@ -33,6 +76,9 @@ export function CustomDropdown({
   const selectedOption = options.find(opt => opt.value === value);
 
   useEffect(() => {
+    /**
+     * Handles clicks outside the dropdown to close it.
+     */
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
@@ -43,12 +89,21 @@ export function CustomDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * Toggles the dropdown open/closed state.
+   */
   const toggleOpen = () => {
     if (!disabled) {
       setIsOpen(!isOpen);
     }
   };
 
+  /**
+   * Selects an option and closes the dropdown.
+   *
+   * @param optionValue - The value of the option to select
+   * @param optionDisabled - Whether the option is disabled
+   */
   const selectOption = (optionValue: string, optionDisabled?: boolean) => {
     if (!optionDisabled) {
       onValueChange(optionValue);

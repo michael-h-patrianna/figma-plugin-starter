@@ -1,5 +1,5 @@
-import { useTheme } from '../../contexts/ThemeContext';
-import { Toast as ToastType } from '../../hooks/useToast';
+import { useTheme } from '@ui/contexts/ThemeContext';
+import { Toast as ToastType } from '@ui/hooks/useToast';
 
 interface ToastProps {
   toast: ToastType;

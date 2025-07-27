@@ -1,10 +1,35 @@
 import { BORDER_RADIUS } from '@shared/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
+/**
+ * Props for the DebugPanel component.
+ */
 interface DebugPanelProps {
+  /** Whether the debug panel should be visible */
   isVisible: boolean;
 }
 
+/**
+ * A debug panel component for displaying development and debugging information.
+ * Only renders when the isVisible prop is true (usually set via Debug toggleswitch in the main view), making it easy to toggle on/off.
+ *
+ * @param props - The debug panel props
+ * @returns A styled debug panel or null if not visible
+ *
+ * @example
+ * ```tsx
+ * const [debugMode, setDebugMode] = useState(false);
+ *
+ * // Toggle debug mode with keyboard shortcut
+ * useKeyboardShortcuts([{
+ *   key: 'd',
+ *   ctrlKey: true,
+ *   action: () => setDebugMode(!debugMode)
+ * }]);
+ *
+ * <DebugPanel isVisible={debugMode} />
+ * ```
+ */
 export function DebugPanel({ isVisible = false }: DebugPanelProps) {
   const { colors } = useTheme();
 

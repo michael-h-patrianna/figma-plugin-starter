@@ -1,196 +1,120 @@
-import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from '../base/Button';
-import { Input } from '../base/Input';
-import { Panel } from '../base/Panel';
-import { ToggleSwitch } from '../base/ToggleSwitch';
+import { Alert } from '@ui/components/base/Alert';
+import { Button } from '@ui/components/base/Button';
+import { Panel } from '@ui/components/base/Panel';
+import { Textbox } from '@ui/components/base/Textbox';
+import { ToggleSwitch } from '@ui/components/base/ToggleSwitch';
+import { useTheme } from '@ui/contexts/ThemeContext';
+import { PluginSettings } from '@ui/hooks/useSettings';
+import React, { useState } from 'react';
 
 interface DataViewProps {
-  onExportData: () => void;
-  onStorageAction: () => void;
-  userPreference: string;
-  storedSettings: {
-    userName: string;
-    autoSave: boolean;
-    lastExportPath: string;
-    favoriteColor: string;
-  };
-  onUpdateSettings: (settings: any) => void;
+  settings: PluginSettings;
+  onSettingsChange: (settings: Partial<PluginSettings>) => void;
+  debugMode: boolean;
+  onDebugToggle: () => void;
+  onThemeToggle: () => void;
+  isPersistent: boolean;
 }
 
-export function DataView({
-  onExportData,
-  onStorageAction,
-  userPreference,
-  storedSettings,
-  onUpdateSettings
-}: DataViewProps) {
-  const { theme, colors, toggleTheme } = useTheme();
+export const DataView: React.FC<DataViewProps> = ({
+  settings,
+  onSettingsChange,
+  debugMode,
+  onDebugToggle,
+  onThemeToggle,
+  isPersistent
+}) => {
+  const { theme } = useTheme();
+  const [localText, setLocalText] = useState(settings.userText || '');
 
-  const handleSettingChange = (key: string, value: any) => {
-    onUpdateSettings({
-      ...storedSettings,
-      [key]: value
-    });
+  const handleSave = () => {
+    onSettingsChange({ userText: localText });
+  };
+
+  const handleLoad = () => {
+    setLocalText(settings.userText || '');
+  };
+
+  const handleClear = () => {
+    setLocalText('');
+    onSettingsChange({ userText: '' });
+  };
+
+  const handleExportSettings = () => {
+    const exportData = JSON.stringify(settings, null, 2);
+    console.log('Settings exported:', exportData);
+
+    // In a real plugin, you might use figma.showUI or other Figma APIs
+    // For now, we'll just log to console
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Theme Panel */}
-      <Panel title="Theme Settings">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Theme Toggle</h4>
-            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
-              Switch between dark and light themes. Theme preference is automatically saved to plugin storage.
+    <div style={{ padding: '16px' }}>
+      <Panel title="Settings Demo">
+        <>
+          {!isPersistent && (
+            <Alert type="warning" style={{ marginBottom: '16px' }}>
+              <strong>Development Mode:</strong> Settings will not persist between sessions.
+              Only real Figma plugins can save settings permanently.
+            </Alert>
+          )}
+
+          <div style={{ marginBottom: '16px' }}>
+            <h3>Settings Status</h3>
+            <p>Current Theme: {theme}</p>
+            <p>Debug Mode: {debugMode ? 'Enabled' : 'Disabled'}</p>
+            <p>Storage: {isPersistent ? 'Persistent (figma.clientStorage)' : 'In-Memory Only'}</p>
+            <p>Last Saved: {settings.lastSaved ? new Date(settings.lastSaved).toLocaleString() : 'Never'}</p>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <h3>Text Setting</h3>
+            <Textbox
+              value={localText}
+              onValueInput={(value: string) => setLocalText(value)}
+              placeholder="Enter some text..."
+              style={{ marginBottom: '8px' }}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <Button onClick={handleSave}>Save Text</Button>
+              <Button onClick={handleLoad} variant="secondary">Load Text</Button>
+              <Button onClick={handleClear} variant="secondary">Clear Text</Button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <h3>Quick Controls</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', marginBottom: '8px' }}>
+              💡 Try the cog wheel icon (⚙️) in the top-right corner for a settings context menu!
             </p>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Alert type="info" variant="subtle" style={{ marginBottom: '12px' }}>
+              <strong>New Alert Component:</strong> Check out the Content tab to see all Alert examples and usage patterns!
+            </Alert>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <ToggleSwitch
-                checked={theme === 'dark'}
-                onChange={toggleTheme}
-                label={`${theme === 'dark' ? 'Dark' : 'Light'} Theme`}
+                checked={debugMode}
+                onChange={onDebugToggle}
+                label="Debug Mode"
               />
-              <span style={{ fontSize: 12, color: colors.textSecondary }}>
-                Current: {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </Panel>
-
-      {/* Export Panel */}
-      <Panel title="Data Export">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>CSV Export</h4>
-            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
-              Export data as CSV files with proper formatting and headers. Perfect for analysis in Excel or Google Sheets.
-            </p>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <Button onClick={onExportData}>Export Demo Data</Button>
-              {storedSettings.lastExportPath && (
-                <span style={{ fontSize: 11, color: colors.textSecondary }}>
-                  Last export: {new Date().toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </Panel>
-
-      {/* Plugin Storage Demo Panel */}
-      <Panel title="Plugin Storage Demo">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>What is Plugin Storage?</h4>
-            <p style={{ color: colors.textSecondary, margin: '0 0 12px 0', fontSize: 12, lineHeight: 1.4 }}>
-              Plugin storage allows you to save user preferences, settings, and data that persist between plugin sessions.
-              This data is stored locally and remains available even after Figma is closed and reopened.
-            </p>
-          </div>
-
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>User Settings</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <Input
-                value={storedSettings.userName}
-                onChange={(value) => handleSettingChange('userName', value)}
-                label="User Name"
-                placeholder="Enter your name..."
-                width="200px"
-              />
-
-              <Input
-                value={storedSettings.favoriteColor}
-                onChange={(value) => handleSettingChange('favoriteColor', value)}
-                label="Favorite Color (Hex)"
-                placeholder="#3772FF"
-                width="140px"
-              />
-
-              <ToggleSwitch
-                checked={storedSettings.autoSave}
-                onChange={(value) => handleSettingChange('autoSave', value)}
-                label="Enable Auto-Save"
-              />
-            </div>
-          </div>
-
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Storage Status</h4>
-            <div style={{
-              background: colors.darkBg,
-              border: `1px solid ${colors.border}`,
-              borderRadius: 6,
-              padding: 12,
-              fontSize: 11,
-              fontFamily: 'monospace'
-            }}>
-              <div style={{ color: colors.textSecondary, marginBottom: 8 }}>Current stored data:</div>
-              <pre style={{
-                margin: 0,
-                color: colors.textColor,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all'
-              }}>
-                {JSON.stringify(storedSettings, null, 2)}
-              </pre>
-            </div>
-          </div>
-
-          <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Storage Actions</h4>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button onClick={onStorageAction} variant="secondary">
-                Switch Theme: {userPreference}
-              </Button>
-              <Button
-                onClick={() => onUpdateSettings({
-                  userName: '',
-                  autoSave: false,
-                  lastExportPath: '',
-                  favoriteColor: '#3772FF'
-                })}
-                variant="secondary"
-              >
-                Reset Settings
+              <Button onClick={onThemeToggle} variant="secondary">
+                Toggle Theme ({theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'})
               </Button>
             </div>
           </div>
-        </div>
-      </Panel>
 
-      {/* Storage Benefits Panel */}
-      <Panel title="Storage Use Cases" variant="standard">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <h5 style={{ color: colors.textColor, margin: '0 0 6px 0', fontSize: 13 }}>Common Use Cases:</h5>
-            <ul style={{ color: colors.textSecondary, fontSize: 12, lineHeight: 1.5, margin: 0, paddingLeft: 16 }}>
-              <li>User preferences (theme, language, shortcuts)</li>
-              <li>Recently used colors, fonts, or styles</li>
-              <li>Export settings and file paths</li>
-              <li>Plugin configuration and API keys</li>
-              <li>User workspace layouts and tool states</li>
-              <li>Cache frequently accessed data</li>
-            </ul>
+          <div style={{ marginBottom: '16px' }}>
+            <h3>Export</h3>
+            <Button onClick={handleExportSettings}>Export Settings to Console</Button>
           </div>
 
-          <div style={{
-            background: colors.darkBg,
-            border: `1px solid ${colors.accent}20`,
-            borderLeft: `4px solid ${colors.accent}`,
-            borderRadius: 4,
-            padding: 12
-          }}>
-            <div style={{ color: colors.accent, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
-              💡 Pro Tip
-            </div>
-            <div style={{ color: colors.textSecondary, fontSize: 11, lineHeight: 1.4 }}>
-              Storage is scoped per plugin, so your data won't conflict with other plugins.
-              Perfect for creating personalized user experiences!
-            </div>
+          <div style={{ marginTop: '16px', padding: '12px', backgroundColor: theme === 'dark' ? '#2d2d2d' : '#f5f5f5', borderRadius: '4px' }}>
+            <h4>Settings Overview</h4>
+            <pre style={{ fontSize: '12px', margin: 0 }}>
+              {JSON.stringify(settings, null, 2)}
+            </pre>
           </div>
-        </div>
+        </>
       </Panel>
     </div>
   );
-}
+};

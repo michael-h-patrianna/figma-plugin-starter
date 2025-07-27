@@ -1,24 +1,60 @@
 import { BORDER_RADIUS } from '@shared/constants';
+import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
-import { useTheme } from '../../contexts/ThemeContext';
 
-
+/**
+ * Visual variant types for the Panel component.
+ */
 type PanelVariant = 'standard' | 'yellow' | 'blue';
 
+/**
+ * Props for the Panel component.
+ */
 interface PanelProps {
+  /** Title text displayed in the panel header */
   title: string;
+  /** Optional subtitle text displayed below the title */
   subtitle?: string;
+  /** Content to display in the panel body */
   children: h.JSX.Element | h.JSX.Element[];
+  /** Optional action element (button, etc.) to display in the header */
   headerAction?: h.JSX.Element;
+  /** Maximum height of the panel with scrolling */
   maxHeight?: string;
+  /** Internal padding of the panel content */
   padding?: number;
+  /** Optional status badge to display next to the title */
   status?: {
     label: string;
     type: 'success' | 'error' | 'warning' | 'info';
   };
+  /** Visual variant of the panel affecting border/background colors */
   variant?: PanelVariant;
 }
 
+/**
+ * A themed panel component with header, optional status, and content area.
+ *
+ * Provides a structured container with title, optional subtitle, status badges,
+ * header actions, and scrollable content. Supports different visual variants
+ * for different use cases.
+ *
+ * @param props - The panel props
+ * @returns A styled panel container
+ *
+ * @example
+ * ```tsx
+ * <Panel
+ *   title="Layer Properties"
+ *   subtitle="Edit selected layer"
+ *   status={{ label: "3 selected", type: "info" }}
+ *   headerAction={<Button size="small">Reset</Button>}
+ *   variant="blue"
+ * >
+ *   <div>Panel content goes here</div>
+ * </Panel>
+ * ```
+ */
 export function Panel({
   title,
   subtitle,
@@ -31,6 +67,12 @@ export function Panel({
 }: PanelProps) {
   const { colors } = useTheme();
 
+  /**
+   * Gets the color for a status type.
+   *
+   * @param type - The status type
+   * @returns The corresponding color from the theme
+   */
   const getStatusColor = (type: string) => {
     switch (type) {
       case 'success': return colors.success;

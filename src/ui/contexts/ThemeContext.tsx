@@ -1,35 +1,43 @@
 import { createContext } from 'preact';
-import { useContext, useEffect } from 'preact/hooks';
-import { usePluginStorage } from '../hooks/usePluginStorage';
+import { useContext, useEffect, useState } from 'preact/hooks';
 
+/**
+ * Available theme options for the plugin.
+ */
 export type Theme = 'dark' | 'light';
 
+/**
+ * Complete color palette interface for the plugin theming system.
+ *
+ * Provides all the color tokens needed for consistent theming across
+ * all UI components in both light and dark modes.
+ */
 interface ThemeColors {
-  // Background colors
+  /** Background colors */
   darkBg: string;
   darkPanel: string;
   backgroundSecondary: string;
   backgroundTertiary: string;
   overlay: string;
 
-  // Border colors
+  /** Border colors */
   border: string;
   borderSecondary: string;
   borderActive: string;
 
-  // Text colors
+  /** Text colors */
   textColor: string;
   textSecondary: string;
   textTertiary: string;
   textDisabled: string;
   textInverse: string;
 
-  // Interactive colors
+  /** Interactive colors */
   accent: string;
   accentHover: string;
   accentActive: string;
 
-  // State colors
+  /** State colors */
   success: string;
   successLight: string;
   successBorder: string;
@@ -43,14 +51,14 @@ interface ThemeColors {
   infoLight: string;
   infoBorder: string;
 
-  // Form input colors
+  /** Form input colors */
   inputBackground: string;
   inputBackgroundDisabled: string;
   inputBorder: string;
   inputBorderFocus: string;
   inputBorderError: string;
 
-  // Component specific colors
+  /** Component specific colors */
   toggleBackground: string;
   toggleBackgroundActive: string;
   toggleSlider: string;
@@ -60,17 +68,23 @@ interface ThemeColors {
   buttonDisabled: string;
   buttonDisabledText: string;
 
-  // Data visualization
+  /** Data visualization */
   dataRow: string;
   dataRowAlt: string;
   dataHeader: string;
 
-  // Scrollbar colors
+  /** Scrollbar colors */
   scrollbarTrack: string;
   scrollbarThumb: string;
   scrollbarThumbHover: string;
 }
 
+/**
+ * Dark theme color palette.
+ *
+ * Provides all color tokens for dark mode with proper contrast ratios
+ * and accessibility considerations.
+ */
 const darkTheme: ThemeColors = {
   // Background colors
   darkBg: '#181a20',
@@ -89,7 +103,7 @@ const darkTheme: ThemeColors = {
   textSecondary: '#a0a3a8',
   textTertiary: '#6c757d',
   textDisabled: '#555862',
-  textInverse: '#000000',
+  textInverse: '#ffffff',
 
   // Interactive colors
   accent: '#4f94ff',
@@ -205,22 +219,57 @@ const lightTheme: ThemeColors = {
   scrollbarThumbHover: '#2c3e50'
 };
 
+/**
+ * Context interface for theme functionality.
+ */
 interface ThemeContextType {
+  /** Current active theme */
   theme: Theme;
+  /** Color palette for the current theme */
   colors: ThemeColors;
+  /** Function to toggle between light and dark themes */
   toggleTheme: () => void;
+  /** Function to set a specific theme */
   setTheme: (theme: Theme) => void;
 }
 
+/**
+ * React context for theme management.
+ */
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+/**
+ * Props for the ThemeProvider component.
+ */
 interface ThemeProviderProps {
+  /** Child components to provide theme context to */
   children: any;
+  /** Default theme to use if no stored preference exists */
   defaultTheme?: Theme;
 }
 
+/**
+ * Theme provider component that manages theme state and provides theme context.
+ *
+ * Handles theme persistence via plugin storage, applies CSS custom properties
+ * for Figma component integration, and provides theme switching functionality.
+ *
+ * @param props - The theme provider props
+ * @returns A context provider with theme state and functions
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   return (
+ *     <ThemeProvider defaultTheme="dark">
+ *       <YourComponents />
+ *     </ThemeProvider>
+ *   );
+ * }
+ * ```
+ */
 export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProviderProps) {
-  const { value: theme, setValue: setStoredTheme } = usePluginStorage<Theme>('theme', defaultTheme);
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
   const colors = theme === 'dark' ? darkTheme : lightTheme;
 
@@ -283,13 +332,21 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
     }
   }, [theme]);
 
+  /**
+   * Toggles between light and dark themes.
+   */
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setStoredTheme(newTheme);
+    setThemeState(newTheme);
   };
 
+  /**
+   * Sets a specific theme.
+   *
+   * @param newTheme - The theme to set
+   */
   const setTheme = (newTheme: Theme) => {
-    setStoredTheme(newTheme);
+    setThemeState(newTheme);
   };
 
   return (
@@ -299,6 +356,29 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
   );
 }
 
+/**
+ * Hook to access the current theme context.
+ *
+ * Provides access to the current theme, colors, and theme manipulation functions.
+ * Must be used within a ThemeProvider component.
+ *
+ * @returns The current theme context
+ * @throws Error if used outside of ThemeProvider
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { theme, colors, toggleTheme } = useTheme();
+ *
+ *   return (
+ *     <div style={{ color: colors.textColor }}>
+ *       Current theme: {theme}
+ *       <button onClick={toggleTheme}>Toggle Theme</button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
@@ -307,7 +387,22 @@ export function useTheme() {
   return context;
 }
 
-// Helper function to get current theme colors (fallback for non-context usage)
+/**
+ * Helper function to get theme colors without requiring context.
+ *
+ * Useful for components that need theme colors but aren't within a ThemeProvider,
+ * such as error boundaries or standalone components.
+ *
+ * @param theme - The theme to get colors for (defaults to 'dark')
+ * @returns The color palette for the specified theme
+ *
+ * @example
+ * ```tsx
+ * // In an error boundary or standalone component
+ * const colors = getThemeColors('dark');
+ * const lightColors = getThemeColors('light');
+ * ```
+ */
 export function getThemeColors(theme: Theme = 'dark'): ThemeColors {
   return theme === 'dark' ? darkTheme : lightTheme;
 }

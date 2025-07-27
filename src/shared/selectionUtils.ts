@@ -1,5 +1,16 @@
 // Selection utility functions for common Figma operations
 
+
+/**
+ * Information about the current Figma selection.
+ *
+ * @property count - Number of selected nodes.
+ * @property types - Array of node types in the selection.
+ * @property hasText - Whether selection contains text nodes.
+ * @property hasFrames - Whether selection contains frame nodes.
+ * @property hasComponents - Whether selection contains components or instances.
+ * @property hasImages - Whether selection contains image fills.
+ */
 export interface SelectionInfo {
   count: number;
   types: string[];
@@ -9,7 +20,12 @@ export interface SelectionInfo {
   hasImages: boolean;
 }
 
-// Get detailed information about current selection
+/**
+ * Analyzes the current Figma selection and returns detailed info.
+ *
+ * @param selection - Array of selected SceneNodes.
+ * @returns {SelectionInfo} Information about the selection.
+ */
 export function analyzeSelection(selection: readonly SceneNode[]): SelectionInfo {
   const typeSet = new Set(selection.map(node => node.type));
   const types = Array.from(typeSet);
@@ -28,7 +44,13 @@ export function analyzeSelection(selection: readonly SceneNode[]): SelectionInfo
   };
 }
 
-// Filter selection by type
+/**
+ * Filters the selection by node type.
+ *
+ * @param selection - Array of selected SceneNodes.
+ * @param type - The node type to filter by.
+ * @returns {T[]} Array of nodes of the specified type.
+ */
 export function filterSelectionByType<T extends SceneNode>(
   selection: readonly SceneNode[],
   type: T['type']
@@ -36,7 +58,12 @@ export function filterSelectionByType<T extends SceneNode>(
   return selection.filter(node => node.type === type) as T[];
 }
 
-// Get all text nodes from selection (including nested)
+/**
+ * Recursively gets all text nodes from the selection (including nested).
+ *
+ * @param nodes - Array of SceneNodes to search.
+ * @returns {TextNode[]} Array of all text nodes found.
+ */
 export function getAllTextNodes(nodes: readonly SceneNode[]): TextNode[] {
   const textNodes: TextNode[] = [];
 
@@ -54,7 +81,12 @@ export function getAllTextNodes(nodes: readonly SceneNode[]): TextNode[] {
   return textNodes;
 }
 
-// Get all frames from selection (including nested)
+/**
+ * Recursively gets all frame nodes from the selection (including nested).
+ *
+ * @param nodes - Array of SceneNodes to search.
+ * @returns {FrameNode[]} Array of all frame nodes found.
+ */
 export function getAllFrames(nodes: readonly SceneNode[]): FrameNode[] {
   const frames: FrameNode[] = [];
 
@@ -72,13 +104,27 @@ export function getAllFrames(nodes: readonly SceneNode[]): FrameNode[] {
   return frames;
 }
 
-// Validate selection for specific operations
+
+/**
+ * Validation rule for checking Figma selection.
+ *
+ * @property name - Name of the rule.
+ * @property validator - Function to validate the selection.
+ * @property message - Error message if validation fails.
+ */
 export interface ValidationRule {
   name: string;
   validator: (selection: readonly SceneNode[]) => boolean;
   message: string;
 }
 
+/**
+ * Validates the selection against a set of rules.
+ *
+ * @param selection - Array of selected SceneNodes.
+ * @param rules - Array of validation rules to apply.
+ * @returns Object with isValid boolean and list of error messages.
+ */
 export function validateSelection(
   selection: readonly SceneNode[],
   rules: ValidationRule[]
@@ -97,7 +143,9 @@ export function validateSelection(
   };
 }
 
-// Common validation rules
+/**
+ * Common validation rules for Figma selection.
+ */
 export const commonValidationRules = {
   notEmpty: {
     name: 'notEmpty',
@@ -132,7 +180,12 @@ export const commonValidationRules = {
   })
 };
 
-// Extract common properties from selection
+/**
+ * Extracts common properties from the first node in the selection.
+ *
+ * @param selection - Array of selected SceneNodes.
+ * @returns Object with common properties, or null if selection is empty.
+ */
 export function getSelectionProperties(selection: readonly SceneNode[]) {
   if (selection.length === 0) return null;
 

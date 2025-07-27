@@ -1,6 +1,6 @@
-import { useTheme } from '../../contexts/ThemeContext';
-import { Button } from './Button';
-import { Modal } from './Modal';
+import { Button } from '@ui/components/base/Button';
+import { Modal } from '@ui/components/base/Modal';
+import { useTheme } from '@ui/contexts/ThemeContext';
 
 interface MessageBoxProps {
   isVisible: boolean;

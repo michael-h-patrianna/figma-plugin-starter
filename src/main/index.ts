@@ -3,6 +3,16 @@ import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from '@shared/constants';
 import { ErrorHelpers, hasErrors } from './errors';
 import { Issue, OperationResult } from './types';
 
+/**
+ * Main entry point for the Figma plugin.
+ *
+ * Initializes the plugin UI and sets up message handlers for communication
+ * between the UI and main thread.
+ *
+ * This function is called when the plugin is first loaded and creates the
+ * plugin window with default dimensions and establishes the message handling
+ * system for bidirectional communication.
+ */
 export default function () {
   showUI({ height: DEFAULT_HEIGHT, width: DEFAULT_WIDTH });
 
@@ -41,6 +51,11 @@ export default function () {
   };
 }
 
+/**
+ * Performs a scan operation on the current Figma selection.
+ *
+ * @returns {Promise<OperationResult>} The result of the scan operation, including issues and summary data.
+ */
 async function performScan(): Promise<OperationResult> {
   // Example scan operation - customize this for your plugin
   const selection = figma.currentPage.selection;
@@ -74,6 +89,13 @@ async function performScan(): Promise<OperationResult> {
   };
 }
 
+
+/**
+ * Performs a process operation on the provided input data.
+ *
+ * @param inputData - The data to process.
+ * @returns {Promise<OperationResult>} The result of the process operation.
+ */
 async function performProcess(inputData: any): Promise<OperationResult> {
   // Example process operation - customize this for your plugin
   const issues: Issue[] = [];
