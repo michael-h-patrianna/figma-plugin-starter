@@ -22,13 +22,6 @@ interface ContextMenuProps {
 
 /**
  * A context menu component that appears at a specified position.
- *
- * Features:
- * - Customizable menu items with icons and separators
- * - Automatic positioning to stay within viewport
- * - Click outside to close
- * - Keyboard support (Escape key)
- * - Custom components can be embedded as menu items
  */
 export const ContextMenu: React.FC<ContextMenuProps> = ({
   items,

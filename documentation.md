@@ -1165,7 +1165,7 @@ function MyComponent() {
       <Button onClick={handleLoad} disabled={isLoading}>
         {isLoading ? <Spinner size="small" /> : 'Load Data'}
       </Button>
-      
+
       {isLoading && (
         <div style={{ textAlign: 'center', padding: 20 }}>
           <Spinner size="large" />
