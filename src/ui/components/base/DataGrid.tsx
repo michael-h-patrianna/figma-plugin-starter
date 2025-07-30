@@ -271,7 +271,7 @@ export function DataGrid<T = any>({
   style,
   ...props
 }: DataGridProps<T>) {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, borderRadius } = useTheme();
   const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -571,15 +571,15 @@ export function DataGrid<T = any>({
       return (
         <div
           onClick={(e) => e.stopPropagation()}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: `${spacing.sm}px` }}
         >
           <div
             style={{
               width: '20px',
               height: '20px',
-              borderRadius: '3px',
+              borderRadius: `${borderRadius.small}px`,
               backgroundColor: value || '#000000',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: `1px solid ${colors.border}`,
               cursor: column.editable ? 'pointer' : 'default'
             }}
             onClick={() => {
@@ -588,7 +588,7 @@ export function DataGrid<T = any>({
               }
             }}
           />
-          <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+          <span style={{ fontSize: `${typography.caption}px`, color: colors.textSecondary }}>
             {value || '#000000'}
           </span>
         </div>
@@ -608,10 +608,10 @@ export function DataGrid<T = any>({
     if (!sort) return null;
 
     return (
-      <span style={{ marginLeft: 4, fontSize: 12 }}>
+      <span style={{ marginLeft: spacing.xs, fontSize: typography.caption }}>
         {sort.direction === 'asc' ? '↑' : '↓'}
         {currentState.sortBy!.length > 1 && (
-          <span style={{ fontSize: 10 }}>
+          <span style={{ fontSize: typography.tiny }}>
             {currentState.sortBy!.findIndex(s => s.key === columnKey) + 1}
           </span>
         )}
@@ -631,11 +631,11 @@ export function DataGrid<T = any>({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 12px',
+          padding: `${spacing.sm}px ${spacing.sm + spacing.xs}px`,
           borderRight: `1px solid ${colors.border}`,
           backgroundColor: colors.backgroundSecondary,
           fontWeight: 600,
-          fontSize: 14,
+          fontSize: typography.body,
           minWidth: column.minWidth || 100,
           width: column.width || 150,
           cursor: column.sortable ? 'pointer' : 'default',
@@ -671,7 +671,7 @@ export function DataGrid<T = any>({
         style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '8px 12px',
+          padding: `${spacing.sm}px ${spacing.sm + spacing.xs}px`,
           borderRight: `1px solid ${colors.border}`,
           minWidth: column.minWidth || 100,
           width: column.width || 150,
@@ -698,7 +698,7 @@ export function DataGrid<T = any>({
       style={{
         height,
         border: `1px solid ${colors.border}`,
-        borderRadius: 4,
+        borderRadius: borderRadius.medium,
         overflow: 'hidden',
         backgroundColor: colors.darkBg,
         display: 'flex',
@@ -817,7 +817,7 @@ export function DataGrid<T = any>({
                 <div
                   key={column.key}
                   style={{
-                    padding: '8px 12px',
+                    padding: `${spacing.sm}px ${spacing.sm + spacing.xs}px`,
                     borderRight: `1px solid ${colors.border}`,
                     minWidth: column.minWidth || 100,
                     width: column.width || 150
@@ -851,7 +851,7 @@ export function DataGrid<T = any>({
               <div
                 key={column.key}
                 style={{
-                  padding: '8px 12px',
+                  padding: `${spacing.sm}px ${spacing.sm + spacing.xs}px`,
                   borderRight: `1px solid ${colors.border}`,
                   minWidth: column.minWidth || 100,
                   width: column.width || 150

@@ -3004,6 +3004,530 @@ usePluginMessages({
 });
 ```
 
+---
+
+## DataGrid
+
+**What it's for**: Enterprise-grade data table with comprehensive editing capabilities, virtual scrolling, column management, and 11 different form control types.
+
+**When to use**: For displaying and editing structured data, spreadsheet-like interfaces, form-heavy data entry, or any scenario requiring inline editing with multiple control types.
+
+### Import
+```tsx
+import { DataGrid, DataGridColumn } from '@ui/components/base/DataGrid';
+```
+
+### Basic Usage
+```tsx
+interface DataItem {
+  id: number;
+  name: string;
+  type: string;
+  enabled: boolean;
+}
+
+function MyComponent() {
+  const [data, setData] = useState<DataItem[]>([
+    { id: 1, name: 'Item 1', type: 'A', enabled: true },
+    { id: 2, name: 'Item 2', type: 'B', enabled: false }
+  ]);
+
+  const columns: DataGridColumn<DataItem>[] = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 80,
+      type: 'number',
+      sortable: true
+    },
+    {
+      key: 'name',
+      title: 'Name',
+      width: 200,
+      type: 'text',
+      editable: true
+    },
+    {
+      key: 'type',
+      title: 'Type',
+      width: 120,
+      type: 'select',
+      editable: true,
+      options: [
+        { value: 'A', label: 'Type A' },
+        { value: 'B', label: 'Type B' }
+      ]
+    },
+    {
+      key: 'enabled',
+      title: 'Enabled',
+      width: 100,
+      type: 'boolean',
+      editable: true
+    }
+  ];
+
+  const handleDataChange = (delta) => {
+    if (delta.updated) {
+      setData(currentData =>
+        currentData.map(row => {
+          const updated = delta.updated?.find(u => u.id === row.id);
+          return updated ? { ...row, ...updated } : row;
+        })
+      );
+    }
+  };
+
+  return (
+    <DataGrid
+      data={data}
+      columns={columns}
+      rowKey="id"
+      height={400}
+      onDataChange={handleDataChange}
+    />
+  );
+}
+```
+
+### Column Types
+
+The DataGrid supports 11 different form control types:
+
+#### 1. Text Input
+```tsx
+{
+  key: 'description',
+  title: 'Description',
+  type: 'text',
+  editable: true,
+  width: 200
+}
+```
+
+#### 2. Number Input
+```tsx
+{
+  key: 'quantity',
+  title: 'Quantity',
+  type: 'number',
+  editable: true,
+  width: 100
+}
+```
+
+#### 3. Select Dropdown
+```tsx
+{
+  key: 'category',
+  title: 'Category',
+  type: 'select',
+  editable: true,
+  width: 150,
+  options: [
+    { value: 'electronics', label: 'Electronics' },
+    { value: 'books', label: 'Books' },
+    { value: 'clothing', label: 'Clothing' }
+  ]
+}
+```
+
+#### 4. Boolean Checkbox
+```tsx
+{
+  key: 'active',
+  title: 'Active',
+  type: 'boolean',
+  editable: true,
+  width: 80
+}
+```
+
+#### 5. Toggle Switch
+```tsx
+{
+  key: 'featured',
+  title: 'Featured',
+  type: 'toggle',
+  editable: true,
+  width: 100
+}
+```
+
+#### 6. Date Picker
+```tsx
+{
+  key: 'createdDate',
+  title: 'Created',
+  type: 'date',
+  editable: true,
+  width: 140,
+  formatter: (value) => new Date(value).toLocaleDateString()
+}
+```
+
+#### 7. Time Picker
+```tsx
+{
+  key: 'scheduledTime',
+  title: 'Time',
+  type: 'time',
+  editable: true,
+  width: 100
+}
+```
+
+#### 8. Color Picker
+```tsx
+{
+  key: 'themeColor',
+  title: 'Color',
+  type: 'color',
+  editable: true,
+  width: 120
+}
+```
+
+#### 9. Textarea
+```tsx
+{
+  key: 'notes',
+  title: 'Notes',
+  type: 'textarea',
+  editable: true,
+  width: 250
+}
+```
+
+#### 10. URL Input
+```tsx
+{
+  key: 'website',
+  title: 'Website',
+  type: 'url',
+  editable: true,
+  width: 200
+}
+```
+
+#### 11. Email Input
+```tsx
+{
+  key: 'contactEmail',
+  title: 'Email',
+  type: 'email',
+  editable: true,
+  width: 200
+}
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `data` | Array | ✅ Yes | Array of data objects | `[{id: 1, name: 'Item'}]` |
+| `columns` | Array | ✅ Yes | Column definitions | `[{key: 'name', title: 'Name'}]` |
+| `rowKey` | String | ✅ Yes | Unique key property for rows | `"id"` |
+| `height` | Number | No | Fixed grid height in pixels | `400` |
+| `editTrigger` | String | No | Edit trigger: `'single'`, `'double'`, `'manual'` | `"single"` |
+| `selectionMode` | String | No | Selection mode: `'none'`, `'single'`, `'multi'` | `"multi"` |
+| `virtualizeRows` | Boolean | No | Enable row virtualization for large datasets | `true` |
+| `stickyFirstColumn` | Boolean | No | Keep first column visible when scrolling | `true` |
+| `aggregatable` | Boolean | No | Enable column aggregation features | `true` |
+| `onDataChange` | Function | No | Called when data is modified | `(delta) => handleChange(delta)` |
+| `onSelectionChange` | Function | No | Called when selection changes | `(selection) => setSelected(selection)` |
+
+### Column Configuration
+
+Each column object supports these properties:
+
+| Property | Type | Required | Description | Example |
+|----------|------|----------|-------------|---------|
+| `key` | String | ✅ Yes | Data property key | `"name"` |
+| `title` | String | ✅ Yes | Column header text | `"Product Name"` |
+| `type` | String | No | Data/editor type | `"text"`, `"number"`, `"select"` |
+| `width` | Number | No | Column width in pixels | `200` |
+| `minWidth` | Number | No | Minimum width when resizing | `100` |
+| `maxWidth` | Number | No | Maximum width when resizing | `300` |
+| `resizable` | Boolean | No | Allow column resizing | `true` |
+| `sortable` | Boolean | No | Allow column sorting | `true` |
+| `editable` | Boolean | No | Allow inline editing | `true` |
+| `options` | Array | No | Options for select type | `[{value: 'a', label: 'Option A'}]` |
+| `formatter` | Function | No | Custom value formatter | `(value) => formatValue(value)` |
+
+### Advanced Features
+
+#### Virtual Scrolling
+For large datasets (1000+ rows):
+```tsx
+<DataGrid
+  data={largeDataset}
+  columns={columns}
+  rowKey="id"
+  height={400}
+  virtualizeRows={true}
+/>
+```
+
+#### Column Resizing
+```tsx
+const columns = [
+  {
+    key: 'name',
+    title: 'Name',
+    width: 200,
+    minWidth: 150,
+    maxWidth: 300,
+    resizable: true
+  }
+];
+```
+
+#### Selection Handling
+```tsx
+const [selectedItems, setSelectedItems] = useState([]);
+
+<DataGrid
+  data={data}
+  columns={columns}
+  rowKey="id"
+  selectionMode="multi"
+  onSelectionChange={(selection) => {
+    setSelectedItems(selection);
+    console.log('Selected:', selection);
+  }}
+/>
+```
+
+#### Data Change Handling
+```tsx
+const handleDataChange = (delta) => {
+  console.log('Data changes:', delta);
+
+  // Handle updates
+  if (delta.updated) {
+    setData(currentData =>
+      currentData.map(row => {
+        const updated = delta.updated?.find(u => u.id === row.id);
+        return updated ? { ...row, ...updated } : row;
+      })
+    );
+  }
+
+  // Handle additions
+  if (delta.added) {
+    setData(currentData => [...currentData, ...delta.added]);
+  }
+
+  // Handle deletions
+  if (delta.deleted) {
+    const deletedIds = delta.deleted.map(d => d.id);
+    setData(currentData =>
+      currentData.filter(row => !deletedIds.includes(row.id))
+    );
+  }
+};
+```
+
+### Real-World Example
+
+```tsx
+interface ProductData {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  inStock: boolean;
+  featured: boolean;
+  launchDate: string;
+  availableTime: string;
+  brandColor: string;
+  website: string;
+  contactEmail: string;
+}
+
+function ProductManager() {
+  const [products, setProducts] = useState<ProductData[]>([]);
+
+  const columns: DataGridColumn<ProductData>[] = [
+    {
+      key: 'id',
+      title: 'ID',
+      width: 60,
+      type: 'number',
+      sortable: true
+    },
+    {
+      key: 'name',
+      title: 'Product Name',
+      width: 200,
+      minWidth: 150,
+      maxWidth: 300,
+      type: 'text',
+      editable: true,
+      resizable: true,
+      sortable: true
+    },
+    {
+      key: 'description',
+      title: 'Description',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      resizable: true
+    },
+    {
+      key: 'price',
+      title: 'Price',
+      width: 100,
+      type: 'number',
+      editable: true,
+      sortable: true,
+      formatter: (value) => `$${value.toFixed(2)}`
+    },
+    {
+      key: 'category',
+      title: 'Category',
+      width: 120,
+      type: 'select',
+      editable: true,
+      options: [
+        { value: 'electronics', label: 'Electronics' },
+        { value: 'books', label: 'Books' },
+        { value: 'clothing', label: 'Clothing' },
+        { value: 'home', label: 'Home & Garden' }
+      ]
+    },
+    {
+      key: 'inStock',
+      title: 'In Stock',
+      width: 80,
+      type: 'boolean',
+      editable: true
+    },
+    {
+      key: 'featured',
+      title: 'Featured',
+      width: 90,
+      type: 'toggle',
+      editable: true
+    },
+    {
+      key: 'launchDate',
+      title: 'Launch Date',
+      width: 120,
+      type: 'date',
+      editable: true,
+      formatter: (value) => new Date(value).toLocaleDateString()
+    },
+    {
+      key: 'availableTime',
+      title: 'Available',
+      width: 100,
+      type: 'time',
+      editable: true
+    },
+    {
+      key: 'brandColor',
+      title: 'Brand Color',
+      width: 110,
+      type: 'color',
+      editable: true
+    },
+    {
+      key: 'website',
+      title: 'Website',
+      width: 200,
+      type: 'url',
+      editable: true
+    },
+    {
+      key: 'contactEmail',
+      title: 'Contact',
+      width: 200,
+      type: 'email',
+      editable: true
+    }
+  ];
+
+  const handleDataChange = (delta) => {
+    if (delta.updated) {
+      setProducts(currentProducts =>
+        currentProducts.map(product => {
+          const updated = delta.updated?.find(u => u.id === product.id);
+          return updated ? { ...product, ...updated } : product;
+        })
+      );
+
+      // Save to backend
+      delta.updated.forEach(async (updatedProduct) => {
+        try {
+          await saveProduct(updatedProduct);
+          Toast.success(`Updated ${updatedProduct.name}`);
+        } catch (error) {
+          Toast.error(`Failed to save ${updatedProduct.name}`);
+        }
+      });
+    }
+  };
+
+  const handleSelectionChange = (selection) => {
+    console.log(`Selected ${selection.length} products:`, selection);
+  };
+
+  return (
+    <Panel title="Product Management">
+      <DataGrid
+        data={products}
+        columns={columns}
+        rowKey="id"
+        height={600}
+        editTrigger="single"
+        selectionMode="multi"
+        virtualizeRows={true}
+        stickyFirstColumn={true}
+        aggregatable={false}
+        onDataChange={handleDataChange}
+        onSelectionChange={handleSelectionChange}
+      />
+    </Panel>
+  );
+}
+```
+
+### Performance Features
+
+- **Virtual Scrolling**: Handles thousands of rows efficiently
+- **Theme Integration**: All colors adapt to light/dark themes automatically
+- **Column Resizing**: Smooth resizing with min/max constraints
+- **Sticky Columns**: Keep important columns visible during horizontal scrolling
+- **Optimized Rendering**: Only renders visible cells for better performance
+- **Memory Efficient**: Minimal re-renders during editing
+
+### Editing Modes
+
+- **Single Click**: Edit on single click (default)
+- **Double Click**: Edit on double click for accidental edit prevention
+- **Manual**: Programmatic editing control
+
+### Accessibility
+
+- **Keyboard Navigation**: Full keyboard support for navigation and editing
+- **Screen Reader**: Proper ARIA labels and roles
+- **Focus Management**: Logical tab order and focus indicators
+- **Theme Contrast**: Automatic text color adjustment for proper contrast
+
+---
+
+## Async Utilities
+
+**What it's for**: Advanced async operation management including debouncing, throttling, cancelable promises, retry logic, and batch processing.
+    }
+  }
+});
+```
+
 ### Performance Optimization
 
 #### High-Frequency Message Handling

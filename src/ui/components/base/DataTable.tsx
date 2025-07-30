@@ -42,30 +42,8 @@ export function DataTable({ data, columns, maxHeight }: DataTableProps) {
         overflow: shouldScroll ? 'auto' : 'visible',
         maxHeight: shouldScroll ? calculatedMaxHeight : 'auto',
         border: `1px solid ${colors.border}`,
-        borderRadius: 6,
-        /* Custom scrollbar styling */
-        scrollbarWidth: 'thin',
-        scrollbarColor: `${colors.textSecondary} ${colors.darkPanel}`,
-        /* Webkit scrollbar styling */
-        WebkitScrollbarWidth: '8px'
-      } as any}>
-      <style>{`
-        .data-table-container::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        .data-table-container::-webkit-scrollbar-track {
-          background: ${colors.darkPanel};
-          border-radius: 4px;
-        }
-        .data-table-container::-webkit-scrollbar-thumb {
-          background: ${colors.textSecondary};
-          border-radius: 4px;
-        }
-        .data-table-container::-webkit-scrollbar-thumb:hover {
-          background: ${colors.textColor};
-        }
-      `}</style>
+        borderRadius: 6
+      }}>
       <table style={{
         width: '100%',
         borderCollapse: 'collapse',

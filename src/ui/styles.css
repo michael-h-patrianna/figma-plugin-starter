@@ -336,29 +336,62 @@ div[class*="middleAlign"] {
   color: var(--figma-text-color) !important;
 }
 
-/* Global scrollbar styles */
+/* Global scrollbar styles - theme-aware and forced */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #202329) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #a0a3a8) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #ffffff) !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track, #202329) !important;
+}
+
+/* Body and main container scrollbars */
+body::-webkit-scrollbar,
+html::-webkit-scrollbar,
+.theme-scrollbar::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+body::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track,
+.theme-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #202329) !important;
+  border-radius: 4px !important;
+}
+
+body::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb,
+.theme-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #a0a3a8) !important;
+  border-radius: 4px !important;
+}
+
+body::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover,
+.theme-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #ffffff) !important;
+}
+
+/* Firefox scrollbar styling with fallbacks */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--figma-text-secondary) var(--figma-bg-secondary);
-}
-
-*::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-*::-webkit-scrollbar-track {
-  background: var(--figma-bg-secondary);
-  border-radius: 4px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: var(--figma-text-secondary);
-  border-radius: 4px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--figma-text-color);
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--scrollbar-thumb, #a0a3a8) var(--scrollbar-track, #202329) !important;
 }
 
 /* Hide scrollbar for tab navigation */

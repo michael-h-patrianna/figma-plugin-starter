@@ -23,6 +23,7 @@ declare const styles: {
   readonly "textbox": string;
   readonly "theme-dark": string;
   readonly "theme-light": string;
+  readonly "theme-scrollbar": string;
 };
 export = styles;
 

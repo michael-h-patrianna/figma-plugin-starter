@@ -481,6 +481,53 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
       root.style.setProperty('--colors-input-background', themeColors.inputBackground);
       root.style.setProperty('--colors-input-border-focus', themeColors.inputBorderFocus);
 
+      // Scrollbar CSS variables
+      root.style.setProperty('--scrollbar-track', themeColors.scrollbarTrack);
+      root.style.setProperty('--scrollbar-thumb', themeColors.scrollbarThumb);
+      root.style.setProperty('--scrollbar-thumb-hover', themeColors.scrollbarThumbHover);
+
+      // Debug: Log values and force CSS recalculation
+      console.log('Setting scrollbar variables:', {
+        track: themeColors.scrollbarTrack,
+        thumb: themeColors.scrollbarThumb,
+        thumbHover: themeColors.scrollbarThumbHover
+      });
+
+      // Force scrollbar style update with direct CSS injection
+      const scrollbarStyleId = 'dynamic-scrollbar-styles';
+      let scrollbarStyle = document.getElementById(scrollbarStyleId);
+      if (!scrollbarStyle) {
+        scrollbarStyle = document.createElement('style');
+        scrollbarStyle.id = scrollbarStyleId;
+        document.head.appendChild(scrollbarStyle);
+      }
+
+      scrollbarStyle.textContent = `
+        ::-webkit-scrollbar {
+          width: 8px !important;
+          height: 8px !important;
+        }
+        ::-webkit-scrollbar-track {
+          background: ${themeColors.scrollbarTrack} !important;
+          border-radius: 4px !important;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: ${themeColors.scrollbarThumb} !important;
+          border-radius: 4px !important;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: ${themeColors.scrollbarThumbHover} !important;
+        }
+        ::-webkit-scrollbar-corner {
+          background: ${themeColors.scrollbarTrack} !important;
+        }
+      `;
+
+      // Force style recalculation
+      document.body.style.display = 'none';
+      document.body.offsetHeight; // Trigger reflow
+      document.body.style.display = '';
+
       // Spacing and typography variables
       root.style.setProperty('--spacing-xs', `${spacing.xs}px`);
       root.style.setProperty('--spacing-sm', `${spacing.sm}px`);

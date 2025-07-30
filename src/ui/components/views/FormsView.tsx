@@ -462,19 +462,6 @@ export function FormsView({ }: FormsViewProps) {
       {/* DataGrid Demo */}
       <Panel title="DataGrid - Control Types Demo">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <InfoBox title="DataGrid Control Types" variant="info">
-            This demo showcases all supported input control types in the DataGrid:<br />
-            • <strong>Sticky Column:</strong> ID column stays fixed while scrolling horizontally<br />
-            • <strong>Text Input:</strong> Editable text field<br />
-            • <strong>Number Input:</strong> Numeric input with validation<br />
-            • <strong>Select Dropdown:</strong> Dropdown with predefined options<br />
-            • <strong>Rating Select:</strong> Star rating display with dropdown selection<br />
-            • <strong>Checkbox:</strong> Boolean toggle with checkbox UI<br />
-            • <strong>Toggle Switch:</strong> Boolean toggle with switch UI<br />
-            • <strong>Date Picker:</strong> Date selection with calendar popup<br />
-            • <strong>Time Picker:</strong> Time selection with time input<br />
-            • <strong>Color Picker:</strong> Color selection with color preview and picker
-          </InfoBox>
 
           <DataGrid
             data={gridData}
@@ -492,12 +479,6 @@ export function FormsView({ }: FormsViewProps) {
             }}
           />
 
-          <InfoBox title="Interactive Controls" variant="plain">
-            <strong>Try the Controls:</strong> Click on any editable cell to test the different input types.<br />
-            <strong>Column Resizing:</strong> Drag column borders to resize columns<br />
-            <strong>Row Selection:</strong> Click rows to select them (multi-select supported)<br />
-            <strong>Horizontal Scrolling:</strong> ID column stays sticky while other columns scroll
-          </InfoBox>
         </div>
       </Panel>
     </div>
