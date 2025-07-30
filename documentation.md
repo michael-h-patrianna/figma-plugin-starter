@@ -70,8 +70,11 @@ This documentation covers all the custom components, hooks, and features in this
 - [ContextMenu](#contextmenu) - Right-click menus and dropdowns
 - [SettingsDropdown](#settingsdropdown) - Settings menu with cog icon
 
+### Performance & Loading Components
+- [LazyLoader](#lazyloader) - Dynamic component loading with fallbacks
+- [ErrorBoundary](#errorboundary) - Error catching and recovery with auto-retry
+
 ### System & State Management
-- [ErrorBoundary](#errorboundary) - Error catching and fallback UI
 - [Theme System](#theme-system) - Light/dark mode management
 - [useSettings Hook](#usesettings-hook) - Automatic settings persistence
 - [Plugin Messaging System](#plugin-messaging-system) - UI ↔ Main thread communication
@@ -79,6 +82,9 @@ This documentation covers all the custom components, hooks, and features in this
 ### Global Services
 - [Toast Service](#toast) - Global toast notification system
 - [MessageBox Service](#messagebox) - Global modal dialog system
+
+### Utilities & Helpers
+- [Async Utilities](#async-utilities) - Debouncing, throttling, and async operation helpers
 
 ---
 
@@ -2123,11 +2129,239 @@ const {
 
 ---
 
+## LazyLoader
+
+**What it's for**: Dynamic component loading to reduce initial bundle size and improve performance.
+
+**When to use**: For heavy components that aren't immediately visible, complex views, or components with large dependencies.
+
+### Import
+```tsx
+import { LazyLoader } from '@ui/components/base/LazyLoader';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  return (
+    <LazyLoader
+      loader={() => import('@ui/components/views/HeavyComponent')}
+    >
+      {(module) => <module.HeavyComponent data={someData} />}
+    </LazyLoader>
+  );
+}
+```
+
+### How It Works
+1. **Dynamic Import**: Uses ES6 dynamic imports to load components only when needed
+2. **Loading State**: Shows spinner while component is loading
+3. **Error Handling**: Displays error UI if component fails to load
+4. **Caching**: Once loaded, component is cached for subsequent renders
+5. **Cancellation**: Cancels loading if component unmounts
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `loader` | Function | ✅ Yes | Function that returns dynamic import promise | `() => import('./Component')` |
+| `children` | Function | ✅ Yes | Render function that receives loaded module | `(module) => <module.Component />` |
+| `fallback` | ReactNode | No | Custom loading UI (defaults to Spinner) | `<div>Loading...</div>` |
+| `errorFallback` | Function | No | Custom error UI function | `(error) => <div>Failed: {error.message}</div>` |
+
+### Common Examples
+
+```tsx
+// Basic lazy loading
+<LazyLoader
+  loader={() => import('@ui/components/views/DataView')}
+>
+  {(module) => <module.DataView />}
+</LazyLoader>
+
+// With props passed to lazy component
+<LazyLoader
+  loader={() => import('@ui/components/views/FormsView')}
+>
+  {(module) => <module.FormsView settings={settings} onSave={handleSave} />}
+</LazyLoader>
+
+// Custom loading indicator
+<LazyLoader
+  loader={() => import('@ui/components/complex/ChartComponent')}
+  fallback={<div style={{ padding: 20, textAlign: 'center' }}>Loading chart...</div>}
+>
+  {(module) => <module.ChartComponent data={chartData} />}
+</LazyLoader>
+
+// Custom error handling
+<LazyLoader
+  loader={() => import('@ui/components/experimental/NewFeature')}
+  errorFallback={(error) => (
+    <div style={{ padding: 16, color: 'red' }}>
+      <h4>Feature Unavailable</h4>
+      <p>This feature couldn't be loaded: {error.message}</p>
+      <Button onClick={() => window.location.reload()}>Retry</Button>
+    </div>
+  )}
+>
+  {(module) => <module.NewFeature />}
+</LazyLoader>
+```
+
+### Tab-Based Lazy Loading
+Commonly used in tabbed interfaces to only load tab content when accessed:
+
+```tsx
+function TabbedInterface() {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const tabs = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      content: <OverviewPanel />  // Always loaded
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      content: (
+        <LazyLoader
+          loader={() => import('@ui/components/analytics/AnalyticsPanel')}
+        >
+          {(module) => <module.AnalyticsPanel />}
+        </LazyLoader>
+      )
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      content: (
+        <LazyLoader
+          loader={() => import('@ui/components/settings/SettingsPanel')}
+        >
+          {(module) => <module.SettingsPanel />}
+        </LazyLoader>
+      )
+    }
+  ];
+
+  return (
+    <Tabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onChange={setActiveTab}
+    />
+  );
+}
+```
+
+### Real-World Usage Pattern
+```tsx
+function PluginInterface() {
+  return (
+    <Tabs
+      tabs={[
+        {
+          id: 'start',
+          label: 'Start',
+          content: <StartView />  // Immediately visible, not lazy
+        },
+        {
+          id: 'forms',
+          label: 'Forms',
+          content: (
+            <LazyLoader
+              loader={() => import('@ui/components/views/FormsView')}
+              fallback={<div style={{ textAlign: 'center', padding: 20 }}>Loading forms...</div>}
+            >
+              {(module) => <module.FormsView />}
+            </LazyLoader>
+          )
+        },
+        {
+          id: 'data',
+          label: 'Data',
+          content: (
+            <LazyLoader
+              loader={() => import('@ui/components/views/DataView')}
+            >
+              {(module) => (
+                <module.DataView
+                  settings={settings}
+                  onSettingsChange={updateSettings}
+                  debugMode={debugMode}
+                />
+              )}
+            </LazyLoader>
+          )
+        }
+      ]}
+      activeTab={activeTab}
+      onChange={setActiveTab}
+    />
+  );
+}
+```
+
+### Performance Benefits
+- **Reduced Initial Bundle**: Heavy components don't increase initial load time
+- **Faster Startup**: Plugin starts faster with smaller initial JavaScript bundle
+- **Memory Efficiency**: Components only loaded when actually needed
+- **Progressive Loading**: Users can interact with loaded parts while others load
+- **Better UX**: Immediate response on first tab, smooth loading for others
+
+### Component Requirements
+For components to work with LazyLoader, they must be:
+
+1. **Default or Named Exports**: Use consistent export patterns
+```tsx
+// ✅ Good: Named export
+export function MyComponent() { ... }
+
+// ✅ Good: Default export
+export default function MyComponent() { ... }
+
+// ✅ Good: Multiple exports
+export function ComponentA() { ... }
+export function ComponentB() { ... }
+```
+
+2. **Self-Contained**: No direct dependencies on parent component state
+```tsx
+// ✅ Good: Props-based dependencies
+function LazyComponent({ data, onSave }) {
+  return <div>{data.title}</div>;
+}
+
+// ❌ Bad: Direct parent state access
+function LazyComponent() {
+  const data = useContext(ParentContext);  // May not be available
+  return <div>{data.title}</div>;
+}
+```
+
+### Error Scenarios
+LazyLoader handles these error cases:
+- **Network failures**: When dynamic import fails due to connectivity
+- **Missing files**: When bundled component files are not found
+- **Component errors**: When the component itself throws during loading
+- **Cancellation**: When component unmounts before loading completes
+
+### Best Practices
+- Use for components > 50KB or with heavy dependencies
+- Provide meaningful loading states for better UX
+- Test lazy loading in development and production builds
+- Consider grouping related components in the same lazy module
+- Use for routes or major view components, not small UI elements
+
+---
+
 ## ErrorBoundary
 
-**What it's for**: Catching JavaScript errors in child components and providing a fallback UI to prevent the entire plugin from crashing.
+**What it's for**: Catching JavaScript errors in child components with automatic recovery, retry mechanisms, and detailed error reporting.
 
-**When to use**: Wrap components that might throw errors, especially during development or around risky operations.
+**When to use**: Wrap components that might throw errors, around risky operations, or at application boundaries to prevent crashes.
 
 ### Import
 ```tsx
@@ -2137,70 +2371,178 @@ import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
 ### Basic Usage
 ```tsx
 function MyComponent() {
-  const [hasError, setHasError] = useState(false);
-
-  // Component that might throw an error
-  const RiskyComponent = () => {
-    if (hasError) {
-      throw new Error('Something went wrong!');
-    }
-    return <div>Everything is working fine!</div>;
-  };
-
   return (
-    <div>
-      <Button onClick={() => setHasError(true)}>
-        Trigger Error
-      </Button>
-      <Button onClick={() => setHasError(false)}>
-        Reset
-      </Button>
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('Caught error:', error, errorInfo);
+        showToast('An error occurred!', 'error');
+      }}
+    >
+      <RiskyComponent />
+    </ErrorBoundary>
+  );
+}
+```
 
+### Enhanced Features
+
+#### Automatic Recovery
+```tsx
+<ErrorBoundary
+  maxRetries={3}
+  autoRecover={true}
+  recoveryDelay={5000}
+>
+  <UnstableComponent />
+</ErrorBoundary>
+```
+
+#### Custom Error UI
+```tsx
+<ErrorBoundary
+  fallback={(error, errorInfo, retry) => (
+    <div style={{ padding: 16, border: '1px solid red' }}>
+      <h3>Custom Error Display</h3>
+      <p>Error: {error.message}</p>
+      <Button onClick={retry}>Try Again</Button>
+      <Button onClick={() => window.location.reload()}>Reload Plugin</Button>
+    </div>
+  )}
+>
+  <MyRiskyComponent />
+</ErrorBoundary>
+```
+
+### All Props Explained
+
+| Prop | Type | Required | Description | Example |
+|------|------|----------|-------------|---------|
+| `children` | ReactNode | ✅ Yes | Components to wrap with error boundary | `<MyComponent />` |
+| `fallback` | Function | No | Custom error UI function | `(error, errorInfo, retry) => <CustomErrorUI />` |
+| `onError` | Function | No | Error handler callback | `(error, errorInfo) => logError(error)` |
+| `maxRetries` | Number | No | Maximum retry attempts (default: 3) | `5` |
+| `autoRecover` | Boolean | No | Enable automatic recovery (default: false) | `true` |
+| `recoveryDelay` | Number | No | Auto-recovery delay in ms (default: 5000) | `3000` |
+
+### Error State Management
+- **Error Count Tracking**: Tracks consecutive errors to prevent infinite retry loops
+- **Retry Limits**: Prevents endless retry attempts with configurable maximum
+- **Recovery Delay**: Configurable delay before auto-recovery attempts
+- **Reset Capability**: Full state reset to clear error history
+
+### Error Information Display
+The enhanced ErrorBoundary shows:
+- **Error Count**: Number of consecutive errors
+- **Error Details**: Expandable section with full error information
+- **Component Stack**: Shows where in the component tree the error occurred
+- **Stack Trace**: Full JavaScript stack trace for debugging
+- **Retry Controls**: Manual retry and reset buttons
+
+### Retry Mechanisms
+```tsx
+// Manual retry only
+<ErrorBoundary maxRetries={3}>
+  <Component />
+</ErrorBoundary>
+
+// Automatic recovery with delay
+<ErrorBoundary
+  maxRetries={3}
+  autoRecover={true}
+  recoveryDelay={3000}
+>
+  <Component />
+</ErrorBoundary>
+
+// Unlimited manual retries
+<ErrorBoundary maxRetries={Infinity}>
+  <Component />
+</ErrorBoundary>
+```
+
+### Application-Level Protection
+Wrap your entire app for comprehensive error handling:
+
+```tsx
+function App() {
+  return (
+    <ThemeProvider>
       <ErrorBoundary
+        maxRetries={3}
+        autoRecover={true}
         onError={(error, errorInfo) => {
-          console.error('Caught error:', error, errorInfo);
-          showToast('An error occurred!', 'error');
+          console.error('🚨 App Level Error:', error, errorInfo);
+          Toast.error('Application error occurred. Attempting recovery...');
         }}
       >
-        <RiskyComponent />
+        <MainApplication />
+      </ErrorBoundary>
+    </ThemeProvider>
+  );
+}
+```
+
+### Component-Level Protection
+Wrap individual risky components:
+
+```tsx
+function DataProcessor() {
+  return (
+    <div>
+      <h2>Data Processing</h2>
+
+      <ErrorBoundary
+        maxRetries={2}
+        onError={(error) => {
+          analytics.track('data_processing_error', { error: error.message });
+        }}
+      >
+        <ComplexDataView />
+      </ErrorBoundary>
+
+      <ErrorBoundary
+        maxRetries={1}
+        fallback={(error, errorInfo, retry) => (
+          <div>
+            <p>Chart failed to load</p>
+            <Button onClick={retry}>Retry Chart</Button>
+          </div>
+        )}
+      >
+        <ExpensiveChart />
       </ErrorBoundary>
     </div>
   );
 }
 ```
 
-### Advanced Usage with Custom Fallback
+### Development vs Production
 ```tsx
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 <ErrorBoundary
-  fallback={(error, errorInfo) => (
-    <div style={{ padding: 16, border: '1px solid red' }}>
-      <h3>Custom Error Display</h3>
-      <p>Error: {error.message}</p>
-      <Button onClick={() => window.location.reload()}>
-        Reload Plugin
-      </Button>
-    </div>
-  )}
+  maxRetries={isDevelopment ? 1 : 3}
+  autoRecover={!isDevelopment}
   onError={(error, errorInfo) => {
-    // Send error to logging service
-    analytics.track('plugin_error', { error: error.message });
+    if (isDevelopment) {
+      console.error('Development Error:', error, errorInfo);
+    } else {
+      sendErrorToLoggingService(error, errorInfo);
+    }
   }}
 >
-  <MyRiskyComponent />
+  <ProductionComponent />
 </ErrorBoundary>
 ```
 
-### Props
-- `children`: React elements to wrap with error boundary
-- `fallback`: `(error: Error, errorInfo: any) => JSX.Element` - Optional custom fallback UI function
-- `onError`: `(error: Error, errorInfo: any) => void` - Optional error handler callback
-
-### Features
-- **Default Fallback UI**: Provides a styled error display with details and retry button
-- **Error Details**: Shows error message and component stack trace in expandable section
-- **Retry Mechanism**: "Try Again" button to reset the error state
-- **Error Logging**: Automatically logs errors to console and calls optional error handler
-- **Theming**: Uses theme colors for consistent styling
+### Features Summary
+- **Progressive Retry**: Retry attempts with limits to prevent infinite loops
+- **Auto-Recovery**: Configurable automatic recovery with delays
+- **Detailed Logging**: Enhanced error information with component stacks
+- **User Feedback**: Warning indicators for repeated errors
+- **Reset Capability**: Full state reset option
+- **Theme Integration**: Error UI adapts to light/dark themes
+- **Accessibility**: Proper focus management and screen reader support
 
 ---
 
@@ -2270,443 +2612,1021 @@ colors.info          // Info states
 
 ## Plugin Messaging System
 
-The plugin messaging system enables communication between the UI thread and the main Figma thread. This allows you to trigger operations on Figma nodes, request data analysis, and receive results back in the UI.
+The enhanced plugin messaging system enables optimized communication between the UI thread and the main Figma thread with object pooling, memory management, and improved error handling.
 
 ### Architecture
 
 - **UI Thread**: Runs in an iframe with access to React/Preact and web APIs
 - **Main Thread**: Runs in Figma's sandbox with access to the Figma API and document nodes
-- **Communication**: Bidirectional message passing using `postMessage` API
+- **Communication**: Bidirectional message passing using `postMessage` API with object pooling
+- **Memory Optimization**: Message object pooling to reduce garbage collection
+- **Error Recovery**: Enhanced error handling with serialization safety
+
+### Enhanced Messaging Features
+
+#### Object Pooling
+The messaging system now includes object pooling to reduce garbage collection during high-frequency messaging:
+
+```tsx
+import { messagePool } from '@shared/messagePool';
+
+// Messages are automatically pooled and reused
+function sendOptimizedMessage(type: string, data: any) {
+  const message = messagePool.get(type);
+  message.data = data;
+  message.timestamp = Date.now();
+
+  parent.postMessage({ pluginMessage: message }, '*');
+
+  // Message is automatically returned to pool after sending
+  messagePool.release(message);
+}
+```
+
+#### Safe Serialization
+Enhanced message sending with automatic serialization safety:
+
+```tsx
+import { sendToUI } from '@shared/messaging';
+
+// Automatically handles serialization errors
+sendToUI('COMPLEX_DATA', {
+  nodes: processedNodes,
+  metadata: extractedMetadata
+});
+
+// If serialization fails, automatically sends error message instead
+```
 
 ### UI to Main Thread Communication
 
-#### Import
+#### Enhanced Sending
 ```tsx
-import { sendToMain } from '@ui/messaging-simple';
-```
+function sendToMain(type: string, data?: any) {
+  parent.postMessage({
+    pluginMessage: {
+      type,
+      data,
+      timestamp: Date.now()
+    }
+  }, '*');
+}
 
-#### Sending Messages
-```tsx
-// Simple message with no data
+// Examples with different data types
 sendToMain('SCAN_NODES');
-
-// Message with data payload
 sendToMain('EXPORT_SELECTION', {
   format: 'PNG',
   scale: 2,
   includeMetadata: true
 });
-
-// Complex data structures
-sendToMain('BATCH_RENAME', {
-  pattern: 'Layer_{index}',
-  startIndex: 1,
-  nodes: ['node-id-1', 'node-id-2']
+sendToMain('BATCH_PROCESS', {
+  items: selectedItems,
+  options: processingOptions
 });
 ```
 
 ### Main Thread to UI Communication
 
-#### Receiving Messages in Main Thread
+#### Enhanced Response Handling
 ```typescript
-// src/main/index.ts
-figma.ui.onmessage = (msg) => {
-  const { type, ...data } = msg.pluginMessage || msg;
+import { sendToUI, sendProgress, sendError, sendSuccess } from '@shared/messaging';
 
-  switch (type) {
-    case 'SCAN_NODES':
-      handleNodeScan(data);
-      break;
-
-    case 'EXPORT_SELECTION':
-      handleExportSelection(data);
-      break;
-
-    case 'BATCH_RENAME':
-      handleBatchRename(data);
-      break;
-
-    default:
-      console.log('Unknown message type:', type);
-  }
-};
-```
-
-#### Sending Results Back to UI
-```typescript
-// Send simple response
-figma.ui.postMessage({
-  type: 'SCAN_COMPLETE',
-  nodeCount: 42
-});
-
-// Send detailed analysis results
-figma.ui.postMessage({
-  type: 'ANALYSIS_RESULT',
-  summary: {
-    totalNodes: 156,
-    componentCount: 23,
-    textNodes: 67
-  },
-  nodes: extractedNodeData,
+// Basic response with automatic safety checks
+sendToUI('OPERATION_COMPLETE', {
+  processedCount: 42,
   timestamp: Date.now()
 });
 
-// Send progress updates
-figma.ui.postMessage({
-  type: 'PROGRESS',
-  percentage: 65,
-  currentTask: 'Processing components'
-});
+// Progress updates with built-in formatting
+sendProgress(65, 'Processing components', 13, 20, 'Button Component');
+
+// Error handling with context
+sendError(
+  'Failed to process selection',
+  'Node type not supported',
+  'UNSUPPORTED_NODE_TYPE'
+);
+
+// Success responses with summary
+sendSuccess('EXPORT_OPERATION', {
+  files: exportedFiles,
+  totalSize: '2.4MB'
+}, 'Export completed successfully');
+```
+
+#### Batch Processing with Progress
+```typescript
+import { SafeBatchProcessor } from '@shared/messaging';
+
+async function processManyNodes(nodes: SceneNode[]) {
+  const processor = new SafeBatchProcessor(
+    nodes,
+    async (node, index) => {
+      // Process individual node
+      return await processNode(node);
+    },
+    {
+      batchSize: 10,
+      onProgress: (progress, current, total) => {
+        sendProgress(progress, `Processing nodes`, current, total);
+      },
+      onBatchComplete: (results, batchIndex) => {
+        console.log(`Batch ${batchIndex} completed`);
+      }
+    }
+  );
+
+  try {
+    const results = await processor.process();
+    sendSuccess('BATCH_PROCESS', { results });
+  } catch (error) {
+    sendError('Batch processing failed', error.message);
+  }
+}
 ```
 
 ### Receiving Messages in UI
 
-#### Import
+#### Enhanced Message Handling
 ```tsx
-import { usePluginMessages } from '@ui/messaging-simple';
+import { extractMessageSafely } from '@shared/messaging';
+
+// Automatic message extraction with safety checks
+useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    const message = extractMessageSafely(event);
+    if (!message) return;
+
+    switch (message.type) {
+      case 'PROCESS_COMPLETE':
+        handleProcessComplete(message.data);
+        break;
+      case 'PROGRESS':
+        updateProgress(message.data);
+        break;
+      case 'ERROR':
+        handleError(message.data);
+        break;
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
 ```
 
-#### Basic Usage
+### Advanced Async Operations
+
+#### Debounced Operations
 ```tsx
-function MyComponent() {
-  const [results, setResults] = useState(null);
-  const [progress, setProgress] = useState(0);
+import { createDebouncer } from '@shared/asyncUtils';
 
-  usePluginMessages({
-    SCAN_COMPLETE: (data) => {
-      console.log('Scan finished:', data.nodeCount);
-      setResults(data);
-    },
+// Debounce frequent operations to reduce message spam
+const debouncedSave = createDebouncer(
+  (data: any) => {
+    sendToMain('SAVE_SETTINGS', data);
+  },
+  500,  // 500ms delay
+  {
+    leading: false,
+    trailing: true,
+    maxWait: 2000  // Maximum 2s wait
+  }
+);
 
-    ANALYSIS_RESULT: (data) => {
-      console.log('Analysis complete:', data.summary);
-      setResults(data);
-    },
+// Usage in component
+function SettingsPanel() {
+  const handleChange = (newSettings: any) => {
+    setLocalSettings(newSettings);
+    debouncedSave(newSettings);  // Debounced save
+  };
 
-    PROGRESS: (data) => {
-      setProgress(data.percentage);
-    },
-
-    ERROR: (data) => {
-      console.error('Plugin error:', data.message);
-    }
-  });
-
-  return (
-    <div>
-      {progress > 0 && <ProgressBar value={progress} />}
-      {results && <DisplayResults data={results} />}
-    </div>
-  );
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSave.cancel();
+    };
+  }, []);
 }
 ```
 
-### Complete Example: Node Analysis
-
-#### UI Component
+#### Cancelable Operations
 ```tsx
-function NodeAnalyzer() {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState(null);
-  const [progress, setProgress] = useState(0);
+import { createCancelablePromise } from '@shared/asyncUtils';
 
-  usePluginMessages({
-    ANALYSIS_COMPLETE: (data) => {
-      setResults(data);
-      setIsAnalyzing(false);
-      setProgress(0);
-    },
+function LongRunningOperation() {
+  const [operation, setOperation] = useState(null);
 
-    ANALYSIS_PROGRESS: (data) => {
-      setProgress(data.percentage);
-    },
+  const startOperation = () => {
+    const { promise, cancel, isCanceled } = createCancelablePromise(
+      async (signal) => {
+        // Send start message
+        sendToMain('START_LONG_OPERATION', { signal });
 
-    ERROR: (data) => {
-      console.error('Analysis failed:', data.message);
-      setIsAnalyzing(false);
-      setProgress(0);
+        // Wait for completion
+        return new Promise((resolve, reject) => {
+          const handleMessage = (event) => {
+            const message = extractMessageSafely(event);
+            if (message?.type === 'LONG_OPERATION_COMPLETE') {
+              resolve(message.data);
+            } else if (message?.type === 'ERROR') {
+              reject(new Error(message.data.error));
+            }
+          };
+
+          window.addEventListener('message', handleMessage);
+          signal.addEventListener('abort', () => {
+            window.removeEventListener('message', handleMessage);
+            reject(new Error('Operation was canceled'));
+          });
+        });
+      }
+    );
+
+    setOperation({ promise, cancel, isCanceled });
+
+    promise
+      .then(result => {
+        console.log('Operation completed:', result);
+        setOperation(null);
+      })
+      .catch(error => {
+        if (!isCanceled()) {
+          console.error('Operation failed:', error);
+        }
+        setOperation(null);
+      });
+  };
+
+  const cancelOperation = () => {
+    if (operation) {
+      operation.cancel();
+      sendToMain('CANCEL_OPERATION');
     }
-  });
-
-  const startAnalysis = () => {
-    setIsAnalyzing(true);
-    setResults(null);
-    setProgress(0);
-
-    sendToMain('ANALYZE_SELECTION', {
-      includeHidden: false,
-      analyzeText: true,
-      analyzeComponents: true
-    });
   };
 
   return (
     <div>
       <Button
-        onClick={startAnalysis}
-        disabled={isAnalyzing}
+        onClick={startOperation}
+        disabled={operation !== null}
       >
-        {isAnalyzing ? 'Analyzing...' : 'Analyze Selection'}
+        Start Operation
       </Button>
-
-      {isAnalyzing && (
-        <ProgressBar
-          value={progress}
-          label={`Processing... ${progress}%`}
-        />
-      )}
-
-      {results && (
-        <Panel title="Analysis Results">
-          <div>
-            <p>Total Nodes: {results.summary.totalNodes}</p>
-            <p>Components: {results.summary.componentCount}</p>
-            <p>Text Layers: {results.summary.textNodes}</p>
-          </div>
-
-          <Code language="json">
-            {JSON.stringify(results.nodes, null, 2)}
-          </Code>
-        </Panel>
+      {operation && (
+        <Button onClick={cancelOperation} variant="secondary">
+          Cancel
+        </Button>
       )}
     </div>
   );
 }
 ```
 
-#### Main Thread Handler
-```typescript
-// src/main/index.ts
-async function handleAnalyzeSelection(data: any) {
+#### Retry with Exponential Backoff
+```tsx
+import { retryWithBackoff } from '@shared/asyncUtils';
+
+async function reliableOperation() {
   try {
-    const selection = figma.currentPage.selection;
+    const result = await retryWithBackoff(
+      async () => {
+        // Send request to main thread
+        sendToMain('UNRELIABLE_OPERATION');
 
-    if (selection.length === 0) {
-      figma.ui.postMessage({
-        type: 'ERROR',
-        message: 'No nodes selected'
-      });
-      return;
-    }
+        // Wait for response
+        return new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Operation timeout'));
+          }, 5000);
 
-    // Send initial progress
-    figma.ui.postMessage({
-      type: 'ANALYSIS_PROGRESS',
-      percentage: 0
-    });
+          const handleMessage = (event) => {
+            const message = extractMessageSafely(event);
+            if (message?.type === 'OPERATION_SUCCESS') {
+              clearTimeout(timeout);
+              resolve(message.data);
+            } else if (message?.type === 'ERROR') {
+              clearTimeout(timeout);
+              reject(new Error(message.data.error));
+            }
+          };
 
-    const results = {
-      summary: {
-        totalNodes: 0,
-        componentCount: 0,
-        textNodes: 0
+          window.addEventListener('message', handleMessage, { once: true });
+        });
       },
-      nodes: []
-    };
+      {
+        maxRetries: 3,
+        initialDelay: 1000,
+        maxDelay: 10000,
+        backoffFactor: 2
+      }
+    );
 
-    // Process each selected node
-    for (let i = 0; i < selection.length; i++) {
-      const node = selection[i];
-
-      // Analyze node
-      const nodeData = analyzeNode(node, data);
-      results.nodes.push(nodeData);
-
-      // Update counters
-      results.summary.totalNodes++;
-      if (node.type === 'COMPONENT') results.summary.componentCount++;
-      if (node.type === 'TEXT') results.summary.textNodes++;
-
-      // Send progress update
-      const percentage = Math.round(((i + 1) / selection.length) * 100);
-      figma.ui.postMessage({
-        type: 'ANALYSIS_PROGRESS',
-        percentage: percentage
-      });
-    }
-
-    // Send final results
-    figma.ui.postMessage({
-      type: 'ANALYSIS_COMPLETE',
-      summary: results.summary,
-      nodes: results.nodes,
-      timestamp: Date.now()
-    });
-
+    console.log('Operation succeeded:', result);
+    return result;
   } catch (error) {
-    figma.ui.postMessage({
-      type: 'ERROR',
-      message: error.message
-    });
+    console.error('Operation failed after retries:', error);
+    throw error;
   }
 }
+```
 
-function analyzeNode(node: SceneNode, options: any) {
-  return {
-    id: node.id,
-    name: node.name,
-    type: node.type,
-    x: node.x,
-    y: node.y,
-    width: node.width,
-    height: node.height,
-    visible: node.visible,
-    // Add more analysis based on options
-    textContent: options.analyzeText && node.type === 'TEXT' ? node.characters : null,
-    componentInfo: options.analyzeComponents && node.type === 'COMPONENT' ? {
-      mainComponent: node.mainComponent?.name,
-      variantProperties: node.variantProperties
-    } : null
-  };
+### Memory Management
+
+#### Message Pool Configuration
+```tsx
+import { messagePool } from '@shared/messagePool';
+
+// Check pool status
+console.log('Pool size:', messagePool.getPoolSize());
+
+// Clear pool if needed (useful for cleanup)
+messagePool.clear();
+
+// Pool automatically manages up to 50 messages by default
+// Older messages are automatically garbage collected
+```
+
+#### Event Listener Cleanup
+```tsx
+import { useWindowResize } from '@ui/hooks/useWindowResize';
+
+// Enhanced useWindowResize with proper cleanup
+function MyComponent() {
+  const containerRef = useWindowResize(
+    400,  // minWidth
+    300,  // minHeight
+    1200, // maxWidth
+    800,  // maxHeight
+    48    // extraPadding
+  );
+
+  // ResizeObserver is automatically cleaned up on unmount
+  // No memory leaks from event listeners
+
+  return <div ref={containerRef}>Content</div>;
 }
 ```
 
-### Message Patterns
+### Error Handling Patterns
 
-#### Request-Response Pattern
+#### Comprehensive Error Handling
 ```tsx
-// UI: Send request
-sendToMain('GET_LAYER_STYLES', { nodeId: 'selected' });
-
-// Main: Process and respond
-figma.ui.postMessage({
-  type: 'LAYER_STYLES_RESULT',
-  nodeId: data.nodeId,
-  styles: extractedStyles
-});
-
-// UI: Handle response
-usePluginMessages({
-  LAYER_STYLES_RESULT: (data) => {
-    setLayerStyles(data.styles);
-  }
-});
-```
-
-#### Progress Updates Pattern
-```tsx
-// Main: Send periodic progress
-for (let i = 0; i < items.length; i++) {
-  processItem(items[i]);
-
-  figma.ui.postMessage({
-    type: 'PROCESS_PROGRESS',
-    current: i + 1,
-    total: items.length,
-    percentage: Math.round(((i + 1) / items.length) * 100)
-  });
-}
-```
-
-#### Error Handling Pattern
-```tsx
-// Main: Consistent error reporting
+// Main thread error handling
 try {
-  const result = await dangerousOperation();
-  figma.ui.postMessage({
-    type: 'OPERATION_SUCCESS',
-    result: result
-  });
+  const result = await complexOperation(data);
+  sendSuccess('COMPLEX_OPERATION', result);
 } catch (error) {
-  figma.ui.postMessage({
-    type: 'ERROR',
-    operation: 'dangerousOperation',
-    message: error.message,
-    timestamp: Date.now()
-  });
+  sendError(
+    'Complex operation failed',
+    error.message,
+    'COMPLEX_OP_ERROR'
+  );
 }
 
-// UI: Handle all errors consistently
+// UI thread error handling
 usePluginMessages({
   ERROR: (data) => {
-    console.error(`Error in ${data.operation}:`, data.message);
-    showToast(`Error: ${data.message}`, 'error');
+    console.error(`Error (${data.code}):`, data.error);
+    if (data.details) {
+      console.error('Details:', data.details);
+    }
+
+    Toast.error(`${data.error}${data.details ? ': ' + data.details : ''}`);
+  },
+
+  COMPLEX_OPERATION_COMPLETE: (data) => {
+    if (data.success) {
+      Toast.success(data.summary || 'Operation completed');
+      setResults(data.data);
+    }
   }
 });
+```
+
+### Performance Optimization
+
+#### High-Frequency Message Handling
+```tsx
+import { createThrottler } from '@shared/asyncUtils';
+
+// Throttle high-frequency updates
+const throttledProgressUpdate = createThrottler(
+  (progress: number) => {
+    setProgress(progress);
+    updateProgressBar(progress);
+  },
+  100  // Max once per 100ms
+);
+
+usePluginMessages({
+  PROGRESS: (data) => {
+    throttledProgressUpdate(data.progress);
+  }
+});
+```
+
+#### Bulk Message Processing
+```tsx
+import { ComputationTasks } from '@shared/workerUtils';
+
+// Process large datasets efficiently
+async function processLargeDataset(items: any[]) {
+  const results = await ComputationTasks.processArray(
+    items,
+    async (item, index) => {
+      // Process individual item
+      return await processItem(item);
+    },
+    {
+      chunkSize: 50,  // Process 50 items at a time
+      onProgress: (progress) => {
+        setProcessingProgress(progress);
+      }
+    }
+  );
+
+  return results;
+}
 ```
 
 ### Best Practices
 
-#### Data Safety
-- Extract only primitive values from Figma nodes to avoid memory leaks
-- Use `String()`, `Number()`, and `Boolean()` to ensure primitive types
-- Avoid passing complex Figma objects directly to UI
-
+#### Memory-Safe Data Extraction
 ```typescript
-// ✅ Good: Extract primitives
-const nodeData = {
-  id: String(node.id),
-  name: String(node.name),
-  width: Number(node.width),
-  visible: Boolean(node.visible)
-};
+// ✅ Good: Extract primitives with type safety
+function extractNodeData(node: SceneNode): any {
+  return {
+    id: String(node.id),
+    name: String(node.name),
+    type: String(node.type),
+    x: Number(node.x) || 0,
+    y: Number(node.y) || 0,
+    width: Number(node.width) || 0,
+    height: Number(node.height) || 0,
+    visible: Boolean(node.visible),
+    locked: Boolean(node.locked),
+    // Only include serializable properties
+    fills: 'fills' in node ? node.fills?.map(fill => ({
+      type: fill.type,
+      color: fill.type === 'SOLID' ? fill.color : null
+    })) : null
+  };
+}
 
-// ❌ Bad: Passing complex objects
-const nodeData = node; // May cause memory issues
+// ❌ Bad: Direct node references
+function badExtractNodeData(node: SceneNode): any {
+  return {
+    node: node,  // Contains non-serializable references
+    parent: node.parent,  // Can cause circular references
+    children: 'children' in node ? node.children : null  // Deep object graphs
+  };
+}
 ```
 
-#### Message Structure
-- Use consistent message types with clear, descriptive names
-- Include metadata like timestamps and operation IDs for debugging
-- Structure data consistently across different message types
-
+#### Efficient Message Patterns
 ```typescript
-// ✅ Good: Structured message
-figma.ui.postMessage({
-  type: 'EXPORT_COMPLETE',
-  operationId: 'export-001',
-  timestamp: Date.now(),
-  result: {
-    format: 'PNG',
-    fileCount: 5,
-    totalSize: '2.4MB'
-  }
+// ✅ Good: Batch similar operations
+const batchedUpdates = [];
+items.forEach(item => {
+  batchedUpdates.push(processItem(item));
+});
+
+sendToUI('BATCH_UPDATE', {
+  updates: batchedUpdates,
+  timestamp: Date.now()
+});
+
+// ❌ Bad: Individual messages for each item
+items.forEach(item => {
+  sendToUI('ITEM_UPDATE', { item });  // Creates message spam
 });
 ```
 
-#### Error Handling
-- Always wrap main thread operations in try-catch blocks
-- Provide meaningful error messages with context
-- Include operation identifiers for debugging
+#### Resource Cleanup
+```tsx
+// ✅ Good: Proper cleanup patterns
+useEffect(() => {
+  const debouncedSave = createDebouncer(saveData, 500);
+  const cancelableOperation = createCancelablePromise(longOperation);
 
-```typescript
-// ✅ Good: Comprehensive error handling
-try {
-  const result = await complexOperation(data);
-  figma.ui.postMessage({
-    type: 'OPERATION_SUCCESS',
-    operationId: data.operationId,
-    result: result
-  });
-} catch (error) {
-  figma.ui.postMessage({
-    type: 'ERROR',
-    operationId: data.operationId,
-    operation: 'complexOperation',
-    message: error.message,
-    stack: error.stack
-  });
-}
+  return () => {
+    // Clean up all resources
+    debouncedSave.cancel();
+    cancelableOperation.cancel();
+    messagePool.clear();
+  };
+}, []);
 ```
 
 ### Common Message Types
 
-Here are standard message types used throughout the plugin:
+#### Standard Messages
+- `PING` / `PONG` - Connectivity testing
+- `GET_SELECTION` / `SELECTION_RESULT` - Selection analysis
+- `SCAN_NODES` / `SCAN_COMPLETE` - Document scanning
+- `EXPORT_*` / `EXPORT_COMPLETE` - Export operations
+- `PROGRESS` - Progress updates with consolidation
+- `ERROR` - Error notifications with context
+- `SUCCESS` - Success confirmations with summaries
 
-#### UI to Main
-- `PING` - Test connectivity
-- `GET_SELECTION` - Request current selection info
-- `SCAN_NODES` - Analyze nodes in document
-- `EXPORT_SELECTION` - Export selected nodes
-- `RESIZE` - Resize plugin window
+#### Enhanced Messages
+- `BATCH_PROCESS` / `BATCH_COMPLETE` - Bulk operations
+- `CANCEL_OPERATION` - Operation cancellation
+- `MEMORY_CLEANUP` - Memory management
+- `VALIDATION_ERROR` - Data validation failures
+- `RETRY_OPERATION` - Retry requests with backoff
 
-#### Main to UI
-- `PONG` - Response to ping
-- `SELECTION_RESULT` - Selection analysis results
-- `SCAN_COMPLETE` - Node scan results
-- `EXPORT_COMPLETE` - Export operation results
-- `PROGRESS` - Operation progress updates
-- `ERROR` - Error notifications
+---
+
+## Async Utilities
+
+**What it's for**: Advanced async operation helpers including debouncing, throttling, cancellation, and retry mechanisms with proper cleanup.
+
+**When to use**: For optimizing performance, preventing race conditions, managing frequent function calls, and handling long-running operations.
+
+### Import
+```tsx
+import {
+  createDebouncer,
+  createThrottler,
+  createCancelablePromise,
+  retryWithBackoff
+} from '@shared/asyncUtils';
+```
+
+### createDebouncer
+
+**What it's for**: Delays function execution until after a specified delay, preventing excessive calls from frequent events.
+
+**When to use**: For search inputs, save operations, resize handlers, API calls triggered by user input, or any operation that shouldn't execute on every change.
+
+#### Basic Usage
+```tsx
+function SearchComponent() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState([]);
+
+  // Create debounced search function
+  const debouncedSearch = useMemo(
+    () => createDebouncer(async (term: string) => {
+      if (!term.trim()) return;
+      const searchResults = await searchAPI(term);
+      setResults(searchResults);
+    }, 300),
+    []
+  );
+
+  const handleInputChange = (value: string) => {
+    setSearchTerm(value);
+    debouncedSearch(value);  // Only calls API after 300ms of no typing
+  };
+
+  return (
+    <div>
+      <Input
+        value={searchTerm}
+        onChange={(e) => handleInputChange(e.target.value)}
+        placeholder="Search..."
+      />
+      {/* Results display */}
+    </div>
+  );
+}
+```
+
+#### Advanced Options
+```tsx
+// Leading edge: Execute immediately, then wait
+const leadingDebouncer = createDebouncer(
+  () => console.log('Immediate execution'),
+  1000,
+  { leading: true, trailing: false }
+);
+
+// Trailing edge: Wait, then execute (default)
+const trailingDebouncer = createDebouncer(
+  () => console.log('Delayed execution'),
+  1000,
+  { leading: false, trailing: true }
+);
+
+// Both edges: Execute immediately AND after delay
+const bothEdgesDebouncer = createDebouncer(
+  () => console.log('Both immediate and delayed'),
+  1000,
+  { leading: true, trailing: true }
+);
+
+// Maximum wait: Ensures execution even with continuous calls
+const maxWaitDebouncer = createDebouncer(
+  () => console.log('Guaranteed execution'),
+  500,
+  { maxWait: 2000 }  // Will execute at least every 2 seconds
+);
+```
+
+#### Manual Control
+```tsx
+function AutoSaveComponent() {
+  const [data, setData] = useState('');
+
+  const debouncedSave = useMemo(
+    () => createDebouncer(async (content: string) => {
+      await saveToAPI(content);
+      console.log('Auto-saved!');
+    }, 1000),
+    []
+  );
+
+  const handleChange = (newData: string) => {
+    setData(newData);
+    debouncedSave(newData);
+  };
+
+  const handleManualSave = () => {
+    // Cancel pending auto-save and save immediately
+    debouncedSave.cancel();
+    saveToAPI(data);
+  };
+
+  const handleForceFlush = () => {
+    // Execute any pending debounced call immediately
+    debouncedSave.flush();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => debouncedSave.cancel();
+  }, [debouncedSave]);
+
+  return (
+    <div>
+      <Textbox value={data} onValueInput={handleChange} />
+      <Button onClick={handleManualSave}>Save Now</Button>
+      <Button onClick={handleForceFlush}>Flush Pending</Button>
+    </div>
+  );
+}
+```
+
+### createThrottler
+
+**What it's for**: Limits function execution to at most once per specified interval, useful for rate limiting.
+
+**When to use**: For scroll handlers, mouse move events, resize handlers, or any high-frequency event where you need regular but limited execution.
+
+#### Basic Usage
+```tsx
+function ScrollTracker() {
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const throttledScroll = useMemo(
+    () => createThrottler((event: Event) => {
+      const position = window.scrollY;
+      setScrollPosition(position);
+      console.log('Scroll position:', position);
+    }, 100),  // Maximum once every 100ms
+    []
+  );
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledScroll);
+    return () => {
+      window.removeEventListener('scroll', throttledScroll);
+      throttledScroll.cancel();
+    };
+  }, [throttledScroll]);
+
+  return <div>Scroll position: {scrollPosition}</div>;
+}
+```
+
+#### Throttle Options
+```tsx
+// Leading edge only: Execute immediately, then wait
+const leadingThrottler = createThrottler(
+  handleResize,
+  250,
+  { leading: true, trailing: false }
+);
+
+// Trailing edge only: Wait, then execute at end of interval
+const trailingThrottler = createThrottler(
+  handleResize,
+  250,
+  { leading: false, trailing: true }
+);
+
+// Both edges: Execute immediately AND at end (default)
+const bothEdgesThrottler = createThrottler(
+  handleResize,
+  250,
+  { leading: true, trailing: true }
+);
+```
+
+### createCancelablePromise
+
+**What it's for**: Wraps promises with cancellation capability to prevent race conditions and memory leaks.
+
+**When to use**: For API calls, file operations, or any async operation that might become irrelevant before completion.
+
+#### Basic Usage
+```tsx
+function DataLoader() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const cancelableRef = useRef(null);
+
+  const loadData = async (id: string) => {
+    // Cancel previous request if still pending
+    if (cancelableRef.current) {
+      cancelableRef.current.cancel();
+    }
+
+    setLoading(true);
+
+    // Create cancelable API call
+    const cancelable = createCancelablePromise(async (signal) => {
+      const response = await fetch(`/api/data/${id}`, { signal });
+      return response.json();
+    });
+
+    cancelableRef.current = cancelable;
+
+    try {
+      const result = await cancelable.promise;
+      setData(result);
+    } catch (error) {
+      if (!cancelable.isCanceled()) {
+        console.error('Failed to load data:', error);
+      }
+    } finally {
+      setLoading(false);
+      cancelableRef.current = null;
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (cancelableRef.current) {
+        cancelableRef.current.cancel();
+      }
+    };
+  }, []);
+
+  return (
+    <div>
+      <Button onClick={() => loadData('123')}>Load Data</Button>
+      {loading && <Spinner />}
+      {data && <div>{JSON.stringify(data)}</div>}
+    </div>
+  );
+}
+```
+
+### retryWithBackoff
+
+**What it's for**: Automatically retries failed operations with increasing delays between attempts.
+
+**When to use**: For network requests, API calls, or any operation that might fail temporarily but could succeed with retry.
+
+#### Basic Usage
+```tsx
+function RobustApiCall() {
+  const [status, setStatus] = useState('idle');
+
+  const makeRobustCall = async () => {
+    setStatus('loading');
+
+    try {
+      const result = await retryWithBackoff(
+        async () => {
+          const response = await fetch('/api/unstable-endpoint');
+          if (!response.ok) throw new Error('API request failed');
+          return response.json();
+        },
+        {
+          maxRetries: 3,
+          initialDelay: 1000,      // Start with 1 second
+          maxDelay: 10000,         // Never wait more than 10 seconds
+          backoffFactor: 2,        // Double delay each time (1s, 2s, 4s)
+        }
+      );
+
+      setStatus('success');
+      console.log('API call succeeded:', result);
+    } catch (error) {
+      setStatus('error');
+      console.error('API call failed after all retries:', error);
+    }
+  };
+
+  return (
+    <div>
+      <Button onClick={makeRobustCall} disabled={status === 'loading'}>
+        Make Robust API Call
+      </Button>
+      <div>Status: {status}</div>
+    </div>
+  );
+}
+```
+
+#### With Cancellation
+```tsx
+function CancelableRetry() {
+  const cancelableRef = useRef(null);
+
+  const startRetryOperation = async () => {
+    const controller = new AbortController();
+    cancelableRef.current = { cancel: () => controller.abort() };
+
+    try {
+      await retryWithBackoff(
+        async () => {
+          const response = await fetch('/api/data', {
+            signal: controller.signal
+          });
+          return response.json();
+        },
+        {
+          maxRetries: 5,
+          initialDelay: 500,
+          signal: controller.signal  // Pass signal for cancellation
+        }
+      );
+    } catch (error) {
+      if (controller.signal.aborted) {
+        console.log('Operation was cancelled');
+      } else {
+        console.error('Operation failed:', error);
+      }
+    }
+  };
+
+  const cancelOperation = () => {
+    if (cancelableRef.current) {
+      cancelableRef.current.cancel();
+    }
+  };
+
+  return (
+    <div>
+      <Button onClick={startRetryOperation}>Start Operation</Button>
+      <Button onClick={cancelOperation}>Cancel</Button>
+    </div>
+  );
+}
+```
+
+### Real-World Usage Patterns
+
+#### Settings Auto-Save with Debouncing
+```tsx
+// From useSettings hook
+const debouncedSave = useMemo(
+  () => createDebouncer(async (settingsToSave: PluginSettings) => {
+    setIsSaving(true);
+    await SettingsStorage.save(settingsToSave);
+    setIsSaving(false);
+  }, 500),
+  []
+);
+
+// Auto-save when settings change
+useEffect(() => {
+  if (isLoading) return;
+  debouncedSave(settings);
+}, [settings, isLoading, debouncedSave]);
+```
+
+#### Search with Debouncing and Cancellation
+```tsx
+function SmartSearch() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const searchRef = useRef(null);
+
+  const debouncedSearch = useMemo(
+    () => createDebouncer(async (searchTerm: string) => {
+      if (!searchTerm.trim()) {
+        setResults([]);
+        return;
+      }
+
+      // Cancel previous search
+      if (searchRef.current) {
+        searchRef.current.cancel();
+      }
+
+      // Create new cancelable search
+      const cancelable = createCancelablePromise(async (signal) => {
+        // Retry the search with backoff in case of network issues
+        return retryWithBackoff(
+          async () => {
+            const response = await fetch(`/search?q=${searchTerm}`, { signal });
+            return response.json();
+          },
+          { maxRetries: 2, signal }
+        );
+      });
+
+      searchRef.current = cancelable;
+
+      try {
+        const searchResults = await cancelable.promise;
+        setResults(searchResults);
+      } catch (error) {
+        if (!cancelable.isCanceled()) {
+          console.error('Search failed:', error);
+        }
+      }
+    }, 300),
+    []
+  );
+
+  const handleInputChange = (value: string) => {
+    setQuery(value);
+    debouncedSearch(value);
+  };
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+      if (searchRef.current) {
+        searchRef.current.cancel();
+      }
+    };
+  }, [debouncedSearch]);
+}
+```
+
+### Best Practices
+
+#### ✅ Good Patterns
+```tsx
+// Always clean up in useEffect
+useEffect(() => {
+  const debounced = createDebouncer(expensiveOperation, 300);
+  return () => debounced.cancel();
+}, []);
+
+// Use useMemo to prevent recreating debouncers
+const debouncedHandler = useMemo(
+  () => createDebouncer(handleChange, 500),
+  [dependency]
+);
+
+// Combine with cancellation for robust async operations
+const robustAsyncOperation = async () => {
+  const cancelable = createCancelablePromise(async (signal) => {
+    return retryWithBackoff(
+      () => apiCall(signal),
+      { maxRetries: 3, signal }
+    );
+  });
+
+  return cancelable.promise;
+};
+```
+
+#### ❌ Bad Patterns
+```tsx
+// Don't create new debouncers on every render
+function BadComponent() {
+  const handleChange = (value) => {
+    // Creates new debouncer every time!
+    const debounced = createDebouncer(save, 500);
+    debounced(value);
+  };
+}
+
+// Don't forget cleanup
+function LeakyComponent() {
+  const debounced = createDebouncer(expensiveOp, 1000);
+  // Missing cleanup - will continue executing after unmount!
+}
+
+// Don't ignore cancellation
+function RaceConditionComponent() {
+  const loadData = async () => {
+    // No cancellation - old requests can overwrite new ones
+    const data = await fetch('/api/data');
+    setData(data);
+  };
+}
+```
+
+### Performance Impact
+
+- **Debouncing**: Reduces API calls by ~80-95% for typical user input
+- **Throttling**: Limits event handler execution to manageable rates
+- **Cancellation**: Prevents memory leaks and race conditions
+- **Retry**: Improves reliability without blocking UI
+- **Memory**: Minimal overhead with proper cleanup
 
 ---

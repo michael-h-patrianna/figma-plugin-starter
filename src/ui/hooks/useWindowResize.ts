@@ -37,10 +37,16 @@ export function useWindowResize(
   extraPadding = 48
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || typeof parent === 'undefined' || !parent.postMessage) {
       return;
+    }
+
+    // Cleanup any existing observer
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
     }
 
     /**
@@ -60,10 +66,15 @@ export function useWindowResize(
       }
     });
 
+    resizeObserverRef.current = resizeObserver;
     resizeObserver.observe(containerRef.current);
 
+    // Cleanup function
     return () => {
-      resizeObserver.disconnect();
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
     };
   }, [minWidth, minHeight, maxWidth, maxHeight, extraPadding]);
 

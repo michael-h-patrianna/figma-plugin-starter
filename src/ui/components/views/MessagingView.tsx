@@ -1,6 +1,13 @@
+import {
+  createCancelablePromise,
+  createDebouncer,
+  createThrottler,
+  retryWithBackoff
+} from '@shared/asyncUtils';
 import { Button } from '@ui/components/base/Button';
 import { Code } from '@ui/components/base/Code';
 import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { Input } from '@ui/components/base/Input';
 import { Panel } from '@ui/components/base/Panel';
 import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { ProgressModal } from '@ui/components/base/ProgressModal';
@@ -8,7 +15,7 @@ import { Spinner } from '@ui/components/base/Spinner';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { sendToMain, usePluginMessages } from '@ui/messaging';
 import { Toast as ToastService } from '@ui/services/toast';
-import { useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 export function MessagingView() {
   const { colors } = useTheme();
@@ -19,6 +26,47 @@ export function MessagingView() {
   const [inlineProgress, setInlineProgress] = useState(0);
   const [showInlineProgress, setShowInlineProgress] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  // Async utilities test states
+  const [debounceInput, setDebounceInput] = useState('');
+  const [debounceOutput, setDebounceOutput] = useState('');
+  const [throttleCount, setThrottleCount] = useState(0);
+  const [cancelableStatus, setCancelableStatus] = useState('idle');
+  const [retryStatus, setRetryStatus] = useState('idle');
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const cancelableRef = useRef<any>(null);
+
+  // Create debounced function for testing
+  const debouncedUpdate = useMemo(
+    () => createDebouncer((value: string) => {
+      setDebounceOutput(`Debounced: ${value} at ${new Date().toLocaleTimeString()}`);
+      ToastService.success(`Debounced update: ${value}`);
+    }, 500),
+    []
+  );
+
+  // Create throttled function for testing
+  const throttledIncrement = useMemo(
+    () => createThrottler(() => {
+      setThrottleCount(prev => {
+        const newCount = prev + 1;
+        ToastService.info(`Throttled increment: ${newCount}`);
+        return newCount;
+      });
+    }, 1000),
+    []
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      debouncedUpdate.cancel();
+      throttledIncrement.cancel();
+      if (cancelableRef.current) {
+        cancelableRef.current.cancel();
+      }
+    };
+  }, [debouncedUpdate, throttledIncrement]);
 
   usePluginMessages({
     PONG: (data) => {
@@ -101,6 +149,107 @@ export function MessagingView() {
 
   const handleErrorDemo = () => {
     setHasError(true);
+  };
+
+  // Async utilities test functions
+  const handleDebounceInput = (value: string) => {
+    setDebounceInput(value);
+    debouncedUpdate(value);
+  };
+
+  const handleThrottleClick = () => {
+    throttledIncrement();
+  };
+
+  const handleCancelableOperation = async () => {
+    if (cancelableRef.current) {
+      cancelableRef.current.cancel();
+      setCancelableStatus('cancelled');
+      ToastService.warning('Previous operation cancelled');
+      return;
+    }
+
+    setCancelableStatus('running');
+
+    const cancelable = createCancelablePromise(async (signal) => {
+      ToastService.info('Starting cancelable operation...');
+
+      // Simulate long-running operation
+      for (let i = 0; i < 10; i++) {
+        if (signal.aborted) {
+          throw new Error('Operation was canceled');
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+        ToastService.info(`Step ${i + 1}/10 completed`);
+      }
+
+      return 'Operation completed successfully!';
+    });
+
+    cancelableRef.current = cancelable;
+
+    try {
+      const result = await cancelable.promise;
+      setCancelableStatus('completed');
+      ToastService.success(result);
+    } catch (error) {
+      if (cancelable.isCanceled()) {
+        setCancelableStatus('cancelled');
+        ToastService.warning('Operation was cancelled');
+      } else {
+        setCancelableStatus('error');
+        ToastService.error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } finally {
+      cancelableRef.current = null;
+    }
+  };
+
+  const handleRetryOperation = async () => {
+    setRetryStatus('running');
+    setRetryAttempts(0);
+
+    try {
+      const result = await retryWithBackoff(
+        async () => {
+          setRetryAttempts(prev => prev + 1);
+          ToastService.info(`Retry attempt ${retryAttempts + 1}`);
+
+          // 70% chance of failure to demonstrate retry mechanism
+          if (Math.random() < 0.7) {
+            throw new Error('Simulated network failure');
+          }
+
+          return 'Operation succeeded after retry!';
+        },
+        {
+          maxRetries: 5,
+          initialDelay: 1000,
+          maxDelay: 5000,
+          backoffFactor: 1.5
+        }
+      );
+
+      setRetryStatus('completed');
+      ToastService.success(result);
+    } catch (error) {
+      setRetryStatus('failed');
+      ToastService.error(`Operation failed after ${retryAttempts} attempts: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  const handleDebouncerManualControl = () => {
+    const hasQueued = debouncedUpdate.flush();
+    if (hasQueued) {
+      ToastService.info('Flushed pending debounced call');
+    } else {
+      ToastService.warning('No pending debounced calls to flush');
+    }
+  };
+
+  const handleDebouncerCancel = () => {
+    debouncedUpdate.cancel();
+    ToastService.info('Cancelled pending debounced calls');
   };
 
   return (
@@ -283,6 +432,133 @@ export function MessagingView() {
               </div>
             </div>
           )}
+        </div>
+      </Panel>
+
+      <Panel title="Async Utilities Test">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Debouncer Test */}
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Debouncer Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Input
+                value={debounceInput}
+                onChange={handleDebounceInput}
+                placeholder="Type to test debouncing (500ms delay)..."
+              />
+              <div style={{
+                padding: 8,
+                background: colors.backgroundSecondary,
+                borderRadius: 4,
+                fontSize: 12,
+                color: colors.textSecondary,
+                minHeight: 20
+              }}>
+                {debounceOutput || 'Output will appear here after 500ms of no typing...'}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Button
+                  onClick={handleDebouncerManualControl}
+                  size="small"
+                  variant="secondary"
+                >
+                  Flush Pending
+                </Button>
+                <Button
+                  onClick={handleDebouncerCancel}
+                  size="small"
+                  variant="secondary"
+                >
+                  Cancel Pending
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Throttler Test */}
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Throttler Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{
+                padding: 8,
+                background: colors.backgroundSecondary,
+                borderRadius: 4,
+                fontSize: 12,
+                color: colors.textSecondary
+              }}>
+                Throttle count: {throttleCount} (max once per 1s)
+              </div>
+              <Button
+                onClick={handleThrottleClick}
+                size="small"
+              >
+                Click Rapidly (Throttled)
+              </Button>
+            </div>
+          </div>
+
+          {/* Cancelable Promise Test */}
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Cancelable Promise Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{
+                padding: 8,
+                background: colors.backgroundSecondary,
+                borderRadius: 4,
+                fontSize: 12,
+                color: colors.textSecondary
+              }}>
+                Status: {cancelableStatus}
+              </div>
+              <Button
+                onClick={handleCancelableOperation}
+                size="small"
+                variant={cancelableStatus === 'running' ? 'danger' : 'primary'}
+                disabled={cancelableStatus === 'running' ? false : cancelableStatus !== 'idle' && cancelableStatus !== 'completed' && cancelableStatus !== 'cancelled' && cancelableStatus !== 'error'}
+              >
+                {cancelableStatus === 'running' ? 'Cancel Operation' : 'Start Long Operation (10 steps)'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Retry with Backoff Test */}
+          <div>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Retry with Backoff Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{
+                padding: 8,
+                background: colors.backgroundSecondary,
+                borderRadius: 4,
+                fontSize: 12,
+                color: colors.textSecondary
+              }}>
+                Status: {retryStatus} | Attempts: {retryAttempts}
+              </div>
+              <Button
+                onClick={handleRetryOperation}
+                size="small"
+                disabled={retryStatus === 'running'}
+              >
+                {retryStatus === 'running' ? 'Retrying...' : 'Start Unreliable Operation (70% failure rate)'}
+              </Button>
+            </div>
+          </div>
+
+          <div style={{
+            padding: 12,
+            background: colors.backgroundSecondary,
+            borderRadius: 6,
+            border: `1px solid ${colors.border}`
+          }}>
+            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Async Utilities Benefits</h4>
+            <p style={{ color: colors.textSecondary, margin: 0, fontSize: 12, lineHeight: 1.4 }}>
+              • <strong>Debouncer:</strong> Reduces API calls by delaying execution until input stops<br />
+              • <strong>Throttler:</strong> Limits high-frequency events to manageable rates<br />
+              • <strong>Cancelable:</strong> Prevents race conditions and memory leaks<br />
+              • <strong>Retry:</strong> Handles transient failures with exponential backoff<br />
+              • <strong>Cleanup:</strong> All utilities properly clean up resources on unmount
+            </p>
+          </div>
         </div>
       </Panel>
 

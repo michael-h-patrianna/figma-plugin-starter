@@ -3,6 +3,7 @@ import { OperationResult } from '@main/types';
 import { PLUGIN_NAME } from '@shared/constants';
 import { copyToClipboard } from '@shared/utils';
 import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { LazyLoader } from '@ui/components/base/LazyLoader';
 import { MessageBox } from '@ui/components/base/MessageBox';
 import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { SettingsDropdown } from '@ui/components/base/SettingsDropdown';
@@ -10,11 +11,6 @@ import { Tabs } from '@ui/components/base/Tabs';
 import { GlobalToastContainer } from '@ui/components/base/Toast';
 import { DebugPanel } from '@ui/components/panels/DebugPanel';
 import { HelpPopup } from '@ui/components/panels/HelpPopup';
-import { ContentView } from '@ui/components/views/ContentView';
-import { DataView } from '@ui/components/views/DataView';
-import { FormsView } from '@ui/components/views/FormsView';
-import { MessagingView } from '@ui/components/views/MessagingView';
-import { ModalsView } from '@ui/components/views/ModalsView';
 import { SectionsView } from '@ui/components/views/SectionsView';
 import { ThemeProvider, useTheme } from '@ui/contexts/ThemeContext';
 import { useSettings } from '@ui/hooks/useSettings';
@@ -262,44 +258,64 @@ function App() {
               id: 'forms',
               label: 'Forms',
               content: (
-                <FormsView />
+                <LazyLoader
+                  loader={() => import('@ui/components/views/FormsView')}
+                >
+                  {(module) => <module.FormsView />}
+                </LazyLoader>
               )
             },
             {
               id: 'content',
               label: 'Content',
               content: (
-                <ContentView
-                  accordionItems={accordionItems}
-                />
+                <LazyLoader
+                  loader={() => import('@ui/components/views/ContentView')}
+                >
+                  {(module) => <module.ContentView accordionItems={accordionItems} />}
+                </LazyLoader>
               )
             },
             {
               id: 'modals',
               label: 'Modal Dialogs',
               content: (
-                <ModalsView />
+                <LazyLoader
+                  loader={() => import('@ui/components/views/ModalsView')}
+                >
+                  {(module) => <module.ModalsView />}
+                </LazyLoader>
               )
             },
             {
               id: 'messaging',
               label: 'Messaging',
               content: (
-                <MessagingView />
+                <LazyLoader
+                  loader={() => import('@ui/components/views/MessagingView')}
+                >
+                  {(module) => <module.MessagingView />}
+                </LazyLoader>
               )
             },
             {
               id: 'data',
               label: 'Data',
               content: (
-                <DataView
-                  settings={settings}
-                  onSettingsChange={updateSettings}
-                  debugMode={settings.debugMode}
-                  onDebugToggle={() => handleDebugToggle(!settings.debugMode)}
-                  onThemeToggle={handleThemeToggle}
-                  isPersistent={isPersistent}
-                />
+                <LazyLoader
+                  loader={() => import('@ui/components/views/DataView')}
+                >
+                  {(module) => (
+                    <module.DataView
+                      settings={settings}
+                      onSettingsChange={updateSettings}
+                      debugMode={settings.debugMode}
+                      onDebugToggle={() => handleDebugToggle(!settings.debugMode)}
+                      onThemeToggle={handleThemeToggle}
+                      isPersistent={isPersistent}
+                    />
+                  )}
+                </LazyLoader>
               )
             }
           ]}
@@ -382,18 +398,27 @@ function App() {
 }
 
 /**
- * Root application component wrapped with providers.
+ * Root application component wrapped with providers and enhanced error boundary.
  *
- * Provides the theme context and message context to the entire application
- * and renders the main App component. This is the entry point for the plugin UI
+ * Provides comprehensive error handling, theme context, and message context
+ * to the entire application. This is the entry point for the plugin UI
  * that gets rendered by the Figma plugin system.
  *
- * @returns The app with all necessary providers
+ * @returns The app with all necessary providers and error protection
  */
 function AppWithProviders() {
   return (
     <ThemeProvider>
-      <App />
+      <ErrorBoundary
+        maxRetries={3}
+        autoRecover={true}
+        onError={(error, errorInfo) => {
+          console.error('🚨 App Level Error:', error, errorInfo);
+          ToastService.error('Application error occurred. Attempting recovery...');
+        }}
+      >
+        <App />
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

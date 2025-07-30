@@ -1,4 +1,4 @@
-import { debounce } from '@shared/utils';
+import { createDebouncer } from '@shared/asyncUtils';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 
 /**
@@ -95,7 +95,7 @@ export function useSettings() {
 
   // Create debounced save function
   const debouncedSave = useMemo(
-    () => debounce(async (settingsToSave: PluginSettings) => {
+    () => createDebouncer(async (settingsToSave: PluginSettings) => {
       setIsSaving(true);
       await SettingsStorage.save(settingsToSave);
       setIsSaving(false);

@@ -35,3 +35,7 @@ export { Tabs } from './Tabs';
 export { ContextMenu } from './ContextMenu';
 export { SettingsDropdown } from './SettingsDropdown';
 
+// Export utility components
+export { ErrorBoundary } from './ErrorBoundary';
+export { LazyLoader } from './LazyLoader';
+
