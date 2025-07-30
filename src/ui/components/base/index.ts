@@ -25,6 +25,7 @@ export { GlobalToastContainer } from './Toast';
 
 // Export container components
 export { Accordion } from './Accordion';
+export { DataGrid } from './DataGrid';
 export { DataTable } from './DataTable';
 export { Modal } from './Modal';
 export { Panel } from './Panel';

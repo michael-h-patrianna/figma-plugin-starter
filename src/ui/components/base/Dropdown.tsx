@@ -1,4 +1,5 @@
 import { useTheme } from '@ui/contexts/ThemeContext';
+import { createPortal } from 'preact/compat';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
 /**
@@ -71,7 +72,10 @@ export function Dropdown({
 }: DropdownProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const selectedOption = options.find((opt: DropdownOption) => opt.value === value);
 
@@ -80,8 +84,14 @@ export function Dropdown({
      * Handles clicks outside the dropdown to close it.
      */
     const handleClickOutside = (event: MouseEvent) => {
+      // Check if click is outside both the button and the portal menu
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        // For portal-rendered menu, we need to check if click is on the menu
+        const target = event.target as Element;
+        const isMenuClick = target.closest('[data-dropdown-menu]');
+        if (!isMenuClick) {
+          setIsOpen(false);
+        }
       }
     };
 
@@ -94,11 +104,30 @@ export function Dropdown({
    */
   const toggleOpen = () => {
     if (!disabled) {
+      if (!isOpen && buttonRef.current) {
+        // Calculate button position and dropdown placement
+        const buttonRect = buttonRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const dropdownHeight = Math.min(200, Math.max(120, options.length * 32 + 16));
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+
+        // Open upward if there's not enough space below but enough space above
+        const shouldOpenUpward = spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight;
+        setOpenUpward(shouldOpenUpward);
+
+        // Calculate fixed position for portal
+        setMenuPosition({
+          top: shouldOpenUpward
+            ? Math.max(4, buttonRect.top - dropdownHeight - 4)
+            : buttonRect.bottom + 4,
+          left: buttonRect.left,
+          width: Math.max(buttonRect.width, 200)
+        });
+      }
       setIsOpen(!isOpen);
     }
-  };
-
-  /**
+  };  /**
    * Selects an option and closes the dropdown.
    *
    * @param optionValue - The value of the option to select
@@ -131,17 +160,18 @@ export function Dropdown({
   };
 
   const menuStyle = {
-    position: 'absolute' as const,
-    top: '100%',
-    left: 0,
-    right: 0,
+    position: 'fixed' as const,
+    top: menuPosition.top,
+    left: menuPosition.left,
+    width: menuPosition.width,
     background: colors.inputBackground,
     border: `1px solid ${colors.inputBorder}`,
     borderRadius: borderRadius.default,
-    marginTop: `${spacing.xs}px`,
+    minHeight: '120px',
     maxHeight: '200px',
     overflowY: 'auto' as const,
-    zIndex: 1000,
+    overflowX: 'hidden' as const,
+    zIndex: 10000,
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
   };
 
@@ -152,6 +182,7 @@ export function Dropdown({
       className={`custom-dropdown ${className}`}
     >
       <button
+        ref={buttonRef}
         type="button"
         onClick={toggleOpen}
         disabled={disabled}
@@ -185,8 +216,8 @@ export function Dropdown({
         </span>
       </button>
 
-      {isOpen && (
-        <div style={menuStyle}>
+      {isOpen && createPortal(
+        <div style={menuStyle} data-dropdown-menu="true">
           {options.map((option: DropdownOption) => (
             <button
               key={option.value}
@@ -202,7 +233,13 @@ export function Dropdown({
                 fontSize: typography.bodySmall,
                 textAlign: 'left',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease'
+                transition: 'background-color 0.2s ease',
+                display: 'block',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                minHeight: '32px',
+                boxSizing: 'border-box'
               }}
               onMouseEnter={(e) => {
                 if (!option.disabled) {
@@ -216,7 +253,8 @@ export function Dropdown({
               {option.text}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

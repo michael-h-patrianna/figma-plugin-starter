@@ -7,6 +7,7 @@ import {
 import { Button } from '@ui/components/base/Button';
 import { Code } from '@ui/components/base/Code';
 import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { InfoBox } from '@ui/components/base/InfoBox';
 import { Input } from '@ui/components/base/Input';
 import { Panel } from '@ui/components/base/Panel';
 import { ProgressBar } from '@ui/components/base/ProgressBar';
@@ -358,21 +359,7 @@ export function MessagingView() {
             </div>
           </div>
 
-          <div style={{
-            padding: 12,
-            background: colors.backgroundSecondary,
-            borderRadius: 6,
-            border: `1px solid ${colors.border}`
-          }}>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Singleton Toast Benefits</h4>
-            <p style={{ color: colors.textSecondary, margin: 0, fontSize: 12, lineHeight: 1.4 }}>
-              • <strong>Global Access:</strong> Call from anywhere without component state<br />
-              • <strong>Multiple Toasts:</strong> Stack multiple notifications automatically<br />
-              • <strong>Rich API:</strong> Special methods for common scenarios<br />
-              • <strong>No Prop Drilling:</strong> Zero boilerplate in components<br />
-              • <strong>Reactive State:</strong> Powered by Preact signals
-            </p>
-          </div>
+
         </div>
       </Panel>
 
@@ -544,21 +531,13 @@ export function MessagingView() {
             </div>
           </div>
 
-          <div style={{
-            padding: 12,
-            background: colors.backgroundSecondary,
-            borderRadius: 6,
-            border: `1px solid ${colors.border}`
-          }}>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Async Utilities Benefits</h4>
-            <p style={{ color: colors.textSecondary, margin: 0, fontSize: 12, lineHeight: 1.4 }}>
-              • <strong>Debouncer:</strong> Reduces API calls by delaying execution until input stops<br />
-              • <strong>Throttler:</strong> Limits high-frequency events to manageable rates<br />
-              • <strong>Cancelable:</strong> Prevents race conditions and memory leaks<br />
-              • <strong>Retry:</strong> Handles transient failures with exponential backoff<br />
-              • <strong>Cleanup:</strong> All utilities properly clean up resources on unmount
-            </p>
-          </div>
+          <InfoBox variant="plain" title="Async Utilities Benefits">
+            • <strong>Debouncer:</strong> Reduces API calls by delaying execution until input stops<br />
+            • <strong>Throttler:</strong> Limits high-frequency events to manageable rates<br />
+            • <strong>Cancelable:</strong> Prevents race conditions and memory leaks<br />
+            • <strong>Retry:</strong> Handles transient failures with exponential backoff<br />
+            • <strong>Cleanup:</strong> All utilities properly clean up resources on unmount
+          </InfoBox>
         </div>
       </Panel>
 

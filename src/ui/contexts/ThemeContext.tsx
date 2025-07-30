@@ -467,6 +467,30 @@ export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProvider
       root.style.setProperty('--figma-bg', themeColors.darkBg);
       root.style.setProperty('--figma-bg-secondary', themeColors.darkPanel);
 
+      // DataGrid specific CSS variables
+      root.style.setProperty('--colors-dark-bg', themeColors.darkBg);
+      root.style.setProperty('--colors-border', themeColors.border);
+      root.style.setProperty('--colors-data-header', themeColors.dataHeader);
+      root.style.setProperty('--colors-data-row', themeColors.dataRow);
+      root.style.setProperty('--colors-data-row-alt', themeColors.dataRowAlt);
+      root.style.setProperty('--colors-text-color', themeColors.textColor);
+      root.style.setProperty('--colors-text-secondary', themeColors.textSecondary);
+      root.style.setProperty('--colors-text-tertiary', themeColors.textTertiary);
+      root.style.setProperty('--colors-accent', themeColors.accent);
+      root.style.setProperty('--colors-button-secondary-hover', themeColors.buttonSecondaryHover);
+      root.style.setProperty('--colors-input-background', themeColors.inputBackground);
+      root.style.setProperty('--colors-input-border-focus', themeColors.inputBorderFocus);
+
+      // Spacing and typography variables
+      root.style.setProperty('--spacing-xs', `${spacing.xs}px`);
+      root.style.setProperty('--spacing-sm', `${spacing.sm}px`);
+      root.style.setProperty('--spacing-caption', `${spacing.sm}px`); // Using sm for 12px equivalent
+      root.style.setProperty('--typography-body', `${typography.body}px`);
+      root.style.setProperty('--typography-caption', `${typography.caption}px`);
+      root.style.setProperty('--typography-tiny', `${typography.tiny}px`);
+      root.style.setProperty('--border-radius-default', `${borderRadius.default}px`);
+      root.style.setProperty('--border-radius-small', `${borderRadius.small}px`);
+
       // Force secondary button styling with high specificity
       const styleElement = document.getElementById('theme-override-styles') || document.createElement('style');
       styleElement.id = 'theme-override-styles';

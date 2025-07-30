@@ -1,0 +1,233 @@
+/* DataGrid styles using theme-aware CSS variables */
+
+.data-grid {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--border-radius-default, 6px);
+  position: relative;
+  background-color: var(--colors-dark-bg, #181a20);
+  border: 1px solid var(--colors-border, #2c3039);
+}
+
+.data-grid-header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: var(--colors-data-header, #202329);
+  border-bottom: 2px solid var(--colors-border, #2c3039);
+}
+
+.data-grid-header-row {
+  display: flex;
+  min-width: fit-content;
+}
+
+.data-grid-header-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm, 8px) var(--spacing-caption, 12px);
+  font-weight: 600;
+  font-size: var(--typography-body, 14px);
+  user-select: none;
+  min-width: 100px;
+  position: relative;
+  flex-shrink: 0;
+  background-color: var(--colors-data-header, #202329);
+  border-right: 1px solid var(--colors-border, #2c3039);
+  color: var(--colors-text-color, #ffffff);
+}
+
+.data-grid-header-cell.sortable {
+  cursor: pointer;
+}
+
+.data-grid-header-cell.pinned-left {
+  position: sticky;
+  left: 0;
+  z-index: 11;
+}
+
+.data-grid-header-cell.pinned-right {
+  position: sticky;
+  right: 0;
+  z-index: 11;
+}
+
+/* Column Resizer */
+.data-grid-resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 12;
+}
+
+.data-grid-resizer:hover,
+.data-grid-resizer.resizing {
+  background: var(--colors-accent, #4f94ff);
+}
+
+.data-grid-body {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.data-grid-row {
+  display: flex;
+  cursor: pointer;
+  min-width: fit-content;
+  border-bottom: 1px solid var(--colors-border, #2c3039);
+}
+
+.data-grid-row:nth-child(even) .data-grid-cell {
+  background-color: var(--colors-data-row-alt, rgba(255, 255, 255, 0.02));
+}
+
+.data-grid-row:nth-child(odd) .data-grid-cell {
+  background-color: var(--colors-data-row, transparent);
+}
+
+.data-grid-row.selected .data-grid-cell {
+  background-color: var(--colors-button-secondary-hover, #383b44);
+}
+
+.data-grid-cell {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm, 8px) var(--spacing-caption, 12px);
+  min-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  border-right: 1px solid var(--colors-border, #2c3039);
+  color: var(--colors-text-color, #ffffff);
+}
+
+.data-grid-cell.editable {
+  cursor: pointer;
+}
+
+.data-grid-cell.pinned-left {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.data-grid-cell.pinned-right {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+}
+
+.data-grid-footer {
+  display: flex;
+  font-weight: 600;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: var(--colors-data-header, #202329);
+  border-top: 2px solid var(--colors-border, #2c3039);
+}
+
+.data-grid-footer-row {
+  display: flex;
+  min-width: fit-content;
+}
+
+.data-grid-footer-cell {
+  padding: var(--spacing-sm, 8px) var(--spacing-caption, 12px);
+  min-width: 100px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--colors-border, #2c3039);
+  background-color: var(--colors-data-header, #202329);
+  color: var(--colors-text-color, #ffffff);
+}
+
+.data-grid-footer-cell.pinned-left {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.data-grid-footer-cell.pinned-right {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+}
+
+.data-grid-editor {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  font-size: inherit;
+  font-family: inherit;
+  background-color: var(--colors-input-background, #2a2d35);
+  color: var(--colors-text-color, #ffffff);
+  border-radius: var(--border-radius-small, 3px);
+}
+
+.data-grid-editor:focus {
+  border: 1px solid var(--colors-input-border-focus, #4f94ff);
+}
+
+.data-grid-sort-indicator {
+  margin-left: var(--spacing-xs, 4px);
+  font-size: var(--typography-caption, 12px);
+  color: var(--colors-text-secondary, #a0a3a8);
+}
+
+.data-grid-sort-number {
+  font-size: var(--typography-tiny, 10px);
+  color: var(--colors-text-tertiary, #6c757d);
+}
+
+.data-grid-scrollable-columns {
+  display: flex;
+  overflow: hidden;
+}
+
+.data-grid-virtual-spacer {
+  width: 100%;
+}
+
+.data-grid-color-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.data-grid-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--border-radius-small, 3px);
+  border: 1px solid var(--colors-border-secondary, #383b44);
+  cursor: pointer;
+}
+
+.data-grid-color-swatch.disabled {
+  cursor: default;
+}
+
+.data-grid-color-text {
+  font-size: var(--typography-caption, 12px);
+  color: var(--colors-text-secondary, #a0a3a8);
+}
+
+.hide-scrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

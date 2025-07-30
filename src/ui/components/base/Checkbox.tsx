@@ -17,10 +17,12 @@ export function Checkbox({
   className = '',
   style = {}
 }: CheckboxProps) {
-  const { colors, spacing, typography, borderRadius } = useTheme();
+  const { theme, colors, spacing, typography, borderRadius } = useTheme();
 
-  const handleChange = () => {
+  const handleChange = (e?: Event) => {
     if (!disabled) {
+      // Prevent event bubbling to parent elements (e.g., DataGrid cells)
+      e?.stopPropagation();
       onChange(!checked);
     }
   };
@@ -31,7 +33,14 @@ export function Checkbox({
     background: checked
       ? colors.accent
       : (disabled ? colors.inputBackgroundDisabled : colors.inputBackground),
-    border: `1px solid ${checked ? colors.accent : colors.inputBorder}`,
+    border: `1px solid ${checked
+      ? colors.accent
+      : disabled
+        ? colors.inputBorder
+        : theme === 'dark' && !checked
+          ? colors.textSecondary // Bright border for unchecked checkboxes in dark theme
+          : colors.inputBorder
+      }`,
     borderRadius: borderRadius.small,
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'flex',
