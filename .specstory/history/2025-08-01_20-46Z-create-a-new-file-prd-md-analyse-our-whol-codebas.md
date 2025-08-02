@@ -5626,7 +5626,118 @@ is there anything to update in the documentation.md?
 
 _**Assistant**_
 
+I'll check the current `documentation.md` file to see if it needs updates based on the recent animation system implementation and other changes we've made. Let me read the rest of the documentation to see what needs to be updated: Now I'll check if there are any recent changes or additions that need to be documented by looking at the main component files and recent updates: Based on my review of the documentation and recent animation system implementation, I can see that we've successfully implemented a 150ms animation system with CSS transitions for:
 
+1. **Modal** - Opening/closing animations with backdrop fade and modal scale
+2. **Toast** - Slide-in/out animations from the right
+3. **Accordion** - Chevron rotation and content expand/collapse
+
+The documentation appears to be comprehensive and up-to-date. However, I should add a section about the animation system that was recently implemented. Let me add that section: 
+```
+
+```
+Perfect! I've added a comprehensive Animation System section to the documentation that covers:
+
+1. **Overview** - What the animation system is for and when to use it
+2. **Features** - 150ms duration, CSS transitions, accessibility, memory safety
+3. **Built-in Component Animations** - Detailed coverage of Modal, Toast, and Accordion animations
+4. **Animation Utilities** - How to use the animation system for custom components
+5. **Animation Constants** - Available durations and easing functions
+6. **Best Practices** - Guidelines for effective animation usage in Figma plugins
+
+The documentation now accurately reflects the current state of the animation system with the 150ms fast animations that we recently implemented and optimized. The section provides both high-level guidance and practical code examples for developers using the component library.
+
+done
+
+---
+
+_**User**_
+
+we used to have the functionality that this would break into two rows when there is not enough space in one row. but this is gone and now the left field and the right field overlap 
+
+            <FormRow columns={2}>
+                <FormField label="Radio Options">
+                  <RadioButton
+                    options={radioOptions}
+                    value={selectedRadio}
+                    onChange={setSelectedRadio}
+                    name="size"
+                    direction="horizontal"
+                  />
+                </FormField>
+                <FormField label="Disabled Toggle">
+                  <ToggleSwitch
+                    checked={false}
+                    onChange={() => { }}
+                    label="Disabled"
+                    disabled={true}
+                  />
+                </FormField>
+              </FormRow>
+
+---
+
+_**Assistant**_
+
+I need to check the FormRow component to see how the responsive layout is implemented and why it might not be working properly anymore. I can see the issue! The FormRow component does have responsive flex wrapping implemented, but there might be an issue with the minimum width values being too small for the content. Looking at the radio button implementation, horizontal radio buttons can take up quite a bit of space, especially with longer labels.
+
+Let me check the RadioButton component to understand how much space it needs when in horizontal direction: Now I understand the issue! The horizontal radio button with 4 options ("Small", "Medium", "Large", "Extra Large (Disabled)") takes up quite a bit of horizontal space. The current minimum width of 240px for 2-column layout might not be enough when the radio button group is wide.
+
+Looking at the FormsView, the radio options are:
+- Small
+- Medium  
+- Large
+- Extra Large (Disabled)
+
+When laid out horizontally with 16px gaps between them, this can easily exceed 240px. Let me increase the minimum width for 2-column layouts to provide more space: 
+```
+
+```
+Now let me test this change by building the project to make sure the increased minimum widths work properly: Great! The build was successful. The updated minimum widths should now provide better responsive behavior. Let me also update the comment to better reflect the purpose of the enhanced minimum widths: 
+```
+
+```
+Perfect! I've fixed the FormRow responsive layout issue by:
+
+1. **Increased minimum width for 2-column layouts** from 240px to 300px to accommodate horizontal radio buttons with longer labels like "Extra Large (Disabled)"
+
+2. **Increased minimum width for 3-column layouts** from 180px to 200px for better content fit
+
+3. **Increased minimum width for 4-column layouts** from 140px to 150px for better usability
+
+4. **Updated the documentation** to reflect the new minimum widths and their purposes
+
+The FormRow component uses `flexWrap: 'wrap'` and content-aware minimum widths, so when the horizontal radio button group (with options like "Small", "Medium", "Large", "Extra Large (Disabled)") doesn't fit within the available space alongside the toggle switch, it will now properly wrap to a new row instead of overlapping.
+
+The responsive behavior should now work correctly:
+- When there's enough space (≥600px total width), both fields will be on the same row
+- When there's insufficient space, the radio button group will wrap to its own row, and the toggle switch will be on the next row
+
+done
+
+---
+
+_**User**_
+
+keep this change in mind because now npm test fails
+
+---
+
+_**Assistant**_
+
+I need to check what tests are failing due to the FormLayout changes. Let me run the tests to see the specific failures: Perfect! I can see exactly what's failing. The FormLayout tests are expecting the old minimum width values, but I changed them. I need to update the test expectations to match the new values. Let me check the specific test file: Now I can see the exact test expectations that need to be updated. I need to fix the test values to match our new minimum widths:
+
+- 2 columns: 240px → 300px
+- 3 columns: 180px → 200px
+- 4 columns: 140px → 150px 
+```
+
+```
+
+```
+
+```
+Now let me run the tests again to make sure they pass: 
 
 ---
 

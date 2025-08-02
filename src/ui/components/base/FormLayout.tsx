@@ -189,9 +189,9 @@ interface FormRowProps {
  * when content doesn't fit (e.g., horizontal radio buttons with many options).
  *
  * The responsive system uses content-aware minimum widths:
- * - 2 columns: 240px minimum (good for most form controls)
- * - 3 columns: 180px minimum (adequate for compact controls)
- * - 4 columns: 140px minimum (for very compact controls)
+ * - 2 columns: 300px minimum (accommodates horizontal radio buttons and longer content)
+ * - 3 columns: 200px minimum (good for standard form controls)
+ * - 4 columns: 150px minimum (for compact controls)
  *
  * When content exceeds available space, elements automatically wrap to new lines.
  */
@@ -212,12 +212,12 @@ export function FormRow({
     // Provide minimum widths that work well for different content types
     const minWidths = {
       1: '100%',
-      2: '240px', // Good for most form controls side by side
-      3: '180px', // Adequate for compact controls
-      4: '140px'  // Minimum for very compact controls
+      2: '300px', // Increased for horizontal radio buttons and longer content
+      3: '200px', // Increased for better content fit
+      4: '150px'  // Minimum for compact controls
     };
 
-    return minWidths[columnCount as keyof typeof minWidths] || '200px';
+    return minWidths[columnCount as keyof typeof minWidths] || '250px';
   };
 
   return (

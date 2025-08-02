@@ -266,8 +266,8 @@ describe('FormLayout Components', () => {
       items.forEach(item => {
         const wrapper = item.parentElement;
         expect(wrapper).toHaveStyle({
-          flex: '1 1 180px',
-          minWidth: '180px',
+          flex: '1 1 200px',
+          minWidth: '200px',
           maxWidth: '100%'
         });
       });
@@ -311,9 +311,9 @@ describe('FormLayout Components', () => {
     it('calculates correct flex-basis for different column counts', () => {
       const testCases = [
         { columns: 1, expectedBasis: '100%' },
-        { columns: 2, expectedBasis: '240px' },
-        { columns: 3, expectedBasis: '180px' },
-        { columns: 4, expectedBasis: '140px' }
+        { columns: 2, expectedBasis: '300px' },
+        { columns: 3, expectedBasis: '200px' },
+        { columns: 4, expectedBasis: '150px' }
       ];
 
       testCases.forEach(({ columns, expectedBasis }) => {
