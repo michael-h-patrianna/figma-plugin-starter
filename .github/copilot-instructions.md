@@ -13,6 +13,7 @@ globs: *
 - Always prompt for confirmation before changing this file.
 - Use TSDoc, not JSDoc for documentation.
 - When adding or changing functionality, always amend tests. This is a critical development principle.
+- Always update tests whenever adding or changing functionality.
 
 ## CORE ARCHITECTURE
 
@@ -222,3 +223,4 @@ global.parent = {
 ## Development Principles
 
 - When adding or changing functionality, always amend tests.
+- Always update tests whenever adding or changing functionality.

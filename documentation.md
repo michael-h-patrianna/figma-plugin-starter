@@ -3663,6 +3663,97 @@ useEffect(() => {
 
 ---
 
+## Animation System
+
+**What it's for**: Smooth, performant animations optimized for Figma plugin environments using CSS transitions.
+
+**When to use**: All major components have built-in animations. Use the animation utilities for custom components that need smooth transitions.
+
+### Features
+
+- **150ms Duration**: Fast, snappy animations that feel responsive
+- **CSS Transitions**: Optimized for Figma plugin iframe environment
+- **Accessibility**: Respects `prefers-reduced-motion` settings
+- **Memory Safe**: No animation libraries, pure CSS with proper cleanup
+
+### Built-in Component Animations
+
+#### Modal Animations
+```tsx
+// Modal automatically animates on open/close
+<Modal isVisible={showModal} onClose={() => setShowModal(false)}>
+  {/* Modal content */}
+</Modal>
+```
+- **Opening**: 150ms backdrop fade + modal scale-up from 95% to 100%
+- **Closing**: 150ms backdrop fade + modal scale-down to 95%
+
+#### Toast Animations
+```tsx
+// Toast service automatically handles animations
+Toast.success('Message with slide animation!');
+```
+- **Appearing**: 150ms slide-in from right with opacity fade
+- **Dismissing**: 150ms slide-out to right with opacity fade
+
+#### Accordion Animations
+```tsx
+// Accordion automatically animates expand/collapse
+<Accordion sections={sections} allowMultiple={true} />
+```
+- **Chevron**: 150ms rotation animation when expanding/collapsing
+- **Content**: 150ms max-height and opacity transitions
+
+### Animation Utilities
+
+For custom components, use the animation utilities from `@shared/animationUtils`:
+
+```tsx
+import { ANIMATION_DURATIONS, EASING, createTransition } from '@shared/animationUtils';
+
+// Create CSS transition string
+const transition = createTransition(['opacity', 'transform'], {
+  duration: ANIMATION_DURATIONS.fast, // 150ms
+  easing: EASING.easeOut
+});
+
+// Apply to component styles
+<div style={{
+  opacity: isVisible ? 1 : 0,
+  transform: isVisible ? 'scale(1)' : 'scale(0.95)',
+  transition: transition
+}}>
+  Animated content
+</div>
+```
+
+### Animation Constants
+
+```tsx
+export const ANIMATION_DURATIONS = {
+  fast: 150,    // Quick feedback (buttons, toggles)
+  normal: 250,  // Standard transitions (modals, panels)
+  slow: 350     // Complex animations (lists, data)
+} as const;
+
+export const EASING = {
+  easeIn: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',
+  easeOut: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  easeInOut: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
+  bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+} as const;
+```
+
+### Best Practices
+
+- **Use 150ms** for most UI animations (feels snappy and responsive)
+- **Animate transform and opacity** for best performance (GPU accelerated)
+- **Test in Figma plugin** environment, not just browser
+- **Keep animations simple** - complex animations may not work in plugin iframe
+- **Respect accessibility** - animations automatically disable for users with motion sensitivity
+
+---
+
 ## Async Utilities
 
 **What it's for**: Advanced async operation helpers including debouncing, throttling, cancellation, and retry mechanisms with proper cleanup.

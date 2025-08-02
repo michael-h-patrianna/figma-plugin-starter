@@ -5561,6 +5561,72 @@ good. now increase the animation speed everywhere to 150ms
 _**Assistant**_
 
 Perfect! Let me update all the animation durations from 2000ms to 150ms across all components. 
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+Now let me update Toast: 
+```
+
+```
+
+```
+
+```
+Now let me update the Accordion: 
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+Now let me build and test: Perfect! Now let me update the `animations.css` file to be consistent, even though we're not using those classes anymore: 
+```
+
+```
+Let me also update the reduced motion part: That's fine - the reduced motion section is already correct. Now let me build the final version: Perfect! 🎉
+
+## **✅ Animation Speed Update Complete**
+
+All animations have been updated from **2000ms** to **150ms** for snappy, responsive performance:
+
+### **Updated Components:**
+
+1. **Modal** - **150ms animations**
+   - ✅ Backdrop fade: 150ms
+   - ✅ Modal scale/transform: 150ms
+   - ✅ Exit timing: 200ms (unmount delay)
+
+2. **Toast** - **150ms animations**
+   - ✅ Slide-in from right: 150ms
+   - ✅ Opacity fade: 150ms
+   - ✅ Exit timing: 200ms (unmount delay)
+
+3. 
+
+---
+
+_**User**_
+
+is there anything to update in the documentation.md?
+
+---
+
+_**Assistant**_
+
+
 
 ---
 
