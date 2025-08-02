@@ -433,8 +433,245 @@ describe('DataGrid', () => {
         columns: basicColumns
       });
 
-      const grid = container.firstChild;
+      const grid = container.firstChild as HTMLElement;
       expect(grid).toBeInTheDocument();
+      expect(grid).toHaveAttribute('role', 'grid');
+      expect(grid).toHaveAttribute('aria-rowcount', (sampleData.length + 1).toString());
+      expect(grid).toHaveAttribute('aria-colcount', basicColumns.length.toString());
+      expect(grid).toHaveAttribute('tabindex', '0');
+    });
+
+    it('supports custom aria-label', () => {
+      const customLabel = 'Product data table';
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        'aria-label': customLabel
+      });
+
+      const grid = container.firstChild as HTMLElement;
+      expect(grid).toHaveAttribute('aria-label', customLabel);
+    });
+
+    it('supports aria-labelledby', () => {
+      const labelId = 'grid-label';
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        'aria-labelledby': labelId
+      });
+
+      const grid = container.firstChild as HTMLElement;
+      expect(grid).toHaveAttribute('aria-labelledby', labelId);
+    });
+
+    it('supports aria-describedby', () => {
+      const descriptionId = 'grid-description';
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        'aria-describedby': descriptionId
+      });
+
+      const grid = container.firstChild as HTMLElement;
+      expect(grid).toHaveAttribute('aria-describedby', descriptionId);
+    });
+
+    it('has proper ID when provided', () => {
+      const customId = 'my-data-grid';
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        id: customId
+      });
+
+      const grid = container.firstChild as HTMLElement;
+      expect(grid).toHaveAttribute('id', customId);
+    });
+
+    it('generates descriptive default aria-label', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns
+      });
+
+      const grid = container.firstChild as HTMLElement;
+      expect(grid).toHaveAttribute('aria-label', expect.stringContaining('Data grid with'));
+      expect(grid).toHaveAttribute('aria-label', expect.stringContaining('rows and'));
+      expect(grid).toHaveAttribute('aria-label', expect.stringContaining('columns'));
+    });
+
+    it('has proper rowgroup structure', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns
+      });
+
+      const rowgroups = container.querySelectorAll('[role="rowgroup"]');
+      expect(rowgroups).toHaveLength(2); // header and body
+
+      const headerRowgroup = rowgroups[0];
+      expect(headerRowgroup).toHaveAttribute('aria-label', 'Column headers');
+
+      const bodyRowgroup = rowgroups[1];
+      expect(bodyRowgroup).toHaveAttribute('aria-label', 'Data rows');
+    });
+
+    it('has proper header row and columnheader elements', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns
+      });
+
+      const headerRow = container.querySelector('[role="rowgroup"] [role="row"]');
+      expect(headerRow).toBeInTheDocument();
+
+      const columnHeaders = container.querySelectorAll('[role="columnheader"]');
+      expect(columnHeaders).toHaveLength(basicColumns.length);
+
+      columnHeaders.forEach((header, index) => {
+        expect(header).toHaveAttribute('aria-label', expect.stringContaining(basicColumns[index].title));
+
+        // Only check aria-sort if column is sortable
+        if (basicColumns[index].sortable) {
+          expect(header).toHaveAttribute('aria-sort');
+        }
+      });
+    });
+
+    it('has proper data rows with correct ARIA attributes', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        virtualizeRows: false // Disable virtualization for easier testing
+      });
+
+      const dataRows = container.querySelectorAll('[role="rowgroup"]:nth-child(2) [role="row"]');
+      expect(dataRows).toHaveLength(sampleData.length);
+
+      dataRows.forEach((row, index) => {
+        expect(row).toHaveAttribute('aria-rowindex', (index + 2).toString()); // +2 for header
+        expect(row).toHaveAttribute('aria-selected');
+      });
+    });
+
+    it('has proper gridcell elements with ARIA attributes', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        virtualizeRows: false // Disable virtualization for easier testing
+      });
+
+      const gridCells = container.querySelectorAll('[role="gridcell"]');
+      expect(gridCells.length).toBeGreaterThan(0);
+
+      // Check first row cells
+      const firstRowCells = container.querySelectorAll('[role="rowgroup"]:nth-child(2) [role="row"]:first-child [role="gridcell"]');
+      expect(firstRowCells).toHaveLength(basicColumns.length);
+
+      firstRowCells.forEach((cell, index) => {
+        expect(cell).toHaveAttribute('aria-colindex', (index + 1).toString());
+        expect(cell).toHaveAttribute('aria-label', expect.stringContaining(basicColumns[index].title));
+      });
+    });
+
+    it('sets correct aria-sort values for sortable columns', () => {
+      const sortableColumns = basicColumns.map(col => ({ ...col, sortable: true }));
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: sortableColumns,
+        defaultState: {
+          sortBy: [{ key: 'name', direction: 'asc' }]
+        }
+      });
+
+      const columnHeaders = container.querySelectorAll('[role="columnheader"]');
+      const nameHeader = Array.from(columnHeaders).find(header =>
+        header.getAttribute('aria-label')?.includes('Name')
+      );
+
+      expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
+
+      // Other headers should have 'none'
+      const otherHeaders = Array.from(columnHeaders).filter(header =>
+        !header.getAttribute('aria-label')?.includes('Name')
+      );
+      otherHeaders.forEach(header => {
+        expect(header).toHaveAttribute('aria-sort', 'none');
+      });
+    });
+
+    it('updates aria-selected when rows are selected', () => {
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: basicColumns,
+        rowKey: 'id',
+        selectionMode: 'multi',
+        virtualizeRows: false, // Disable virtualization for easier testing
+        defaultState: {
+          selection: [1] // Select first row by ID
+        }
+      });
+
+      const dataRows = container.querySelectorAll('[role="rowgroup"]:nth-child(2) [role="row"]');
+      expect(dataRows[0]).toHaveAttribute('aria-selected', 'true');
+
+      // Other rows should not be selected
+      for (let i = 1; i < dataRows.length; i++) {
+        expect(dataRows[i]).toHaveAttribute('aria-selected', 'false');
+      }
+    });
+
+    it('makes sortable column headers focusable', () => {
+      const sortableColumns = basicColumns.map(col => ({ ...col, sortable: true }));
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: sortableColumns
+      });
+
+      const columnHeaders = container.querySelectorAll('[role="columnheader"]');
+      columnHeaders.forEach(header => {
+        expect(header).toHaveAttribute('tabindex', '0');
+      });
+    });
+
+    it('makes non-sortable column headers non-focusable', () => {
+      const nonSortableColumns = basicColumns.map(col => ({ ...col, sortable: false }));
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: nonSortableColumns
+      });
+
+      const columnHeaders = container.querySelectorAll('[role="columnheader"]');
+      columnHeaders.forEach(header => {
+        expect(header).toHaveAttribute('tabindex', '-1');
+      });
+    });
+
+    it('makes editable cells focusable', () => {
+      const editableColumns = basicColumns.map(col => ({ ...col, editable: true }));
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: editableColumns
+      });
+
+      const gridCells = container.querySelectorAll('[role="gridcell"]');
+      gridCells.forEach(cell => {
+        expect(cell).toHaveAttribute('tabindex', '0');
+      });
+    });
+
+    it('makes non-editable cells non-focusable', () => {
+      const nonEditableColumns = basicColumns.map(col => ({ ...col, editable: false }));
+      const { container } = renderDataGrid({
+        data: sampleData,
+        columns: nonEditableColumns
+      });
+
+      const gridCells = container.querySelectorAll('[role="gridcell"]');
+      gridCells.forEach(cell => {
+        expect(cell).toHaveAttribute('tabindex', '-1');
+      });
     });
 
     it('supports keyboard navigation', () => {

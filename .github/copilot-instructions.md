@@ -12,6 +12,7 @@ globs: *
 - Always use the `prd.md` file for product requirements and feature specifications.
 - Always prompt for confirmation before changing this file.
 - Use TSDoc, not JSDoc for documentation.
+- When adding or changing functionality, always amend tests. This is a critical development principle.
 
 ## CORE ARCHITECTURE
 
@@ -120,7 +121,7 @@ figma.ui.onmessage = (msg) => {
 - Track with priority levels (HIGH/MEDIUM/LOW)
 - Mark completed with ✅
 - Focus execution without status logs
-- ~95% complete - all tests passing
+- ~98% complete - all tests passing
 
 ### Documentation Standards
 - TSDoc for all public APIs
@@ -177,7 +178,7 @@ global.parent = {
 
 **Test Categories:**
 - **Unit Tests**: Individual components and utilities
-- **Integration Tests**: Cross-thread communication and workflows
+- **Integration Tests**: Cross-thread communication and workflows  
 - **Accessibility Tests**: ARIA attributes, keyboard navigation, focus management
 - **Memory Tests**: Long-running session validation
 
@@ -217,3 +218,7 @@ global.parent = {
 - Actual code patterns from your codebase
 - Real file references and import patterns
 - Concrete examples of the messaging system
+
+## Development Principles
+
+- When adding or changing functionality, always amend tests.

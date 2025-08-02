@@ -13,6 +13,12 @@ interface SingleToastProps {
   onDismiss: (id: string) => void;
   /** Index of the toast in the toast stack for spacing calculations */
   index: number;
+  /** Custom aria-label for the toast */
+  'aria-label'?: string;
+  /** ID of element that labels the toast */
+  'aria-labelledby'?: string;
+  /** ID of element that describes the toast */
+  'aria-describedby'?: string;
 }
 
 /**
@@ -40,7 +46,14 @@ interface SingleToastProps {
  * />
  * ```
  */
-function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
+function SingleToast({
+  toast,
+  onDismiss,
+  index,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy
+}: SingleToastProps) {
   const { colors, spacing, shadows, animations } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
 
@@ -91,6 +104,12 @@ function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
 
   return (
     <div
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+      aria-label={ariaLabel || `${toast.type} notification: ${displayMessage}`}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
       style={{
         background: getToastColor(toast.type),
         color: getToastTextColor(toast.type),
@@ -196,6 +215,10 @@ export function GlobalToastContainer() {
 
   return (
     <div
+      role="region"
+      aria-label="Notifications"
+      aria-live="polite"
+      aria-atomic="false"
       style={{
         position: 'fixed',
         left: '50%',
@@ -211,6 +234,9 @@ export function GlobalToastContainer() {
       {/* Queue indicator and dismiss all button */}
       {(state.queue.length > 0 || state.toasts.length > 2) && (
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={`Dismiss all ${state.toasts.length} notifications${state.queue.length > 0 ? ` and ${state.queue.length} queued` : ''}`}
           style={{
             background: colors.toastQueueBackground,
             color: colors.toastQueueText,
@@ -225,6 +251,12 @@ export function GlobalToastContainer() {
             transition: animations.hover
           }}
           onClick={() => dismissAllToasts()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              dismissAllToasts();
+            }
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = colors.toastQueueBackgroundHover;
           }}

@@ -271,6 +271,121 @@ describe('Dropdown Component', () => {
         expect(options).toHaveLength(4);
       });
     });
+
+    test('supports custom aria-label', () => {
+      const customLabel = 'Select a country';
+      render(h(Dropdown, { ...defaultProps, 'aria-label': customLabel }));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('aria-label', expect.stringContaining(customLabel));
+    });
+
+    test('supports aria-labelledby', () => {
+      const labelId = 'dropdown-label';
+      render(h(Dropdown, { ...defaultProps, 'aria-labelledby': labelId }));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('aria-labelledby', labelId);
+    });
+
+    test('supports aria-describedby', () => {
+      const descriptionId = 'dropdown-description';
+      render(h(Dropdown, { ...defaultProps, 'aria-describedby': descriptionId }));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('aria-describedby', descriptionId);
+    });
+
+    test('has proper ID when provided', () => {
+      const customId = 'my-dropdown';
+      render(h(Dropdown, { ...defaultProps, id: customId }));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('id', customId);
+    });
+
+    test('listbox has enhanced aria-label when custom aria-label provided', async () => {
+      const customLabel = 'Select a country';
+      render(h(Dropdown, { ...defaultProps, 'aria-label': customLabel }));
+
+      const dropdown = screen.getByRole('button');
+      fireEvent.click(dropdown);
+
+      await waitFor(() => {
+        const listbox = screen.getByRole('listbox');
+        expect(listbox).toHaveAttribute('aria-label', `${customLabel} options`);
+      });
+    });
+
+    test('listbox has default aria-label when no custom label provided', async () => {
+      render(h(Dropdown, defaultProps));
+
+      const dropdown = screen.getByRole('button');
+      fireEvent.click(dropdown);
+
+      await waitFor(() => {
+        const listbox = screen.getByRole('listbox');
+        expect(listbox).toHaveAttribute('aria-label', 'Dropdown options');
+      });
+    });
+
+    test('listbox inherits aria-labelledby and aria-describedby', async () => {
+      const labelId = 'dropdown-label';
+      const descriptionId = 'dropdown-description';
+      render(h(Dropdown, {
+        ...defaultProps,
+        'aria-labelledby': labelId,
+        'aria-describedby': descriptionId
+      }));
+
+      const dropdown = screen.getByRole('button');
+      fireEvent.click(dropdown);
+
+      await waitFor(() => {
+        const listbox = screen.getByRole('listbox');
+        expect(listbox).toHaveAttribute('aria-labelledby', labelId);
+        expect(listbox).toHaveAttribute('aria-describedby', descriptionId);
+      });
+    });
+
+    test('options have proper aria-selected attributes', async () => {
+      render(h(Dropdown, { ...defaultProps, value: 'option2' }));
+
+      const dropdown = screen.getByRole('button');
+      fireEvent.click(dropdown);
+
+      await waitFor(() => {
+        const options = screen.getAllByRole('option');
+
+        // First option should not be selected
+        expect(options[0]).toHaveAttribute('aria-selected', 'false');
+
+        // Second option should be selected
+        expect(options[1]).toHaveAttribute('aria-selected', 'true');
+
+        // Third option (disabled) should not be selected
+        expect(options[2]).toHaveAttribute('aria-selected', 'false');
+
+        // Fourth option should not be selected
+        expect(options[3]).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
+    test('generates descriptive aria-label for button when no custom label provided', () => {
+      render(h(Dropdown, { ...defaultProps, value: 'option1' }));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('aria-label', expect.stringContaining('Option 1'));
+      expect(dropdown).toHaveAttribute('aria-label', expect.stringContaining('Select to open dropdown'));
+    });
+
+    test('generates descriptive aria-label for button with placeholder when no value selected', () => {
+      render(h(Dropdown, defaultProps));
+
+      const dropdown = screen.getByRole('button');
+      expect(dropdown).toHaveAttribute('aria-label', expect.stringContaining('Select an option'));
+      expect(dropdown).toHaveAttribute('aria-label', expect.stringContaining('Select to open dropdown'));
+    });
   });
 
   describe('Disabled State', () => {

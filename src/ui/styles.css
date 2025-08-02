@@ -47,6 +47,54 @@
 
 /* Theme support for Figma UI components */
 
+/* Global focus indicators for accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="switch"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--figma-input-border-focus) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Focus indicators for custom components */
+.button:focus-visible,
+.dropdown:focus-visible,
+.accordion-trigger:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid var(--figma-input-border-focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* High contrast focus indicators for accessibility compliance */
+@media (prefers-contrast: high) {
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid var(--figma-input-border-focus) !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Remove default focus styles to use our custom ones */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+[role="button"]:focus,
+[tabindex]:focus {
+  outline: none !important;
+}
+
 /* Dark theme (default) */
 :root {
   --figma-button-secondary-bg: #2a2d35;

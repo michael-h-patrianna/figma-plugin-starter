@@ -140,6 +140,14 @@ export interface DataGridProps<T = any> {
   className?: string;
   /** Additional inline styles */
   style?: React.CSSProperties;
+  /** Accessible label for the data grid */
+  'aria-label'?: string;
+  /** ID of element that labels the data grid */
+  'aria-labelledby'?: string;
+  /** ID of element that describes the data grid */
+  'aria-describedby'?: string;
+  /** Unique ID for the data grid */
+  id?: string;
 }
 
 /**
@@ -381,6 +389,10 @@ export function DataGrid<T = any>({
   onRowClick,
   className,
   style,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  id,
   ...props
 }: DataGridProps<T>) {
   const { colors, spacing, typography, borderRadius } = useTheme();
@@ -736,9 +748,23 @@ export function DataGrid<T = any>({
     const isFirstColumn = columnIndex === 0;
     const isSticky = stickyFirstColumn && isFirstColumn;
 
+    const sortColumn = currentState.sortBy?.find(sort => sort.key === String(column.key));
+
     return (
       <div
         key={column.key}
+        role="columnheader"
+        aria-sort={
+          sortColumn
+            ? sortColumn.direction === 'asc'
+              ? 'ascending'
+              : 'descending'
+            : column.sortable
+              ? 'none'
+              : undefined
+        }
+        aria-label={`${column.title} column`}
+        tabIndex={column.sortable ? 0 : -1}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -757,6 +783,12 @@ export function DataGrid<T = any>({
           zIndex: isSticky ? 11 : 1
         }}
         onClick={(e) => column.sortable && handleSort(String(column.key), e)}
+        onKeyDown={(e) => {
+          if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handleSort(String(column.key), e as any);
+          }
+        }}
       >
         <span>{column.title}</span>
         {renderSortIndicator(String(column.key))}
@@ -780,6 +812,10 @@ export function DataGrid<T = any>({
     return (
       <div
         key={column.key}
+        role="gridcell"
+        aria-colindex={columnIndex + 1}
+        aria-label={`${column.title}: ${String((row as any)[column.key] || '')}`}
+        tabIndex={column.editable ? 0 : -1}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -797,6 +833,12 @@ export function DataGrid<T = any>({
           backgroundColor: rowBackgroundColor
         }}
         onClick={(e) => handleCellClick(rowIndex, String(column.key), e)}
+        onKeyDown={(e) => {
+          if (column.editable && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handleCellClick(rowIndex, String(column.key), e as any);
+          }
+        }}
       >
         {renderCell(row, column, rowIndex)}
       </div>
@@ -807,6 +849,14 @@ export function DataGrid<T = any>({
     <div
       ref={gridRef}
       className={className}
+      role="grid"
+      aria-label={ariaLabel || `Data grid with ${data.length} rows and ${visibleColumns.length} columns`}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
+      aria-rowcount={data.length + 1} // +1 for header row
+      aria-colcount={visibleColumns.length}
+      id={id}
+      tabIndex={0}
       style={{
         height,
         border: `1px solid ${colors.border}`,
@@ -822,6 +872,8 @@ export function DataGrid<T = any>({
       {/* Header */}
       <div
         ref={headerRef}
+        role="rowgroup"
+        aria-label="Column headers"
         style={{
           display: 'flex',
           borderBottom: `2px solid ${colors.border}`,
@@ -833,12 +885,16 @@ export function DataGrid<T = any>({
           minWidth: 'fit-content'
         }}
       >
-        {visibleColumns.map((column, index) => renderHeaderCell(column, index))}
+        <div role="row" style={{ display: 'flex', width: '100%' }}>
+          {visibleColumns.map((column, index) => renderHeaderCell(column, index))}
+        </div>
       </div>
 
       {/* Body */}
       <div
         ref={bodyRef}
+        role="rowgroup"
+        aria-label="Data rows"
         style={{
           flex: 1,
           overflow: 'auto',
@@ -888,6 +944,9 @@ export function DataGrid<T = any>({
           return (
             <div
               key={rowId}
+              role="row"
+              aria-rowindex={actualRowIndex + 2} // +2 because index starts at 1 and includes header
+              aria-selected={isSelected ? "true" : "false"}
               style={{
                 display: 'flex',
                 height: typeof rowHeight === 'function' ? rowHeight(row) : itemHeight,

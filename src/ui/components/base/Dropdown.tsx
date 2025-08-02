@@ -32,32 +32,32 @@ interface DropdownProps {
   className?: string;
   /** Additional inline styles */
   style?: any;
+  /** Accessible label for the dropdown */
+  'aria-label'?: string;
+  /** ID of element that labels the dropdown */
+  'aria-labelledby'?: string;
+  /** ID of element that describes the dropdown */
+  'aria-describedby'?: string;
+  /** Unique ID for the dropdown */
+  id?: string;
 }
 
 /**
- * A custom dropdown/select component with themed styling and keyboard navigation.
- *
- * Provides a styled dropdown menu with hover states, disabled options,
- * click-outside-to-close functionality, and smooth animations.
- *
- * @param props - The dropdown props
- * @returns A styled dropdown select component
+ * A customizable dropdown component with keyboard navigation and ARIA accessibility.
  *
  * @example
  * ```tsx
- * const [selectedColor, setSelectedColor] = useState('');
- *
- * const colorOptions = [
- *   { value: 'red', text: 'Red' },
- *   { value: 'blue', text: 'Blue' },
- *   { value: 'green', text: 'Green', disabled: true }
+ * const options = [
+ *   { value: 'option1', label: 'Option 1' },
+ *   { value: 'option2', label: 'Option 2' }
  * ];
  *
  * <Dropdown
- *   options={colorOptions}
- *   value={selectedColor}
- *   onValueChange={setSelectedColor}
- *   placeholder="Choose a color"
+ *   options={options}
+ *   value={selectedValue}
+ *   onValueChange={setSelectedValue}
+ *   placeholder="Select an option"
+ *   aria-label="Select an option from the list"
  * />
  * ```
  */
@@ -65,10 +65,14 @@ export function Dropdown({
   options,
   value,
   onValueChange,
-  placeholder = 'Select...',
+  placeholder = 'Select an option',
   disabled = false,
   className = '',
-  style = {}
+  style,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  id
 }: DropdownProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -265,6 +269,10 @@ export function Dropdown({
         style={buttonStyle}
         aria-haspopup="listbox"
         aria-expanded={isOpen ? 'true' : 'false'}
+        aria-label={ariaLabel || `${selectedOption ? selectedOption.text : placeholder}. Select to open dropdown`}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        id={id}
         onMouseEnter={(e) => {
           if (!disabled) {
             e.currentTarget.style.borderColor = colors.inputBorderFocus;
@@ -299,7 +307,9 @@ export function Dropdown({
           style={menuStyle}
           data-dropdown-menu="true"
           role="listbox"
-          aria-label="Dropdown options"
+          aria-label={ariaLabel ? `${ariaLabel} options` : "Dropdown options"}
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy}
         >
           {options.map((option: DropdownOption, index: number) => (
             <button

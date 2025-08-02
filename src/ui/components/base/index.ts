@@ -39,4 +39,5 @@ export { SettingsDropdown } from './SettingsDropdown';
 // Export utility components
 export { ErrorBoundary } from './ErrorBoundary';
 export { LazyLoader } from './LazyLoader';
+export { SkipNavigation } from './SkipNavigation';
 
