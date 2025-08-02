@@ -16,7 +16,7 @@ export function ProgressModal({
   onClose,
   progress,
   title = 'Processing',
-  description = 'Please wait while we process your request',
+  description,
   showCloseButton = false
 }: ProgressModalProps) {
   const { colors, spacing } = useTheme();
@@ -26,6 +26,8 @@ export function ProgressModal({
       onClose();
     }
   };
+
+  const displayDescription = description === null ? null : (description === '' ? null : (description || 'Please wait while we process your request'));
 
   return (
     <Modal
@@ -39,14 +41,14 @@ export function ProgressModal({
           progress={progress}
           label={`Processing... ${Math.round(progress)}%`}
         />
-        {description && (
+        {displayDescription && (
           <div style={{
             marginTop: spacing.md,
             color: colors.textSecondary,
             fontSize: 12,
             textAlign: 'center'
           }}>
-            {description}
+            {displayDescription}
           </div>
         )}
       </div>

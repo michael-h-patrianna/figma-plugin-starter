@@ -1,3 +1,5 @@
+import type { CategorizedError } from '@shared/errorService';
+import { ErrorCategory, globalErrorService, RecoveryAction } from '@shared/errorService';
 import { getThemeColors } from '@ui/contexts/ThemeContext';
 import { Component, h } from 'preact';
 
@@ -38,6 +40,8 @@ interface ErrorBoundaryState {
   error?: Error;
   /** Additional error information including component stack */
   errorInfo?: any;
+  /** Categorized error information from error service */
+  categorizedError?: CategorizedError;
   /** Count of consecutive errors for tracking */
   errorCount: number;
   /** Last error timestamp for rate limiting */
@@ -107,10 +111,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const now = Date.now();
     const { maxRetries = 3, autoRecover = false, recoveryDelay = 5000 } = this.props;
 
+    // Use error service to categorize and handle the error
+    const categorizedError = globalErrorService.handleError(error, 'ui-component');
+
     this.setState(prevState => ({
       hasError: true,
       error,
       errorInfo,
+      categorizedError,
       errorCount: prevState.errorCount + 1,
       lastErrorTime: now
     }));
@@ -120,21 +128,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       this.props.onError(error, errorInfo);
     }
 
-    // Enhanced error logging with context
+    // Enhanced error logging with categorization
     console.group('🚨 ErrorBoundary: Error Caught');
     console.error('Error:', error);
     console.error('Error Info:', errorInfo);
+    console.error('Categorized Error:', categorizedError);
     console.error('Error Count:', this.state.errorCount + 1);
     console.error('Component Stack:', errorInfo?.componentStack);
     console.groupEnd();
 
-    // Auto-recovery mechanism
-    if (autoRecover && this.state.errorCount < maxRetries) {
-      console.log(`🔄 Auto-recovery attempt ${this.state.errorCount + 1}/${maxRetries} in ${recoveryDelay}ms`);
+    // Auto-recovery logic based on error categorization
+    const shouldAttemptRecovery = autoRecover &&
+      this.state.errorCount < maxRetries &&
+      categorizedError.recoveryAction !== RecoveryAction.CONTACT;
+
+    if (shouldAttemptRecovery) {
+      const delay = categorizedError.category === ErrorCategory.NETWORK ? recoveryDelay * 2 : recoveryDelay;
+      console.log(`🔄 Attempting error recovery...`);
+      console.log(`Category: ${categorizedError.category}, Action: ${categorizedError.recoveryAction}`);
+      console.log(`Recovery attempt ${this.state.errorCount + 1}/${maxRetries} in ${delay}ms`);
 
       this.recoveryTimeoutId = window.setTimeout(() => {
         this.handleRetry();
-      }, recoveryDelay);
+      }, delay);
     }
   }
 
@@ -193,8 +209,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       const hasExceededRetries = this.state.errorCount > maxRetries;
+      const { categorizedError } = this.state;
 
-      // Default enhanced error UI
+      // Default enhanced error UI with categorization
       return (
         <div style={{
           background: colors.darkPanel,
@@ -219,11 +236,32 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             marginBottom: spacing.md,
             lineHeight: 1.5
           }}>
-            {hasExceededRetries
-              ? `This component has failed ${this.state.errorCount} times. Please refresh the plugin or contact support.`
-              : 'An unexpected error occurred in this component. You can try again or refresh the plugin.'
+            {categorizedError ?
+              globalErrorService.createUserMessage(categorizedError) :
+              hasExceededRetries
+                ? `This component has failed ${this.state.errorCount} times. Please refresh the plugin or contact support.`
+                : 'An unexpected error occurred in this component. You can try again or refresh the plugin.'
             }
           </div>
+
+          {categorizedError && (
+            <div style={{
+              background: colors.warning + '20',
+              border: `1px solid ${colors.warning}`,
+              borderRadius: borderRadius.default,
+              padding: spacing.sm,
+              marginBottom: spacing.md,
+              fontSize: typography.bodySmall,
+              color: colors.textSecondary
+            }}>
+              <strong>Category:</strong> {categorizedError.category} | <strong>Severity:</strong> {categorizedError.severity}
+              {categorizedError.code && (
+                <div style={{ marginTop: spacing.xs }}>
+                  <strong>Error Code:</strong> {categorizedError.code}
+                </div>
+              )}
+            </div>
+          )}
 
           {this.state.errorCount > 1 && (
             <div style={{

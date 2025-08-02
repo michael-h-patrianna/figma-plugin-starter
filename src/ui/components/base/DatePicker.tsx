@@ -1,4 +1,5 @@
 import { useTheme } from '@ui/contexts/ThemeContext';
+import { useState } from 'preact/hooks';
 
 interface DatePickerProps {
   value: string;
@@ -20,24 +21,36 @@ export function DatePicker({
   disabled = false
 }: DatePickerProps) {
   const { colors, spacing } = useTheme();
+  const [inputId] = useState(`date-picker-${Math.random().toString(36).substr(2, 9)}`);
+
+  const handleChange = (e: Event) => {
+    if (!disabled && onChange) {
+      onChange((e.target as HTMLInputElement).value);
+    }
+  };
+
   return (
     <div style={{ width }}>
       {label && (
-        <label style={{
-          display: 'block',
-          color: colors.textColor,
-          fontSize: 12,
-          fontWeight: 500,
-          marginBottom: spacing.xs
-        }}>
+        <label
+          htmlFor={inputId}
+          style={{
+            display: 'block',
+            color: colors.textColor,
+            fontSize: 12,
+            fontWeight: 500,
+            marginBottom: spacing.xs
+          }}
+        >
           {label}
         </label>
       )}
 
       <input
+        id={inputId}
         type="date"
         value={value}
-        onChange={(e) => onChange((e.target as HTMLInputElement).value)}
+        onChange={handleChange}
         min={min}
         max={max}
         disabled={disabled}

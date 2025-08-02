@@ -1,4 +1,5 @@
 import { useTheme } from '@ui/contexts/ThemeContext';
+import { useState } from 'preact/hooks';
 
 interface TimePickerProps {
   value: string;
@@ -18,11 +19,12 @@ export function TimePicker({
   disabled = false
 }: TimePickerProps) {
   const { colors, spacing } = useTheme();
+  const [inputId] = useState(() => `time-picker-${Math.random().toString(36).substr(2, 9)}`);
 
   return (
     <div style={{ width }}>
       {label && (
-        <label style={{
+        <label htmlFor={inputId} style={{
           display: 'block',
           color: colors.textColor,
           fontSize: 12,
@@ -34,9 +36,14 @@ export function TimePicker({
       )}
 
       <input
+        id={inputId}
         type="time"
         value={value}
-        onChange={(e) => onChange((e.target as HTMLInputElement).value)}
+        onChange={(e) => {
+          if (!disabled) {
+            onChange((e.target as HTMLInputElement).value);
+          }
+        }}
         step={step}
         disabled={disabled}
         style={{

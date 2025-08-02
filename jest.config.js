@@ -7,7 +7,7 @@ module.exports = {
       displayName: 'ui-components',
       testMatch: ['<rootDir>/tests/unit/components/**/*.test.*'],
       testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.js'],
+      setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.ts'],
       moduleNameMapper: {
         '^@ui/(.*)$': '<rootDir>/src/ui/$1',
         '^@shared/(.*)$': '<rootDir>/src/shared/$1',
@@ -15,14 +15,14 @@ module.exports = {
         '@testing-library/preact': '<rootDir>/node_modules/@testing-library/preact/dist/cjs/index.js',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(@testing-library|preact))'
+        'node_modules/(?!(@testing-library|preact|@preact))'
       ],
     },
     {
       displayName: 'main-thread',
       testMatch: ['<rootDir>/tests/unit/main/**/*.test.*'],
       testEnvironment: 'node',
-      setupFilesAfterEnv: ['<rootDir>/tests/setup/main.setup.js'],
+      setupFilesAfterEnv: ['<rootDir>/tests/setup/main.setup.ts'],
       moduleNameMapper: {
         '^@main/(.*)$': '<rootDir>/src/main/$1',
         '^@shared/(.*)$': '<rootDir>/src/shared/$1',
@@ -41,7 +41,7 @@ module.exports = {
       displayName: 'integration',
       testMatch: ['<rootDir>/tests/integration/**/*.test.*'],
       testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.js'],
+      setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.ts'],
       moduleNameMapper: {
         '^@ui/(.*)$': '<rootDir>/src/ui/$1',
         '^@main/(.*)$': '<rootDir>/src/main/$1',
@@ -50,7 +50,7 @@ module.exports = {
         '@testing-library/preact': '<rootDir>/node_modules/@testing-library/preact/dist/cjs/index.js',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!@testing-library)'
+        'node_modules/(?!(@testing-library|preact|@preact))'
       ],
     }
   ],

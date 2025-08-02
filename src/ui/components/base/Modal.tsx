@@ -130,11 +130,24 @@ export function Modal({
       const modal = document.getElementById(modalId);
       if (!modal) return;
 
-      const focusableElements = modal.querySelectorAll(
+      // First try to focus content area elements (exclude close button)
+      const contentArea = modal.querySelector('[id$="-body"]');
+      if (contentArea) {
+        const contentFocusableElements = contentArea.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (contentFocusableElements.length > 0) {
+          (contentFocusableElements[0] as HTMLElement).focus();
+          return;
+        }
+      }
+
+      // Fallback to any focusable element in the modal
+      const allFocusableElements = modal.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
 
-      const firstElement = focusableElements[0] as HTMLElement;
+      const firstElement = allFocusableElements[0] as HTMLElement;
       if (firstElement) {
         firstElement.focus();
       }

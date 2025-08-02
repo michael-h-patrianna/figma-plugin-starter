@@ -42,8 +42,10 @@ export function ColorPicker({
       value={value}
       disabled={disabled}
       onChange={(e) => {
-        const target = e.target as HTMLInputElement;
-        onChange?.(target.value);
+        if (!disabled) {
+          const target = e.target as HTMLInputElement;
+          onChange?.(target.value);
+        }
       }}
       style={{
         ...sizeStyles,
