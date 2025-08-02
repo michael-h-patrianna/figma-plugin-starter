@@ -10,6 +10,7 @@ module.exports = {
       setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.ts'],
       moduleNameMapper: {
         '^@ui/(.*)$': '<rootDir>/src/ui/$1',
+        '^@main/(.*)$': '<rootDir>/src/main/$1',
         '^@shared/(.*)$': '<rootDir>/src/shared/$1',
         '\\.css$': 'identity-obj-proxy',
         '@testing-library/preact': '<rootDir>/node_modules/@testing-library/preact/dist/cjs/index.js',

@@ -6,12 +6,12 @@ globs: *
 ## AI Agent Guidance (`.github/copilot-instructions.md`)
 - Refer to `.github/copilot-instructions.md` for architectural guidance when generating code. This file provides essential knowledge for AI agents to be immediately productive.
 
-
 ## ** General**
 - Do not write summaries or conclusions in chat. A simple "done" is sufficient to indicate completion of a task.
 - Always use the `tasks.md` file for task management and execution and to keep track of progress.
 - Always use the `prd.md` file for product requirements and feature specifications.
-
+- Always prompt for confirmation before changing this file.
+- Use TSDoc, not JSDoc for documentation.
 
 ## CORE ARCHITECTURE
 
@@ -120,7 +120,7 @@ figma.ui.onmessage = (msg) => {
 - Track with priority levels (HIGH/MEDIUM/LOW)
 - Mark completed with ✅
 - Focus execution without status logs
-- 95% complete - all tests passing
+- ~95% complete - all tests passing
 
 ### Documentation Standards
 - TSDoc for all public APIs
@@ -187,4 +187,33 @@ global.parent = {
 - **Documentation**: Tests serve as usage examples
 - **Production Ready**: Validate memory usage and performance
 
+## AI Agent Guidance (`.github/copilot-instructions.md`)
 
+### Key Improvements:
+
+**Architecture-First Approach:**
+- Three-layer structure (main/ui/shared) with clear boundaries
+- Critical message flow patterns specific to Figma plugins
+- WASM memory safety rules that aren't obvious from code inspection
+
+**Discoverable Patterns:**
+- Theme system integration across all components
+- Settings persistence using Figma's clientStorage
+- Error handling with categorization and retry logic
+- Async utilities with proper cleanup
+
+**Development Workflows:**
+- Essential build commands and their purposes
+- Testing architecture with multi-project Jest setup
+- Component development patterns with TSDoc requirements
+
+**Critical Knowledge:**
+- Memory safety rules (no setTimeout in main thread)
+- Message format differences between UI→Main and Main→UI
+- Path aliases and module structure
+- Project management via `tasks.md`
+
+**Specific Examples:**
+- Actual code patterns from your codebase
+- Real file references and import patterns
+- Concrete examples of the messaging system
