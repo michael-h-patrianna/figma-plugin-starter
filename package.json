@@ -14,11 +14,24 @@
     "preact": ">=10"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@create-figma-plugin/build": "^4.0.1",
     "@create-figma-plugin/tsconfig": "^4.0.1",
     "@figma/plugin-typings": "1.109.0",
+    "@jest/globals": "^30.0.5",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/preact": "^3.2.4",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "eslint": "^9.31.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
     "typescript": ">=5"
   },
   "scripts": {
@@ -30,7 +43,15 @@
     "dev": "build-figma-plugin --typecheck --watch --minify",
     "copy-fonts": "node scripts/copy-fonts.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "format": "prettier --write 'src/**/*.{ts,tsx,css,json,md}'"
+    "format": "prettier --write 'src/**/*.{ts,tsx,css,json,md}'",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ui": "jest --selectProjects ui-components",
+    "test:main": "jest --selectProjects main-thread",
+    "test:integration": "jest --selectProjects integration",
+    "test:ci": "jest --coverage --watchAll=false"
   },
   "figma-plugin": {
     "editorType": [

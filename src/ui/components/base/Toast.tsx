@@ -3,16 +3,42 @@ import { useTheme } from '@ui/contexts/ThemeContext';
 import { dismissAllToasts, dismissToast, Toast as ServiceToast, toastState } from '@ui/services/toast';
 import { useMemo, useState } from 'preact/hooks';
 
+/**
+ * Props for the SingleToast component.
+ */
 interface SingleToastProps {
+  /** The toast data object containing message, type, and timing information */
   toast: ServiceToast;
+  /** Function to call when the toast should be dismissed */
   onDismiss: (id: string) => void;
+  /** Index of the toast in the toast stack for spacing calculations */
   index: number;
 }
 
 /**
  * Individual toast component used by the global toast container.
  *
+ * Renders a single toast notification with type-based styling, hover effects,
+ * auto-dismiss functionality, and support for consolidated message counting.
+ * Includes pause-on-hover behavior for better user experience.
+ *
  * @param props - The toast props including the toast data and dismiss callback
+ * @returns A styled toast notification element
+ *
+ * @example
+ * ```tsx
+ * // This component is typically used internally by GlobalToastContainer
+ * <SingleToast
+ *   toast={{
+ *     id: '1',
+ *     message: 'Settings saved successfully',
+ *     type: 'success',
+ *     persist: false
+ *   }}
+ *   onDismiss={handleDismiss}
+ *   index={0}
+ * />
+ * ```
  */
 function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
   const { colors, spacing, shadows, animations } = useTheme();
@@ -131,8 +157,33 @@ function SingleToast({ toast, onDismiss, index }: SingleToastProps) {
 /**
  * Singleton toast container component that uses the global toast service.
  *
- * This should be included once in your app root to enable global toasts.
- * It automatically renders all active toasts from the global state.
+ * This component should be included once in your app root to enable global toasts.
+ * It automatically renders all active toasts from the global state, manages
+ * toast queuing, and provides a "dismiss all" action when multiple toasts are present.
+ *
+ * Features include:
+ * - Automatic toast positioning and stacking
+ * - Queue management for multiple simultaneous toasts
+ * - Dismiss all functionality
+ * - Responsive positioning and animations
+ *
+ * @returns A toast container with active toasts or null if no toasts are present
+ *
+ * @example
+ * ```tsx
+ * // Include once in your app root
+ * function App() {
+ *   return (
+ *     <div>
+ *       <GlobalToastContainer />
+ *     </div>
+ *   );
+ * }
+ *
+ * // Use the toast service anywhere
+ * import { showToast } from '@ui/services/toast';
+ * showToast('Operation completed!', 'success');
+ * ```
  */
 export function GlobalToastContainer() {
   const { colors, spacing, shadows, animations } = useTheme();

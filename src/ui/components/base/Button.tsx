@@ -1,3 +1,4 @@
+import { exampleSchemas, validateProps } from '@shared/propValidation';
 import { useTheme } from '@ui/contexts/ThemeContext';
 
 /**
@@ -22,6 +23,16 @@ interface ButtonProps {
   className?: string;
   /** Additional inline styles */
   style?: any;
+  /** Accessible label for screen readers (defaults to text content) */
+  'aria-label'?: string;
+  /** Describes the button for screen readers */
+  'aria-describedby'?: string;
+  /** Whether the button is in a pressed state */
+  'aria-pressed'?: boolean;
+  /** Whether the button controls an expanded/collapsed element */
+  'aria-expanded'?: boolean;
+  /** ID of element(s) controlled by this button */
+  'aria-controls'?: string;
 }
 
 /**
@@ -57,9 +68,32 @@ export function Button({
   fullWidth = false,
   type = 'button',
   className = '',
-  style = {}
+  style = {},
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-pressed': ariaPressed,
+  'aria-expanded': ariaExpanded,
+  'aria-controls': ariaControls
 }: ButtonProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
+
+  // Validate props in development mode
+  validateProps({
+    children,
+    onClick,
+    variant,
+    size,
+    disabled,
+    fullWidth,
+    type,
+    className,
+    style,
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    'aria-pressed': ariaPressed,
+    'aria-expanded': ariaExpanded,
+    'aria-controls': ariaControls
+  }, exampleSchemas.button, 'Button');
 
   /**
    * Gets the style object for the current button variant.
@@ -152,6 +186,15 @@ export function Button({
     border: `1px solid ${colors.inputBorder}`
   } : {};
 
+  // Build ARIA attributes object, only including defined values
+  const ariaAttributes: Record<string, any> = {};
+  if (ariaLabel) ariaAttributes['aria-label'] = ariaLabel;
+  if (ariaDescribedBy) ariaAttributes['aria-describedby'] = ariaDescribedBy;
+  if (ariaPressed !== undefined) ariaAttributes['aria-pressed'] = ariaPressed;
+  if (ariaExpanded !== undefined) ariaAttributes['aria-expanded'] = ariaExpanded;
+  if (ariaControls) ariaAttributes['aria-controls'] = ariaControls;
+  if (disabled) ariaAttributes['aria-disabled'] = 'true';
+
   return (
     <button
       type={type}
@@ -162,6 +205,7 @@ export function Button({
         ...buttonStyle,
         ...disabledStyle
       }}
+      {...ariaAttributes}
       onMouseEnter={(e) => {
         if (!disabled && variantStyles[':hover']) {
           e.currentTarget.style.background = variantStyles[':hover'].background;

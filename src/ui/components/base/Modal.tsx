@@ -18,6 +18,12 @@ interface ModalProps {
   size?: 'small' | 'medium' | 'large';
   /** Whether to show the close button in the header */
   showCloseButton?: boolean;
+  /** Accessible label for screen readers (defaults to title) */
+  'aria-label'?: string;
+  /** Description for screen readers */
+  'aria-describedby'?: string;
+  /** Unique ID for the modal */
+  id?: string;
 }
 
 /**
@@ -51,17 +57,28 @@ export function Modal({
   title,
   children,
   size = 'medium',
-  showCloseButton = true
+  showCloseButton = true,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  id
 }: ModalProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
 
-  // Handle escape key
+  // Generate unique IDs for accessibility
+  const modalId = id || `modal-${Math.random().toString(36).substr(2, 9)}`;
+  const titleId = `${modalId}-title`;
+  const bodyId = `${modalId}-body`;
+
+  // Handle escape key and focus management
   useEffect(() => {
     if (!isVisible) return;
 
+    // Store previous focused element for restoration
+    const previouslyFocused = document.activeElement as HTMLElement;
+
     /**
      * Handles keyboard events for modal navigation.
-     * Closes modal when Escape key is pressed.
+     * Closes modal when Escape key is pressed and manages focus trapping.
      */
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -69,9 +86,73 @@ export function Modal({
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isVisible, onClose]);
+    /**
+     * Handles focus trapping within modal.
+     * Ensures focus stays within modal when tabbing.
+     */
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      handleEscape(e);
+      handleTabKey(e);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Focus management: focus first focusable element when modal opens
+    const focusFirstElement = () => {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      if (firstElement) {
+        firstElement.focus();
+      }
+    };
+
+    // Focus first element after a brief delay to ensure DOM is ready
+    const timeoutId = setTimeout(focusFirstElement, 100);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timeoutId);
+
+      // Restore focus to previously focused element
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus();
+      }
+    };
+  }, [isVisible, onClose, modalId]);
 
   if (!isVisible) return null;
 
@@ -106,8 +187,15 @@ export function Modal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      role="presentation"
     >
       <div
+        id={modalId}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={ariaDescribedBy || bodyId}
+        aria-label={ariaLabel}
         style={{
           background: colors.darkPanel,
           borderRadius: borderRadius.default,
@@ -130,6 +218,7 @@ export function Modal({
           }}
         >
           <h3
+            id={titleId}
             style={{
               margin: 0,
               color: colors.textColor,
@@ -142,6 +231,7 @@ export function Modal({
           {showCloseButton && (
             <button
               onClick={onClose}
+              aria-label="Close dialog"
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -162,6 +252,7 @@ export function Modal({
 
         {/* Content */}
         <div
+          id={bodyId}
           style={{
             padding: spacing.lg,
             flex: 1,

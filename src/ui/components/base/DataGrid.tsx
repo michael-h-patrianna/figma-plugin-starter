@@ -11,69 +11,181 @@ import { TimePicker } from './TimePicker';
 import { ToggleSwitch } from './ToggleSwitch';
 
 // Types and Interfaces
+
+/**
+ * Configuration for a DataGrid column.
+ * @template T - The type of data objects in the grid
+ */
 export interface DataGridColumn<T = any> {
+  /** Unique key identifying the data property */
   key: keyof T;
+  /** Display title for the column header */
   title: string;
+  /** Fixed width in pixels */
   width?: number;
+  /** Minimum width in pixels */
   minWidth?: number;
+  /** Maximum width in pixels */
   maxWidth?: number;
+  /** Whether the column can be resized by dragging */
   resizable?: boolean;
+  /** Whether the column supports sorting */
   sortable?: boolean;
+  /** Whether the column supports filtering */
   filterable?: boolean;
+  /** Whether cells in this column can be edited */
   editable?: boolean;
+  /** Whether the column is hidden from view */
   hidden?: boolean;
+  /** Data type for specialized rendering and editing */
   type?: 'text' | 'number' | 'boolean' | 'date' | 'time' | 'color' | 'select' | 'toggle';
+  /** Options for select-type columns */
   options?: Array<{ value: any; label: string }>;
+  /** Custom formatter function for cell display */
   formatter?: (value: any) => string;
+  /** Aggregation function to apply to column data */
   aggregation?: 'sum' | 'avg' | 'count' | 'min' | 'max';
+  /** Minimum value for number inputs */
   min?: number;
+  /** Maximum value for number inputs */
   max?: number;
+  /** Custom editor component for cell editing */
   editor?: (props: EditorProps) => JSX.Element;
 }
 
+/**
+ * Props passed to custom cell editor components.
+ */
 export interface EditorProps {
+  /** Current value of the cell being edited */
   value: any;
+  /** Function to call when value changes */
   onChange: (value: any) => void;
+  /** Function to call to cancel editing */
   onCancel: () => void;
+  /** Function to call to commit changes */
   onCommit: () => void;
+  /** Column configuration object */
   column: DataGridColumn;
+  /** The complete row data object */
   row: any;
 }
 
+/**
+ * State object for DataGrid component.
+ */
 export interface DataGridState {
+  /** Current sorting configuration */
   sortBy?: { key: string; direction: 'asc' | 'desc' }[];
+  /** Current filter values by column key */
   filters?: Record<string, any>;
+  /** Column keys to group data by */
   groupBy?: string[];
+  /** Array of selected row identifiers */
   selection?: any[];
+  /** Array of expanded group identifiers */
   expandedGroups?: string[];
+  /** Current scroll position */
   scrollPosition?: { top: number; left: number };
 }
 
+/**
+ * Props for the DataGrid component.
+ * @template T - The type of data objects in the grid
+ */
 export interface DataGridProps<T = any> {
+  /** Array of data objects to display */
   data: T[];
+  /** Column configuration array */
   columns: DataGridColumn<T>[];
+  /** Property name or function to generate unique row keys */
   rowKey: string | ((row: T) => string);
+  /** External state object (for controlled mode) */
   state?: DataGridState;
+  /** Default state for uncontrolled mode */
   defaultState?: DataGridState;
+  /** Height of the grid container */
   height?: number | string;
+  /** Height of individual rows */
   rowHeight?: number | ((row: T) => number);
+  /** Trigger type for cell editing */
   editTrigger?: 'single' | 'double';
+  /** Row selection behavior */
   selectionMode?: 'single' | 'multi' | 'checkbox';
+  /** Whether to use virtual scrolling for rows */
   virtualizeRows?: boolean;
+  /** Whether to use virtual scrolling for columns */
   virtualizeColumns?: boolean;
+  /** Whether rows can be grouped */
   groupable?: boolean;
+  /** Whether to show aggregation footer */
   aggregatable?: boolean;
+  /** Whether to show export functionality */
   exportable?: boolean;
+  /** Whether the first column should stick during horizontal scroll */
   stickyFirstColumn?: boolean;
+  /** Callback when data changes (for editing) */
   onDataChange?: (delta: { added?: T[]; updated?: T[]; deleted?: T[] }) => void;
+  /** Callback when grid state changes */
   onStateChange?: (state: DataGridState) => void;
+  /** Callback when row selection changes */
   onSelectionChange?: (selection: T[]) => void;
+  /** Callback when a row is clicked */
   onRowClick?: (row: T, event: Event) => void;
+  /** Locale for formatting */
   locale?: string;
+  /** Theme override */
   theme?: 'light' | 'dark';
+  /** Additional CSS class name */
   className?: string;
+  /** Additional inline styles */
   style?: React.CSSProperties;
 }
+
+/**
+ * A comprehensive data grid component with virtual scrolling, editing, sorting, and filtering.
+ *
+ * Features include:
+ * - Virtual scrolling for performance with large datasets
+ * - In-line cell editing with various input types
+ * - Multi-column sorting and filtering
+ * - Row selection (single/multi)
+ * - Column resizing and reordering
+ * - Aggregation footer
+ * - Sticky first column option
+ * - Responsive design with theme integration
+ *
+ * @param props - The DataGrid props
+ * @returns A feature-rich data grid component
+ *
+ * @example
+ * ```tsx
+ * // Basic data grid
+ * <DataGrid
+ *   data={users}
+ *   columns={[
+ *     { key: 'name', title: 'Name', sortable: true, editable: true },
+ *     { key: 'email', title: 'Email', type: 'email' },
+ *     { key: 'active', title: 'Active', type: 'boolean' }
+ *   ]}
+ *   rowKey="id"
+ *   height={400}
+ * />
+ *
+ * // Advanced grid with editing and aggregation
+ * <DataGrid
+ *   data={salesData}
+ *   columns={[
+ *     { key: 'product', title: 'Product', editable: true },
+ *     { key: 'amount', title: 'Amount', type: 'number', aggregation: 'sum' },
+ *     { key: 'date', title: 'Date', type: 'date' }
+ *   ]}
+ *   rowKey="id"
+ *   aggregatable
+ *   onDataChange={handleDataChange}
+ * />
+ * ```
+ */
 
 // Default cell editors
 const TextEditor = ({ value, onChange, onCommit, onCancel }: EditorProps) => {

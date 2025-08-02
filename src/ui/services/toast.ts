@@ -12,7 +12,7 @@ export interface Toast {
   /** Unique identifier for the toast */
   id: string;
   /** Auto-dismiss timer reference */
-  timerId?: number;
+  timerId?: ReturnType<typeof setTimeout>;
   /** Count for consolidated messages */
   count?: number;
   /** Key for grouping similar messages */
