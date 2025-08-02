@@ -1,6 +1,6 @@
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { h } from 'preact';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 /**
  * Props for the Modal component.
@@ -63,6 +63,29 @@ export function Modal({
   id
 }: ModalProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
+
+  // Simple state management - ensure animation on mount
+  const [shouldRender, setShouldRender] = useState(isVisible);
+  const [isAnimatedIn, setIsAnimatedIn] = useState(false);
+
+  // Handle visibility changes with proper animation timing
+  useEffect(() => {
+    if (isVisible) {
+      // Mount the component first
+      setShouldRender(true);
+      // Then trigger animation in next frame
+      const animationFrame = requestAnimationFrame(() => {
+        setIsAnimatedIn(true);
+      });
+      return () => cancelAnimationFrame(animationFrame);
+    } else if (shouldRender) {
+      // Start exit animation immediately
+      setIsAnimatedIn(false);
+      // Unmount after animation completes
+      const timer = setTimeout(() => setShouldRender(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, shouldRender]);
 
   // Generate unique IDs for accessibility
   const modalId = id || `modal-${Math.random().toString(36).substr(2, 9)}`;
@@ -167,7 +190,8 @@ export function Modal({
     };
   }, [isVisible, onClose, modalId]);
 
-  if (!isVisible) return null;
+  // Don't render modal until animation system says we should
+  if (!shouldRender) return null;
 
   /**
    * Gets the size-specific styles for the modal.
@@ -195,7 +219,10 @@ export function Modal({
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 10000,
-        backdropFilter: 'blur(4px)'
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)', // Safari support
+        opacity: isAnimatedIn ? 1 : 0,
+        transition: 'opacity 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -216,6 +243,9 @@ export function Modal({
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
           display: 'flex',
           flexDirection: 'column',
+          transform: isAnimatedIn ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-10px)',
+          opacity: isAnimatedIn ? 1 : 0,
+          transition: 'transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           ...getSizeStyles()
         }}
         onClick={(e) => e.stopPropagation()}

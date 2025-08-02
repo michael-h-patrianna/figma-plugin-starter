@@ -29,6 +29,29 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
+// Mock Web Animations API
+class MockAnimation {
+  finished: Promise<void>;
+  currentTime: number = 0;
+  playbackRate: number = 1;
+
+  constructor() {
+    this.finished = Promise.resolve();
+  }
+
+  play() { }
+  pause() { }
+  cancel() { }
+  finish() { }
+  reverse() { }
+
+  addEventListener(type: string, listener: any) { }
+  removeEventListener(type: string, listener: any) { }
+}
+
+// Mock element.animate method
+Element.prototype.animate = jest.fn().mockImplementation(() => new MockAnimation());
+
 // Mock clipboard API
 Object.assign(navigator, {
   clipboard: {

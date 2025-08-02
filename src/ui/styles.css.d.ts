@@ -1,5 +1,7 @@
 declare const styles: {
+  readonly "accordion-trigger": string;
   readonly "accordionSlideDown": string;
+  readonly "button": string;
   readonly "container": string;
   readonly "current": string;
   readonly "dropdown": string;

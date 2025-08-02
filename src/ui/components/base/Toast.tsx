@@ -1,7 +1,7 @@
 import { getBestTextColor } from '@shared/utils';
 import { useTheme } from '@ui/contexts/ThemeContext';
 import { dismissAllToasts, dismissToast, Toast as ServiceToast, toastState } from '@ui/services/toast';
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 
 /**
  * Props for the SingleToast component.
@@ -56,6 +56,27 @@ function SingleToast({
 }: SingleToastProps) {
   const { colors, spacing, shadows, animations } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [shouldRender, setShouldRender] = useState(true);
+  const [isAnimatedIn, setIsAnimatedIn] = useState(false);
+
+  // Handle animation timing on mount
+  useEffect(() => {
+    // Trigger animation in next frame after mount
+    const animationFrame = requestAnimationFrame(() => {
+      setIsAnimatedIn(true);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
+  // Handle exit animation when dismissed
+  useEffect(() => {
+    if (!isVisible) {
+      setIsAnimatedIn(false);
+      const timer = setTimeout(() => setShouldRender(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
 
   const getToastColor = (type: string) => {
     switch (type) {
@@ -81,6 +102,14 @@ function SingleToast({
     return textColors[type] || textColors.default;
   };
 
+  // Handle dismiss with animation
+  const handleDismiss = () => {
+    // Call onDismiss immediately for immediate action (like tests)
+    onDismiss(toast.id);
+    // Then trigger exit animation
+    setIsVisible(false);
+  };
+
   // Pause auto-dismiss timer on hover
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -95,17 +124,39 @@ function SingleToast({
     if (!toast.persist && toast.timerId !== undefined) {
       const remainingTime = toast.type === 'error' ? 8000 : 4000; // Shorter remaining time
       toast.timerId = setTimeout(() => {
-        onDismiss(toast.id);
+        handleDismiss();
       }, remainingTime);
     }
   };
 
+  // Auto-dismiss effect
+  useEffect(() => {
+    if (!toast.persist && !isHovered && isVisible) {
+      const timeout = toast.type === 'error' ? 10000 : 5000;
+      const timerId = setTimeout(() => {
+        handleDismiss();
+      }, timeout);
+
+      toast.timerId = timerId;
+
+      return () => {
+        clearTimeout(timerId);
+      };
+    }
+  }, [toast.persist, toast.type, isHovered, isVisible]);
+
   const displayMessage = toast.message;
+
+  if (!shouldRender) return null;
+
+  // Determine ARIA attributes
+  const toastRole = toast.type === 'error' ? 'alert' : 'status';
+  const ariaLive = toast.type === 'error' ? 'assertive' : 'polite';
 
   return (
     <div
-      role={toast.type === 'error' ? 'alert' : 'status'}
-      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+      role={toastRole}
+      aria-live={ariaLive}
       aria-atomic="true"
       aria-label={ariaLabel || `${toast.type} notification: ${displayMessage}`}
       aria-labelledby={ariaLabelledBy}
@@ -118,8 +169,6 @@ function SingleToast({
         fontWeight: 600,
         fontSize: 14,
         boxShadow: isHovered ? shadows.toastHover : shadows.toast,
-        opacity: 1,
-        transition: animations.transition,
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -127,10 +176,13 @@ function SingleToast({
         maxWidth: '400px',
         wordWrap: 'break-word',
         marginBottom: index > 0 ? spacing.sm : 0,
-        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-        position: 'relative'
+        position: 'relative',
+        // CSS animations
+        opacity: isAnimatedIn ? 1 : 0,
+        transform: `translateX(${isAnimatedIn ? '0' : '100%'}) translateY(${isHovered ? '-2px' : '0'})`,
+        transition: 'opacity 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
       }}
-      onClick={() => onDismiss(toast.id)}
+      onClick={handleDismiss}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

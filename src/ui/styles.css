@@ -1,6 +1,9 @@
 /* Import Inter Variable Font */
 @import url('./assets/fonts/inter.css');
 
+/* Import animation keyframes and utilities */
+@import url('../shared/animations.css');
+
 .container {
   overflow: auto;
   height: 164px;

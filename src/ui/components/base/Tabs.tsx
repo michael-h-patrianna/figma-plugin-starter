@@ -273,8 +273,23 @@ export function Tabs({ tabs, activeTab, onChange, variant = 'default' }: TabsPro
       </div>
 
       {/* Tab Content */}
-      <div>
-        {tabs.find(tab => tab.id === activeTab)?.content}
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTab;
+          if (!isActive) return null;
+
+          return (
+            <div
+              key={tab.id}
+              style={{
+                opacity: 1,
+                transform: 'translateY(0)'
+              }}
+            >
+              {tab.content}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
