@@ -47,7 +47,7 @@ export class NodeScanner {
   async getSelection(): Promise<void> {
     try {
       const startTime = Date.now();
-      const selection = figma.currentPage.selection;
+      const selection = this.uiHelpers.getSelection();
 
       const nodes: NodeData[] = [];
       const errors: string[] = [];
@@ -120,7 +120,7 @@ export class NodeScanner {
       const result: ScanResult = {
         summary: {
           totalNodes: allNodes.length,
-          selectedNodes: figma.currentPage.selection.length,
+          selectedNodes: this.uiHelpers.getSelection().length,
           nodesByType: this.groupNodesByType(allNodes),
           processingTime: Date.now() - startTime
         },
@@ -230,7 +230,7 @@ export class NodeScanner {
   private getStartingNodes(startFrom: string): readonly SceneNode[] {
     switch (startFrom) {
       case 'selection':
-        return figma.currentPage.selection;
+        return this.uiHelpers.getSelection();
       case 'page':
         return figma.currentPage.children;
       case 'document':

@@ -5,28 +5,46 @@ import { Panel } from '@ui/components/base/Panel';
 import { useTheme } from '@ui/contexts/ThemeContext';
 
 /**
- * Props for the ContentView component.
- */
-interface ContentViewProps {
-  /** Accordion items to display */
-  accordionItems: Array<{
-    id: string;
-    title: string;
-    content: any;
-  }>;
-}
-
-/**
  * ContentView component demonstrating content display components like InfoBox and Accordion.
  *
  * This view showcases components used for organizing and presenting information,
  * including contextual info boxes with different variants and collapsible accordion sections.
  *
- * @param props - {@link ContentViewProps} for configuring the content display
  * @returns The rendered ContentView React element
  */
-export function ContentView({ accordionItems }: ContentViewProps) {
+export function ContentView() {
   const { colors } = useTheme();
+
+  // Local accordion items for demo
+  const accordionItems = [
+    {
+      id: 'overview',
+      title: 'Plugin Overview',
+      content: (
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
+          This starter includes comprehensive UI components, hooks, and utilities for building professional Figma plugins.
+        </div>
+      )
+    },
+    {
+      id: 'components',
+      title: 'Available Components',
+      content: (
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
+          Panels, Modals, Inputs, Dropdowns, Tabs, Accordions, Native Loading, Tables, Notifications, and more.
+        </div>
+      )
+    },
+    {
+      id: 'features',
+      title: 'Advanced Features',
+      content: (
+        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
+          Theme system, plugin storage, error boundaries, export utilities, and selection helpers.
+        </div>
+      )
+    }
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

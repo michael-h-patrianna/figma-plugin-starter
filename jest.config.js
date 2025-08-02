@@ -5,7 +5,11 @@ module.exports = {
   projects: [
     {
       displayName: 'ui-components',
-      testMatch: ['<rootDir>/tests/unit/components/**/*.test.*'],
+      testMatch: [
+        '<rootDir>/tests/unit/components/**/*.test.*',
+        '<rootDir>/tests/unit/services/**/*.test.*',
+        '<rootDir>/tests/unit/hooks/**/*.test.*'
+      ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/tests/setup/ui.setup.ts'],
       moduleNameMapper: {

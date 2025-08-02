@@ -30,26 +30,34 @@ export function ProgressBar({
           fontSize: typography.bodySmall,
           color: colors.textColor
         }}>
-          {label && <span>{label}</span>}
-          {showPercentage && <span>{Math.round(clampedProgress)}%</span>}
+          {label && <span data-testid="progress-label">{label}</span>}
+          {showPercentage && <span data-testid="progress-percentage">{Math.round(clampedProgress)}%</span>}
         </div>
       )}
 
-      <div style={{
-        width: '100%',
-        height,
-        background: colors.darkBg,
-        borderRadius: borderRadius.default,
-        overflow: 'hidden',
-        border: `1px solid ${colors.border}`
-      }}>
-        <div style={{
-          width: `${clampedProgress}%`,
-          height: '100%',
-          background: progressColor,
-          transition: 'width 0.3s ease',
-          borderRadius: borderRadius.default
-        }} />
+      <div
+        data-testid="progress-bar"
+        data-progress={progress}
+        aria-label={label || `Progress: ${Math.round(clampedProgress)}%`}
+        style={{
+          width: '100%',
+          height,
+          background: colors.darkBg,
+          borderRadius: borderRadius.default,
+          overflow: 'hidden',
+          border: `1px solid ${colors.border}`
+        }}
+      >
+        <div
+          data-testid="progress-fill"
+          style={{
+            width: `${clampedProgress}%`,
+            height: '100%',
+            background: progressColor,
+            transition: 'width 0.3s ease',
+            borderRadius: borderRadius.default
+          }}
+        />
       </div>
     </div>
   );

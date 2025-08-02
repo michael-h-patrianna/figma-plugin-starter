@@ -66,7 +66,7 @@ export class ContentCreator {
       }
 
       // Select the created frame
-      figma.currentPage.selection = [frame];
+      this.uiHelpers.setSelection([frame]);
       figma.viewport.scrollAndZoomIntoView([frame]);
 
       const result: CreationResult = {
@@ -137,7 +137,7 @@ export class ContentCreator {
 
       // Select and focus created elements
       const createdElements = samples.map(s => figma.getNodeById(s.id)).filter(Boolean) as SceneNode[];
-      figma.currentPage.selection = createdElements;
+      this.uiHelpers.setSelection(createdElements);
       figma.viewport.scrollAndZoomIntoView(createdElements);
 
       this.uiHelpers.sendToUI('SAMPLES_CREATED', {
@@ -188,7 +188,7 @@ export class ContentCreator {
         rect.fills = [{ type: 'SOLID', color }];
       }
 
-      figma.currentPage.selection = [rect];
+      this.uiHelpers.setSelection([rect]);
 
       const result: CreationResult = {
         id: rect.id,
@@ -240,7 +240,7 @@ export class ContentCreator {
         ellipse.fills = [{ type: 'SOLID', color }];
       }
 
-      figma.currentPage.selection = [ellipse];
+      this.uiHelpers.setSelection([ellipse]);
 
       const result: CreationResult = {
         id: ellipse.id,
@@ -297,7 +297,7 @@ export class ContentCreator {
         text.fills = [{ type: 'SOLID', color }];
       }
 
-      figma.currentPage.selection = [text];
+      this.uiHelpers.setSelection([text]);
 
       const result: CreationResult = {
         id: text.id,

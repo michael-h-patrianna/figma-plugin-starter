@@ -1,11 +1,10 @@
 import { render } from '@create-figma-plugin/ui';
-import { OperationResult } from '@main/types';
 import { PLUGIN_NAME } from '@shared/constants';
-import { copyToClipboard } from '@shared/utils';
 import { ErrorBoundary } from '@ui/components/base/ErrorBoundary';
+import { GlobalProgressModalContainer } from '@ui/components/base/GlobalProgressModalContainer';
 import { LazyLoader } from '@ui/components/base/LazyLoader';
 import { MessageBox } from '@ui/components/base/MessageBox';
-import { ProgressBar } from '@ui/components/base/ProgressBar';
+import { ProgressManager } from '@ui/components/base/ProgressManager';
 import { SettingsDropdown } from '@ui/components/base/SettingsDropdown';
 import { Tabs } from '@ui/components/base/Tabs';
 import { GlobalToastContainer } from '@ui/components/base/Toast';
@@ -15,6 +14,7 @@ import { SectionsView } from '@ui/components/views/SectionsView';
 import { ThemeProvider, useTheme } from '@ui/contexts/ThemeContext';
 import { useSettings } from '@ui/hooks/useSettings';
 import { useWindowResize } from '@ui/hooks/useWindowResize';
+import { ProgressManagerService } from '@ui/services/progressManager';
 import { Toast as ToastService } from '@ui/services/toast';
 import { useEffect, useState } from 'preact/hooks';
 
@@ -56,10 +56,6 @@ function App() {
     document.body.className = `theme-${theme}`;
   }
 
-  const [scanResult, setScanResult] = useState<OperationResult | null>(null);
-  const [processResult, setProcessResult] = useState<OperationResult | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
 
   // Component demo states
@@ -76,109 +72,12 @@ function App() {
 
   // Handle theme toggle (update both theme context and settings)
   const handleThemeToggle = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    updateSettings({ theme: newTheme });
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  async function handleCopyData() {
-    if (processResult && processResult.data) {
-      const success = await copyToClipboard(JSON.stringify(processResult.data, null, 2));
-      if (success) {
-        ToastService.success('Data copied to clipboard!');
-      } else {
-        ToastService.error('Copy failed - try again');
-      }
-    } else {
-      ToastService.warning('No processed data available');
-    }
-  }
-
-  function loadDemoData() {
-    // Create demo scan result with various issue types
-    const demoScanResult: OperationResult = {
-      success: false,
-      data: {
-        selectionCount: 12,
-        pageInfo: {
-          name: 'Demo Page',
-          id: 'demo-page-id'
-        },
-        totalItems: 25,
-        uniqueItems: 12
-      },
-      issues: [
-        { code: 'MISSING_LAYER', level: 'error', message: 'Missing required layer found' },
-        { code: 'NAMING_ISSUE', level: 'warning', message: 'Inconsistent naming detected' },
-        { code: 'GROUPING_SUGGESTION', level: 'info', message: 'Consider grouping similar elements' }
-      ]
-    };
-
-    const demoProcessResult: OperationResult = {
-      success: true,
-      data: {
-        processedItems: 12,
-        outputFormat: 'JSON',
-        timestamp: new Date().toISOString(),
-        summary: {
-          total: 12,
-          processed: 12,
-          errors: 0
-        }
-      }
-    };
-
-    setScanResult(demoScanResult);
-    setProcessResult(demoProcessResult);
-    ToastService.success('Demo data loaded successfully!');
-  }
-
-  function simulateProgress() {
-    setIsScanning(true);
-    setScanProgress(0);
-
-    const progressInterval = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          setIsScanning(false);
-          ToastService.success('Progress simulation completed!');
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-  }
-
-  const accordionItems = [
-    {
-      id: 'overview',
-      title: 'Plugin Overview',
-      content: (
-        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
-          This starter includes comprehensive UI components, hooks, and utilities for building professional Figma plugins.
-        </div>
-      )
-    },
-    {
-      id: 'components',
-      title: 'Available Components',
-      content: (
-        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
-          Panels, Modals, Inputs, Dropdowns, Tabs, Accordions, Native Loading, Tables, Notifications, and more.
-        </div>
-      )
-    },
-    {
-      id: 'features',
-      title: 'Advanced Features',
-      content: (
-        <div style={{ color: colors.textSecondary, lineHeight: 1.5 }}>
-          Theme system, plugin storage, error boundaries, export utilities, and selection helpers.
-        </div>
-      )
-    }
-  ];
+  const handleShowProgressManager = () => {
+    ProgressManagerService.show();
+  };
 
   return (
     <ErrorBoundary onError={(error, errorInfo) => {
@@ -231,6 +130,7 @@ function App() {
                 debugMode={settings.debugMode}
                 onDebugToggle={handleDebugToggle}
                 onThemeToggle={handleThemeToggle}
+                onShowProgressManager={handleShowProgressManager}
               />
             </div>
           </div>
@@ -245,14 +145,7 @@ function App() {
             {
               id: 'sections',
               label: 'Start',
-              content: (
-                <SectionsView
-                  scanResult={scanResult}
-                  processResult={processResult}
-                  onLoadDemoData={loadDemoData}
-                  onCopyData={handleCopyData}
-                />
-              )
+              content: <SectionsView />
             },
             {
               id: 'forms',
@@ -272,7 +165,7 @@ function App() {
                 <LazyLoader
                   loader={() => import('@ui/components/views/ContentView')}
                 >
-                  {(module) => <module.ContentView accordionItems={accordionItems} />}
+                  {(module) => <module.ContentView />}
                 </LazyLoader>
               )
             },
@@ -323,40 +216,6 @@ function App() {
           onChange={setActiveTab}
         />
 
-        {/* Progress Overlay */}
-        {isScanning && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              background: colors.darkPanel,
-              padding: 32,
-              borderRadius: 8,
-              textAlign: 'center',
-              minWidth: 300,
-              border: `1px solid ${colors.border}`
-            }}>
-              <div style={{ marginBottom: 16, color: colors.textColor, fontSize: 16 }}>
-                Scanning...
-              </div>
-              <ProgressBar
-                progress={scanProgress}
-                showPercentage={true}
-                height={12}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Help Button */}
         <button
           onClick={() => setShowHelp(true)}
@@ -386,6 +245,12 @@ function App() {
 
         {/* Help Popup */}
         <HelpPopup isVisible={showHelp} onClose={() => setShowHelp(false)} />
+
+        {/* Global Progress Modal Container */}
+        <GlobalProgressModalContainer />
+
+        {/* Progress Manager */}
+        <ProgressManager />
 
         {/* Global MessageBox */}
         <MessageBox />

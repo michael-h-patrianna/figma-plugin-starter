@@ -16,10 +16,12 @@ export { ToggleSwitch } from './ToggleSwitch';
 // Export display components
 export { Alert } from './Alert';
 export { Code } from './Code';
+export { GlobalProgressModalContainer } from './GlobalProgressModalContainer';
 export { InfoBox } from './InfoBox';
 export { MessageBox } from './MessageBox';
 export { NotificationBanner } from './NotificationBanner';
 export { ProgressBar } from './ProgressBar';
+export { ProgressManager } from './ProgressManager';
 export { Spinner } from './Spinner';
 export { GlobalToastContainer } from './Toast';
 

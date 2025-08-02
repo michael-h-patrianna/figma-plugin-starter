@@ -9,6 +9,7 @@ interface ProgressModalProps {
   title?: string;
   description?: string;
   showCloseButton?: boolean;
+  zIndex?: number;
 }
 
 export function ProgressModal({
@@ -17,7 +18,8 @@ export function ProgressModal({
   progress,
   title = 'Processing',
   description,
-  showCloseButton = false
+  showCloseButton = false,
+  zIndex
 }: ProgressModalProps) {
   const { colors, spacing } = useTheme();
 
@@ -35,11 +37,13 @@ export function ProgressModal({
       onClose={handleClose}
       title={title}
       showCloseButton={showCloseButton || progress >= 100}
+      zIndex={zIndex}
     >
       <div style={{ padding: `${spacing.md}px 0` }}>
         <ProgressBar
           progress={progress}
-          label={`Processing... ${Math.round(progress)}%`}
+          label={`Processing...`}
+          showPercentage={true}
         />
         {displayDescription && (
           <div style={{

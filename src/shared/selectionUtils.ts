@@ -104,6 +104,84 @@ export function getAllFrames(nodes: readonly SceneNode[]): FrameNode[] {
   return frames;
 }
 
+/**
+ * Recursively gets all descendant nodes from the selection (including all children, grandchildren, etc.).
+ *
+ * @param nodes - Array of SceneNodes to search.
+ * @returns {SceneNode[]} Array of all nodes including the original nodes and their descendants.
+ */
+export function getAllDescendants(nodes: readonly SceneNode[]): SceneNode[] {
+  const allNodes: SceneNode[] = [];
+
+  function traverse(node: SceneNode) {
+    // Add the current node
+    allNodes.push(node);
+
+    // Recursively traverse children if they exist
+    if ('children' in node) {
+      node.children.forEach(traverse);
+    }
+  }
+
+  nodes.forEach(traverse);
+  return allNodes;
+}
+
+/**
+ * Node information with hierarchical children structure.
+ */
+export interface NodeWithChildren {
+  id: string;
+  name: string;
+  type: string;
+  visible: boolean;
+  locked: boolean;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  parent?: string;
+  children?: NodeWithChildren[];
+}
+
+/**
+ * Converts nodes to hierarchical tree structure with all children included.
+ *
+ * @param nodes - Array of SceneNodes to convert.
+ * @returns {NodeWithChildren[]} Array of nodes with hierarchical children structure.
+ */
+export function getNodesWithHierarchy(nodes: readonly SceneNode[]): NodeWithChildren[] {
+  function convertNode(node: SceneNode): NodeWithChildren {
+    const nodeInfo: NodeWithChildren = {
+      id: node.id,
+      name: node.name,
+      type: node.type,
+      visible: node.visible,
+      locked: node.locked,
+      parent: 'parent' in node ? node.parent?.name || 'Page' : 'Page'
+    };
+
+    // Add position and size if available
+    if ('x' in node && 'y' in node) {
+      nodeInfo.x = node.x;
+      nodeInfo.y = node.y;
+    }
+    if ('width' in node && 'height' in node) {
+      nodeInfo.width = node.width;
+      nodeInfo.height = node.height;
+    }
+
+    // Recursively convert children if they exist
+    if ('children' in node && node.children.length > 0) {
+      nodeInfo.children = node.children.map(convertNode);
+    }
+
+    return nodeInfo;
+  }
+
+  return nodes.map(convertNode);
+}
+
 
 /**
  * Validation rule for checking Figma selection.

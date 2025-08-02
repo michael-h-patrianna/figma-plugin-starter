@@ -359,6 +359,19 @@ import { NotificationBanner } from '@ui/components/base';
 />
 ```
 
+### InfoBox
+```tsx
+import { InfoBox } from '@ui/components/base';
+
+<InfoBox
+  title="Tip"
+  message="You can use keyboard shortcuts to work faster"
+  type="tip"
+/>
+```
+
+## Progress & Loading Components
+
 ### ProgressBar
 ```tsx
 import { ProgressBar } from '@ui/components/base';
@@ -391,17 +404,121 @@ import { Spinner } from '@ui/components/base';
 <Spinner size="large" />
 ```
 
-### ProgressModal
+### ProgressManager
 ```tsx
-import { ProgressModal } from '@ui/components/base';
+import { ProgressManagerService } from '@ui/services/progressManager';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
 
-<ProgressModal
-  isVisible={isProcessing}
-  title="Processing Data"
-  progress={processingProgress}
-  message="Please wait while we process your data..."
-  onCancel={handleCancel}
-/>
+// Handle progress updates from main thread operations
+function MyComponent() {
+  useProgressManager(
+    (operationId) => {
+      console.log('Operation completed:', operationId);
+    },
+    (operationId, error) => {
+      console.error('Operation failed:', error);
+    }
+  );
+
+  const handleLongOperation = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Processing Data',
+        description: 'This will take a while...',
+        cancellable: true,
+        total: 100 // Optional: if you know total steps
+      },
+      'LONG_OPERATION', // Message type sent to main thread
+      {
+        // Additional data for main thread
+        steps: 100,
+        mode: 'batch'
+      }
+    );
+  };
+
+  const handleShowProgressManager = () => {
+    // Show the progress manager modal manually
+    ProgressManagerService.show();
+  };
+
+  return (
+    <div>
+      <button onClick={handleLongOperation}>
+        Start Long Operation
+      </button>
+      <button onClick={handleShowProgressManager}>
+        Show Progress Manager
+      </button>
+    </div>
+  );
+}
+```
+
+### Spinner
+```tsx
+import { Spinner } from '@ui/components/base';
+
+// Basic spinner
+<Spinner />
+
+// With message
+<Spinner message="Loading..." />
+
+// Different sizes
+<Spinner size="small" />
+<Spinner size="large" />
+```
+
+### ProgressManager
+```tsx
+import { ProgressManagerService } from '@ui/services/progressManager';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+
+// Handle progress updates from main thread operations
+function MyComponent() {
+  useProgressManager(
+    (operationId) => {
+      console.log('Operation completed:', operationId);
+    },
+    (operationId, error) => {
+      console.error('Operation failed:', error);
+    }
+  );
+
+  const handleLongOperation = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Processing Data',
+        description: 'This will take a while...',
+        cancellable: true,
+        total: 100 // Optional: if you know total steps
+      },
+      'LONG_OPERATION', // Message type sent to main thread
+      {
+        // Additional data for main thread
+        steps: 100,
+        mode: 'batch'
+      }
+    );
+  };
+
+  const handleShowProgressManager = () => {
+    // Show the progress manager modal manually
+    ProgressManagerService.show();
+  };
+
+  return (
+    <div>
+      <button onClick={handleLongOperation}>
+        Start Long Operation
+      </button>
+      <button onClick={handleShowProgressManager}>
+        Show Progress Manager
+      </button>
+    </div>
+  );
+}
 ```
 
 ### MessageBox
@@ -477,12 +594,6 @@ const menuItems = [
 ```tsx
 import { SettingsDropdown } from '@ui/components/base';
 import { ProgressManagerService } from '@ui/services/progressManager';
-
-const settingsItems = [
-  { label: 'Preferences', onClick: openPreferences },
-  { label: 'Export Data', onClick: exportData },
-  { label: 'Reset Settings', onClick: resetSettings }
-];
 
 <SettingsDropdown
   debugMode={debugMode}

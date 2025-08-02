@@ -7,6 +7,7 @@ interface SettingsDropdownProps {
   debugMode: boolean;
   onDebugToggle: (enabled: boolean) => void;
   onThemeToggle: () => void;
+  onShowProgressManager?: () => void;
 }
 
 /**
@@ -16,7 +17,8 @@ interface SettingsDropdownProps {
 export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
   debugMode,
   onDebugToggle,
-  onThemeToggle
+  onThemeToggle,
+  onShowProgressManager
 }) => {
   const { colors, theme } = useTheme();
   const { isVisible, position, showContextMenu, hideContextMenu } = useContextMenu();
@@ -45,6 +47,15 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       label: '',
       separator: true
     },
+    ...(onShowProgressManager ? [{
+      id: 'progress-manager',
+      label: 'Open Progress Manager',
+      onClick: onShowProgressManager
+    }, {
+      id: 'separator-2',
+      label: '',
+      separator: true
+    }] : []),
     {
       id: 'theme-toggle',
       label: '',

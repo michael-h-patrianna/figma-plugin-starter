@@ -89,7 +89,9 @@ npm run format   # Prettier
 
 ## Documentation
 
-📖 **[Complete Documentation](./documentation.md)** - components and  examples
+📖 **[Complete Documentation](./docs/documentation.md)** - Full API reference and component documentation
+🧩 **[Component Examples](./docs/component-examples.md)** - Usage examples for all components
+💬 **[Messaging & Progress Examples](./docs/messaging-examples.md)** - Main↔UI thread communication patterns
 
 ## Resources
 

@@ -24,6 +24,8 @@ interface ModalProps {
   'aria-describedby'?: string;
   /** Unique ID for the modal */
   id?: string;
+  /** Custom z-index for layering multiple modals */
+  zIndex?: number;
 }
 
 /**
@@ -60,7 +62,8 @@ export function Modal({
   showCloseButton = true,
   'aria-label': ariaLabel,
   'aria-describedby': ariaDescribedBy,
-  id
+  id,
+  zIndex = 10000
 }: ModalProps) {
   const { colors, spacing, typography, borderRadius } = useTheme();
 
@@ -218,7 +221,7 @@ export function Modal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 10000,
+        zIndex: zIndex,
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)', // Safari support
         opacity: isAnimatedIn ? 1 : 0,

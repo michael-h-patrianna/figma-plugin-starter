@@ -14,6 +14,7 @@ globs: *
 - Use TSDoc, not JSDoc for documentation.
 - When adding or changing functionality, always amend tests. This is a critical development principle.
 - Always update tests whenever adding or changing functionality.
+- When using the `FormRow` component, be aware of the responsive layout behavior.
 
 ## CORE ARCHITECTURE
 
@@ -104,16 +105,12 @@ export function Component({ prop }: ComponentProps) {
 // Always use UIHelpers for messaging
 const uiHelpers = new UIHelpers();
 
-figma.ui.onmessage = (msg) => {
-  const { type, ...data } = msg.pluginMessage || msg;
-
-  switch (type) {
-    case 'ACTION':
-      // Handle action
-      uiHelpers.sendToUI('RESULT', data);
-      break;
+uiHelpers.setupMessageHandler({
+  ACTION: (data) => {
+    // Handle action
+    uiHelpers.sendToUI('RESULT', data);
   }
-};
+});
 ```
 
 ## PROJECT MANAGEMENT
@@ -127,7 +124,7 @@ figma.ui.onmessage = (msg) => {
 ### Documentation Standards
 - TSDoc for all public APIs
 - Examples in component docs
-- README for setup, `documentation.md` for features
+- README for setup, `docs/documentation.md` for features
 - Error codes for user support
 
 ### Testing Figma Plugins
@@ -179,7 +176,7 @@ global.parent = {
 
 **Test Categories:**
 - **Unit Tests**: Individual components and utilities
-- **Integration Tests**: Cross-thread communication and workflows  
+- **Integration Tests**: Cross-thread communication and workflows
 - **Accessibility Tests**: ARIA attributes, keyboard navigation, focus management
 - **Memory Tests**: Long-running session validation
 
@@ -224,3 +221,77 @@ global.parent = {
 
 - When adding or changing functionality, always amend tests.
 - Always update tests whenever adding or changing functionality.
+
+### FormRow Layout Rules
+
+- The `FormRow` component uses `flexWrap: 'wrap'` and content-aware minimum widths.
+- When the content doesn't fit within the available space, it will wrap to a new row.
+- The following minimum widths apply:
+  - 2 columns: 300px
+  - 3 columns: 200px
+  - 4 columns: 150px
+
+## Animations
+
+### Overview
+
+The project uses CSS transitions for UI animations. While a full JavaScript animation library could be used, CSS transitions provide a good balance of performance, simplicity, and Figma plugin compatibility.
+
+### Key Features:
+
+- **CSS Transitions**: All animations are implemented using CSS transitions (not JavaScript animations)
+- **150ms Duration**: Standard animation duration for a snappy, responsive feel
+- **`useAnimation` Hook**: Manages animation state and applies CSS classes
+- **`animations.css`**: Centralized CSS keyframes and transition classes
+
+### Built-In Component Animations:
+
+The following components have built-in animations:
+
+1. **Modal**
+   - **Opening**: Backdrop fade and modal scale-up animation
+   - **Closing**: Backdrop fade and modal scale-down animation
+
+2. **Toast**
+   - **Appearing**: Slide-in from right + opacity fade
+   - **Dismissing**: Slide-out to right + opacity fade
+
+3. **Accordion**
+   - **Chevron Rotation**: Smooth rotation when expanding/collapsing
+
+### Animation Utilities:
+
+The `animationUtils.ts` file provides helper functions for working with animations:
+
+```typescript
+// Get animation duration from theme
+const animationDuration = useTheme().animationDuration;
+
+// Apply animation to element
+const element = useRef<HTMLDivElement>(null);
+useLayoutEffect(() => {
+  if (isVisible) {
+    const node = element.current;
+    node.classList.add('animate-in');
+    return () => {
+      node.classList.remove('animate-in');
+    };
+  }
+}, [isVisible]);
+```
+
+### Best Practices:
+
+- Use CSS transitions for simple animations like fading, sliding, and scaling
+- Use `animationDuration` from the theme to ensure consistent animation speeds
+- Remember that Figma's plugin environment may not support all animation features
+
+### Remember to
+
+- Amend tests whenever adding or changing functionality
+
+## Code Component
+
+### Max Height and Scrollbars
+
+The `Code` component supports a `maxHeight` prop. When the content exceeds the maximum height, scrollbars are automatically displayed.

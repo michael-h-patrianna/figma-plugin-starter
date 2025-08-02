@@ -1,36 +1,89 @@
 import { OperationResult } from '@main/types';
+import { copyToClipboard } from '@shared/utils';
 import { Button } from '@ui/components/base/Button';
 import { DataTable } from '@ui/components/base/DataTable';
 import { NotificationBanner } from '@ui/components/base/NotificationBanner';
 import { Panel } from '@ui/components/base/Panel';
 import { HowToUsePanel } from '@ui/components/panels/HowToUsePanel';
+import { ProgressManagerDemo } from '@ui/components/views/ProgressManagerDemo';
 import { useTheme } from '@ui/contexts/ThemeContext';
-
-
-/**
- * Props for the SectionsView component.
- */
-interface SectionsViewProps {
-  scanResult: OperationResult | null;
-  processResult: OperationResult | null;
-  onLoadDemoData: () => void;
-  onCopyData: () => void;
-}
-
+import { Toast as ToastService } from '@ui/services/toast';
+import { useState } from 'preact/hooks';
 
 /**
  * Renders a demonstration view for sectioned panels, including scan and process results, action buttons, and usage instructions.
+ * This view manages its own state for demo data and demonstrates various plugin features including data tables and the new Progress Manager system.
  *
- * @param props - {@link SectionsViewProps} for controlling demo data and actions.
  * @returns The rendered sections view React element.
  */
-export function SectionsView({
-  scanResult,
-  processResult,
-  onLoadDemoData,
-  onCopyData
-}: SectionsViewProps) {
+export function SectionsView() {
   const { colors } = useTheme();
+
+  // Local state for demo data
+  const [scanResult, setScanResult] = useState<OperationResult | null>(null);
+  const [processResult, setProcessResult] = useState<OperationResult | null>(null);
+
+  // Handle demo data loading
+  const handleLoadDemoData = () => {
+    // Create demo scan result with various issue types
+    const demoScanResult: OperationResult = {
+      success: false,
+      data: {
+        selectionCount: 12,
+        pageInfo: {
+          name: 'Demo Page',
+          id: 'demo-page-id'
+        },
+        totalItems: 25,
+        uniqueItems: 12
+      },
+      issues: [
+        { code: 'MISSING_LAYER', level: 'error', message: 'Missing required layer found' },
+        { code: 'NAMING_ISSUE', level: 'warning', message: 'Inconsistent naming detected' },
+        { code: 'GROUPING_SUGGESTION', level: 'info', message: 'Consider grouping similar elements' }
+      ]
+    };
+
+    const demoProcessResult: OperationResult = {
+      success: true,
+      data: {
+        processedItems: 12,
+        outputFormat: 'JSON',
+        timestamp: new Date().toISOString(),
+        summary: {
+          total: 12,
+          processed: 12,
+          errors: 0
+        }
+      }
+    };
+
+    setScanResult(demoScanResult);
+    setProcessResult(demoProcessResult);
+    ToastService.success('Demo data loaded successfully!');
+  };
+
+  // Handle copying demo data
+  const handleCopyData = async () => {
+    if (processResult && processResult.data) {
+      const success = await copyToClipboard(JSON.stringify(processResult.data, null, 2));
+      if (success) {
+        ToastService.success('Data copied to clipboard!');
+      } else {
+        ToastService.error('Copy failed - try again');
+      }
+    } else {
+      ToastService.warning('No processed data available');
+    }
+  };
+
+  // Handle clearing demo data
+  const handleClearData = () => {
+    setScanResult(null);
+    setProcessResult(null);
+    ToastService.info('Demo data cleared');
+  };
+
   // Demo data for table - more rows to test scrolling
   const tableData = scanResult?.data ? [
     { id: 1, name: 'Layer 1', type: 'Rectangle', visible: true, x: 0, y: 0 },
@@ -63,17 +116,23 @@ export function SectionsView({
           gap: 8,
           flexWrap: 'wrap'
         }}>
-          <Button onClick={onLoadDemoData}>
+          <Button onClick={handleLoadDemoData}>
             Load Demo Data
           </Button>
-          <Button onClick={onCopyData} disabled={!processResult?.data}>
+          <Button onClick={handleCopyData} disabled={!processResult?.data}>
             Copy Demo Result
+          </Button>
+          <Button onClick={handleClearData} disabled={!scanResult && !processResult}>
+            Clear Data
           </Button>
         </div>
       </Panel>
 
       {/* How To Use Panel (only visible when no scanResult) */}
       {!scanResult && <HowToUsePanel />}
+
+      {/* Progress Manager Demo */}
+      <ProgressManagerDemo />
 
       {/* Scan Results Panel */}
       <Panel

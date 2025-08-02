@@ -2,6 +2,18 @@
 
 This documentation covers all the custom components, hooks, and features in this plugin template.
 
+## Documentation Index
+
+### Implementation Guides
+- **[Complete Communication Flow Examples](./messaging-examples.md)** - Practical examples showing both UI and main thread sides of every interaction
+- **[ProgressManager System Guide](./progress-manager-guide.md)** - Complete implementation guide for progress operations with cancellation
+- **[UI Helpers Implementation Guide](./ui-helpers.md)** - Practical patterns for UI thread services, hooks, and messaging
+- **[Main Thread Helpers Implementation Guide](./main-thread-helpers.md)** - Practical patterns for main thread tools and handlers
+- **[Shared Utilities](./shared-utilities.md)** - Cross-thread utilities for selection, validation, async operations, and more
+
+### Component Documentation
+This section covers all UI components available in the plugin template.
+
 ---
 
 ## TL&DR
@@ -57,11 +69,12 @@ This documentation covers all the custom components, hooks, and features in this
 - [Code](#code) - Code display with syntax highlighting
 - [Spinner](#spinner) - Loading indicators
 - [ProgressBar](#progressbar) - Loading and progress indicators
+- [ProgressManager](#progress-manager) - Unified progress tracking for multiple operations
 
 ### Container & Navigation Components
 - [Panel](#panel) - Container components with consistent styling
 - [Modal](#modal) - Overlay dialogs and popups
-- [ProgressModal](#progressmodal) - Progress display in modal format
+- [ProgressManager](#progressmanager) - Progress tracking system with modal display
 - [Accordion](#accordion) - Expandable content sections
 - [Tabs](#tabs) - Tabbed interfaces
 - [DataTable](#datatable) - Sortable tables with theming
@@ -77,11 +90,13 @@ This documentation covers all the custom components, hooks, and features in this
 ### System & State Management
 - [Theme System](#theme-system) - Light/dark mode management
 - [useSettings Hook](#usesettings-hook) - Automatic settings persistence
+- [useProgressManager Hook](#useprogress-manager-hook) - Progress tracking from main thread
 - [Plugin Messaging System](#plugin-messaging-system) - UI ↔ Main thread communication
 
 ### Global Services
 - [Toast Service](#toast) - Global toast notification system
 - [MessageBox Service](#messagebox) - Global modal dialog system
+- [Progress Manager Service](#progress-manager) - Unified progress tracking for multiple operations
 
 ### Utilities & Helpers
 - [Async Utilities](#async-utilities) - Debouncing, throttling, and async operation helpers
@@ -1434,51 +1449,43 @@ function MyComponent() {
 
 ---
 
-## ProgressModal
+## ProgressManager
 
-**What it's for**: Displaying progress indicators in a modal overlay format.
+> **Recommended**: Use the ProgressManager system for all progress tracking needs.
+> See [Messaging & Progress Examples](./messaging-examples.md) for comprehensive examples.
 
-**When to use**: For long-running operations that need to show progress and prevent user interaction with the main interface.
+**What it's for**: Unified progress tracking system with modal display for long-running operations.
+
+**When to use**: For any operation that requires progress feedback, especially main thread operations.
 
 ### Import
 ```tsx
-import { ProgressModal } from '@ui/components/base/ProgressModal';
+import { ProgressManagerService } from '@ui/services/progressManager';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
 ```
 
-### Basic Usage
+### Service-Based Usage
 ```tsx
 function MyComponent() {
-  const [progress, setProgress] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const handleStartOperation = () => {
+    // Start operation with automatic progress modal
+    const { modalId, operationId } = ProgressManagerService.start({
+      title: 'Processing Files',
+      description: 'Scanning and processing your selection...',
+      showCloseButton: false
+    });
 
-  const handleProcess = () => {
-    setProgress(0);
-    setIsProcessing(true);
-
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setIsProcessing(false), 500);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
+    // Send to main thread for processing
+    parent.postMessage({
+      pluginMessage: {
+        type: 'PROCESS_FILES',
+        operationId
+      }
+    }, '*');
   };
 
-  return (
-    <div>
-      <Button onClick={handleProcess}>Start Process</Button>
-
-      <ProgressModal
-        isVisible={isProcessing}
-        onClose={() => setIsProcessing(false)}
-        progress={progress}
-        title="Processing Files"
-        description="Please wait while we process your files..."
-        showCloseButton={false}
-      />
+  return <Button onClick={handleStartOperation}>Start Process</Button>;
+}
     </div>
   );
 }
@@ -2125,6 +2132,138 @@ const {
   isSaving,           // Saving state
   isPersistent        // Whether storage is persistent
 } = useSettings();
+```
+
+---
+
+## useProgressManager Hook
+
+**What it's for**: Automatically handles progress messages from the main thread for the Progress Manager system.
+
+**When to use**: In components that start operations and need to receive progress updates from the main thread.
+
+### Import
+```tsx
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+```
+
+### Basic Usage
+```tsx
+function MyComponent() {
+  // Handle progress messages automatically
+  useProgressManager();
+
+  const handleExport = () => {
+    ProgressManagerService.start(
+      { title: 'Exporting Files', cancellable: true },
+      'EXPORT_FILES'
+    );
+    // Main thread will send PROGRESS, OPERATION_COMPLETE, or OPERATION_ERROR messages
+  };
+
+  return <Button onClick={handleExport}>Export</Button>;
+}
+```
+
+### With Callbacks
+```tsx
+function MyComponent() {
+  useProgressManager(
+    (operationId) => {
+      // Called when operation completes successfully
+      console.log('Operation completed:', operationId);
+      Toast.success('Export completed!');
+    },
+    (operationId, error) => {
+      // Called when operation fails
+      console.error('Operation failed:', operationId, error);
+      Toast.error(`Export failed: ${error}`);
+    }
+  );
+
+  return <Button onClick={startOperation}>Start Process</Button>;
+}
+```
+
+### Handled Message Types
+The hook automatically processes these message types from the main thread:
+
+- **`PROGRESS`**: Updates operation progress
+  ```typescript
+  // Main thread sends:
+  sendToUI('PROGRESS', {
+    operationId: 'op-123',
+    current: 45,
+    total: 100,
+    message: 'Processing item 45 of 100'
+  });
+  ```
+
+- **`OPERATION_COMPLETE`**: Marks operation as completed
+  ```typescript
+  // Main thread sends:
+  sendToUI('OPERATION_COMPLETE', {
+    operationId: 'op-123',
+    message: 'Export completed successfully'
+  });
+  ```
+
+- **`OPERATION_ERROR`**: Marks operation as failed
+  ```typescript
+  // Main thread sends:
+  sendToUI('OPERATION_ERROR', {
+    operationId: 'op-123',
+    error: 'Network connection failed'
+  });
+  ```
+
+- **`OPERATION_CANCELLED`**: Marks operation as cancelled
+  ```typescript
+  // Main thread sends:
+  sendToUI('OPERATION_CANCELLED', {
+    operationId: 'op-123'
+  });
+  ```
+
+### Real-World Pattern
+```tsx
+function BatchExporter() {
+  const [isExporting, setIsExporting] = useState(false);
+
+  useProgressManager(
+    (operationId) => {
+      setIsExporting(false);
+      Toast.success('Export completed successfully!');
+    },
+    (operationId, error) => {
+      setIsExporting(false);
+      Toast.error(`Export failed: ${error}`);
+    }
+  );
+
+  const handleBatchExport = () => {
+    setIsExporting(true);
+
+    ProgressManagerService.start(
+      {
+        title: 'Batch Export',
+        description: 'Preparing export...',
+        cancellable: true
+      },
+      'BATCH_EXPORT',
+      { format: 'PNG', quality: 'high' }
+    );
+  };
+
+  return (
+    <Button
+      onClick={handleBatchExport}
+      disabled={isExporting}
+    >
+      {isExporting ? 'Exporting...' : 'Export All'}
+    </Button>
+  );
+}
 ```
 
 ---
@@ -4243,5 +4382,376 @@ function RaceConditionComponent() {
 - **Cancellation**: Prevents memory leaks and race conditions
 - **Retry**: Improves reliability without blocking UI
 - **Memory**: Minimal overhead with proper cleanup
+
+---
+
+## Progress Manager
+
+**What it's for**: A unified progress tracking system that displays multiple concurrent operations in a single modal, similar to Windows File Explorer or macOS Finder progress windows.
+
+**When to use**: For any long-running operations like file exports, imports, batch processing, or network operations that need progress visualization.
+
+### Import
+```tsx
+import { ProgressManager, ProgressManagerService } from '@ui/components/base';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+```
+
+### Basic Setup
+Add the ProgressManager component to your app root:
+```tsx
+import { ProgressManager } from '@ui/components/base';
+
+function App() {
+  return (
+    <div>
+      {/* Your app content */}
+      <ProgressManager />
+    </div>
+  );
+}
+```
+
+### Service Methods
+
+The `ProgressManagerService` provides a simple API for managing operations:
+
+#### Starting Operations
+```tsx
+import { ProgressManagerService } from '@ui/services/progressManager';
+
+// Start a new operation
+const { operationId } = ProgressManagerService.start(
+  {
+    title: 'Exporting Components',
+    description: 'Preparing export...',
+    cancellable: true,
+    total: 100
+  },
+  'EXPORT_COMPONENTS', // Message type for main thread
+  { format: 'PNG', quality: 'high' } // Additional data for main thread
+);
+
+console.log('Started operation:', operationId);
+```
+
+#### Manual Progress Updates
+```tsx
+// Update progress manually (if not using main thread integration)
+ProgressManagerService.update(operationId, 45, {
+  description: 'Processing item 45 of 100',
+  current: 45,
+  total: 100
+});
+
+// Mark as completed
+ProgressManagerService.complete(operationId, {
+  description: 'Export completed successfully!'
+});
+
+// Mark as failed
+ProgressManagerService.fail(operationId, 'Network connection failed');
+
+// Cancel if cancellable
+ProgressManagerService.cancel(operationId);
+```
+
+### Main Thread Integration
+
+Use the `useProgressManager` hook to automatically handle progress messages from the main thread:
+
+```tsx
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+import { ProgressManagerService } from '@ui/services/progressManager';
+
+function ExportPanel() {
+  // Handle progress messages from main thread
+  useProgressManager(
+    (operationId) => {
+      console.log('Operation completed:', operationId);
+      Toast.success('Export completed successfully!');
+    },
+    (operationId, error) => {
+      console.error('Operation failed:', operationId, error);
+      Toast.error(`Export failed: ${error}`);
+    }
+  );
+
+  const handleExport = () => {
+    // Start operation - main thread will send progress updates
+    ProgressManagerService.start(
+      {
+        title: 'Exporting Selection',
+        description: 'Analyzing selected nodes...',
+        cancellable: true
+      },
+      'EXPORT_SELECTION',
+      { format: 'PNG', scale: 2 }
+    );
+  };
+
+  return (
+    <Button onClick={handleExport}>
+      Export Selection
+    </Button>
+  );
+}
+```
+
+### Main Thread Implementation
+
+In your main thread code, send progress messages:
+
+```typescript
+// In main thread (e.g., src/main/index.ts)
+import { sendToUI } from '@shared/messaging';
+
+figma.ui.onmessage = async (msg) => {
+  if (msg.type === 'EXPORT_SELECTION') {
+    const { operationId } = msg;
+
+    try {
+      const selection = figma.currentPage.selection;
+      const total = selection.length;
+
+      for (let i = 0; i < selection.length; i++) {
+        const node = selection[i];
+
+        // Send progress update
+        sendToUI('PROGRESS', {
+          operationId,
+          current: i + 1,
+          total,
+          message: `Exporting ${node.name}...`
+        });
+
+        // Do the actual work
+        await exportNode(node);
+      }
+
+      // Send completion
+      sendToUI('OPERATION_COMPLETE', {
+        operationId,
+        message: `Successfully exported ${total} items`
+      });
+
+    } catch (error) {
+      // Send error
+      sendToUI('OPERATION_ERROR', {
+        operationId,
+        error: error.message
+      });
+    }
+  }
+};
+```
+
+### Multiple Concurrent Operations
+
+The Progress Manager excels at showing multiple operations:
+
+```tsx
+function BatchProcessor() {
+  useProgressManager();
+
+  const handleBatchExport = () => {
+    // Start multiple operations
+    const formats = ['PNG', 'SVG', 'PDF'];
+
+    formats.forEach(format => {
+      ProgressManagerService.start(
+        {
+          title: `Export as ${format}`,
+          description: 'Initializing...',
+          cancellable: true
+        },
+        'BATCH_EXPORT',
+        { format }
+      );
+    });
+  };
+
+  const handleLongProcess = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Processing Large Dataset',
+        description: 'Loading data...',
+        cancellable: false,
+        total: 1000
+      },
+      'PROCESS_DATASET'
+    );
+  };
+
+  return (
+    <div>
+      <Button onClick={handleBatchExport}>
+        Export All Formats
+      </Button>
+      <Button onClick={handleLongProcess}>
+        Process Dataset
+      </Button>
+    </div>
+  );
+}
+```
+
+### Advanced Features
+
+#### Operation Status Management
+```tsx
+// Get all operations
+const allOperations = ProgressManagerService.getAll();
+const activeOperations = ProgressManagerService.getActive();
+
+// Clear completed operations
+ProgressManagerService.clearCompleted();
+
+// Show/hide manually
+ProgressManagerService.show();
+ProgressManagerService.hide();
+
+// Access state directly
+const state = ProgressManagerService.getState();
+console.log('Visible:', state.isVisible);
+console.log('Operations:', state.operations.size);
+```
+
+#### Custom Operation Tracking
+```tsx
+function CustomProgressTracker() {
+  const [customOperations, setCustomOperations] = useState([]);
+
+  const startCustomOperation = () => {
+    const { operationId } = ProgressManagerService.start(
+      { title: 'Custom Operation', cancellable: true },
+      'CUSTOM_WORK'
+    );
+
+    // Track locally for additional logic
+    setCustomOperations(prev => [...prev, operationId]);
+
+    // Simulate progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      ProgressManagerService.update(operationId, progress, {
+        description: `Progress: ${progress}%`
+      });
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        ProgressManagerService.complete(operationId);
+        setCustomOperations(prev => prev.filter(id => id !== operationId));
+      }
+    }, 500);
+  };
+
+  return (
+    <div>
+      <Button onClick={startCustomOperation}>
+        Start Custom Operation
+      </Button>
+      <p>Custom operations: {customOperations.length}</p>
+    </div>
+  );
+}
+```
+
+### Real-World Usage Pattern
+
+```tsx
+import { ProgressManagerService } from '@ui/services/progressManager';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+import { Toast } from '@ui/services/toast';
+
+function DesignSystemExporter() {
+  useProgressManager(
+    (operationId) => {
+      Toast.success('Export completed successfully!');
+    },
+    (operationId, error) => {
+      Toast.error(`Export failed: ${error}`);
+    }
+  );
+
+  const handleExportTokens = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Exporting Design Tokens',
+        description: 'Scanning color styles...',
+        cancellable: true
+      },
+      'EXPORT_DESIGN_TOKENS',
+      { includeColors: true, includeTypography: true }
+    );
+  };
+
+  const handleExportComponents = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Exporting Components',
+        description: 'Finding components...',
+        cancellable: true
+      },
+      'EXPORT_COMPONENTS',
+      { format: 'React', typescript: true }
+    );
+  };
+
+  const handleBulkResize = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Bulk Resize Operation',
+        description: 'Preparing resize...',
+        cancellable: true
+      },
+      'BULK_RESIZE',
+      { scale: 2, maintainAspectRatio: true }
+    );
+  };
+
+  return (
+    <Panel title="Design System Tools">
+      <FormGroup title="Export Operations">
+        <Button onClick={handleExportTokens}>
+          Export Design Tokens
+        </Button>
+        <Button onClick={handleExportComponents}>
+          Export Components
+        </Button>
+      </FormGroup>
+
+      <FormGroup title="Batch Operations">
+        <Button onClick={handleBulkResize}>
+          Bulk Resize Selection
+        </Button>
+      </FormGroup>
+    </Panel>
+  );
+}
+```
+
+### Features Summary
+
+- **Single Modal**: All operations appear in one unified progress window
+- **Concurrent Operations**: Handle multiple operations simultaneously
+- **Real-time Updates**: Live progress bars and status updates
+- **Cancellation Support**: Cancel individual operations if supported
+- **Auto-hide**: Modal automatically hides when all operations complete
+- **Operation History**: Shows completed and failed operations
+- **Status Icons**: Visual indicators (⏳ active, ✅ completed, ❌ failed)
+- **Duration Tracking**: Shows elapsed time for each operation
+- **Theme Integration**: Fully themed for light/dark modes
+- **Memory Efficient**: Uses Preact signals for optimal performance
+
+### Benefits Over Traditional Progress Modals
+
+- **Better UX**: Users can see all operations in one place
+- **Less Modal Fatigue**: One modal instead of multiple overlapping modals
+- **Concurrent Visibility**: See multiple operations progressing simultaneously
+- **Operation Management**: Cancel, retry, or clear operations easily
+- **Persistent History**: Completed operations remain visible until cleared
+- **Professional Feel**: Similar to native OS progress windows
 
 ---

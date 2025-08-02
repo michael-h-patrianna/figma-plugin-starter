@@ -48,7 +48,7 @@ export class ImageExporter {
    */
   async exportSelection(options: ExportOptions = {}): Promise<void> {
     try {
-      const selection = figma.currentPage.selection;
+      const selection = this.uiHelpers.getSelection();
 
       if (selection.length === 0) {
         this.uiHelpers.sendError('No selection', 'Please select one or more nodes to export');

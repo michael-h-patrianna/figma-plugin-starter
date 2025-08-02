@@ -312,6 +312,72 @@ normal line`;
     });
   });
 
+  describe('Max Height and Scrolling', () => {
+    it('applies maxHeight when provided', () => {
+      const { container } = renderWithTheme(
+        h(Code, { children: sampleCode, maxHeight: '100px' })
+      );
+
+      const pre = container.querySelector('pre') as HTMLElement;
+      expect(pre.style.maxHeight).toBe('100px');
+      expect(pre.style.overflowY).toBe('auto');
+    });
+
+    it('does not apply maxHeight styles when not provided', () => {
+      const { container } = renderWithTheme(
+        h(Code, { children: sampleCode })
+      );
+
+      const pre = container.querySelector('pre') as HTMLElement;
+      expect(pre.style.maxHeight).toBe('');
+      expect(pre.style.overflowY).toBe('');
+    });
+
+    it('handles different maxHeight values', () => {
+      const testCases = ['50px', '200px', '10rem', '50vh'];
+
+      testCases.forEach(maxHeight => {
+        const { container } = renderWithTheme(
+          h(Code, { children: sampleCode, maxHeight })
+        );
+
+        const pre = container.querySelector('pre') as HTMLElement;
+        expect(pre.style.maxHeight).toBe(maxHeight);
+        expect(pre.style.overflowY).toBe('auto');
+      });
+    });
+
+    it('maintains original overflow auto for horizontal scrolling', () => {
+      const { container } = renderWithTheme(
+        h(Code, { children: sampleCode, maxHeight: '100px' })
+      );
+
+      const pre = container.querySelector('pre') as HTMLElement;
+      // overflow should remain 'auto' for horizontal scrolling
+      expect(pre.style.overflow).toBe('auto');
+      // overflowY should be 'auto' for vertical scrolling when maxHeight is set
+      expect(pre.style.overflowY).toBe('auto');
+    });
+
+    it('works with title and maxHeight together', () => {
+      const { container } = renderWithTheme(
+        h(Code, {
+          children: sampleCode,
+          title: 'example.ts',
+          maxHeight: '100px'
+        })
+      );
+
+      // Title should still be present
+      expect(container.textContent).toContain('example.ts');
+
+      // maxHeight should be applied to pre element
+      const pre = container.querySelector('pre') as HTMLElement;
+      expect(pre.style.maxHeight).toBe('100px');
+      expect(pre.style.overflowY).toBe('auto');
+    });
+  });
+
   describe('Edge Cases', () => {
     it('handles very long single line', () => {
       const longLine = 'a'.repeat(1000);

@@ -14,12 +14,14 @@ import { ProgressBar } from '@ui/components/base/ProgressBar';
 import { ProgressModal } from '@ui/components/base/ProgressModal';
 import { Spinner } from '@ui/components/base/Spinner';
 import { useTheme } from '@ui/contexts/ThemeContext';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
 import { sendToMain, usePluginMessages } from '@ui/messaging';
+import { ProgressManagerService } from '@ui/services/progressManager';
 import { Toast as ToastService } from '@ui/services/toast';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 export function MessagingView() {
-  const { colors } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const [lastMessage, setLastMessage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -69,6 +71,16 @@ export function MessagingView() {
     };
   }, [debouncedUpdate, throttledIncrement]);
 
+  // Progress Manager hook for handling main thread progress
+  useProgressManager(
+    (operationId) => {
+      ToastService.success('Figma creation operation completed!');
+    },
+    (operationId, error) => {
+      ToastService.error(`Figma operation failed: ${error}`);
+    }
+  );
+
   usePluginMessages({
     PONG: (data) => {
       setLastMessage(data);
@@ -88,6 +100,19 @@ export function MessagingView() {
   const handleGetSelection = () => {
     sendToMain('GET_SELECTION');
     ToastService.info('Requested selection');
+  };
+
+  // New Progress Manager demo that creates Figma nodes
+  const handleCreateColorGrid = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Creating 5x5 Color Grid',
+        description: 'Setting up frame with auto layout...',
+        cancellable: true,
+        total: 25 // 25 rectangles to create
+      },
+      'CREATE_COLOR_GRID'
+    );
   };
 
 
@@ -254,34 +279,36 @@ export function MessagingView() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
       <Panel title="Messaging Tests">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+          <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap' }}>
             <Button onClick={handlePing} size="small">
               Send Ping
             </Button>
             <Button onClick={handleGetSelection} size="small">
               Get Selection
             </Button>
-
+            <Button onClick={handleCreateColorGrid} size="small">
+              Create Color Grid
+            </Button>
           </div>
         </div>
       </Panel>
 
       {lastMessage && (
         <Panel title="Last Message">
-          <Code language="json">
+          <Code language="json" maxHeight="200px">
             {JSON.stringify(lastMessage, null, 2)}
           </Code>
         </Panel>
       )}
 
       <Panel title="Toast Notifications">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Basic Toast Types</h4>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Basic Toast Types</h4>
+            <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap' }}>
               <Button
                 onClick={() => ToastService.info('This is an info message')}
                 size="small"
@@ -310,8 +337,8 @@ export function MessagingView() {
           </div>
 
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Special Toast Features</h4>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Special Toast Features</h4>
+            <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap' }}>
               <Button
                 onClick={() => ToastService.quickSuccess('Quick success (2s duration)!')}
                 size="small"
@@ -336,8 +363,8 @@ export function MessagingView() {
           </div>
 
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Multiple Toasts Demo</h4>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Multiple Toasts Demo</h4>
+            <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap' }}>
               <Button
                 onClick={() => {
                   ToastService.info('First toast message');
@@ -364,8 +391,8 @@ export function MessagingView() {
       </Panel>
 
       <Panel title="Loading Components">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+          <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap', alignItems: 'center' }}>
             <Button
               onClick={handleSpinnerDemo}
               size="small"
@@ -389,8 +416,8 @@ export function MessagingView() {
             </Button>
           </div>
           {showInlineProgress && (
-            <div style={{ marginTop: 12 }}>
-              <div style={{ marginBottom: 4, fontSize: 11, color: colors.textSecondary }}>
+            <div style={{ marginTop: spacing.sm }}>
+              <div style={{ marginBottom: spacing.xs, fontSize: typography.tiny, color: colors.textSecondary }}>
                 Inline Progress: {inlineProgress}%
               </div>
               <ProgressBar
@@ -401,19 +428,19 @@ export function MessagingView() {
           )}
           {isLoading && (
             <div style={{
-              padding: 16,
+              padding: spacing.md,
               background: colors.backgroundSecondary,
               borderRadius: 6,
               display: 'flex',
               alignItems: 'center',
-              gap: 12
+              gap: spacing.sm
             }}>
               <Spinner size={24} />
               <div>
-                <div style={{ color: colors.textColor, fontSize: 14, fontWeight: 500 }}>
+                <div style={{ color: colors.textColor, fontSize: typography.body, fontWeight: 500 }}>
                   Processing...
                 </div>
-                <div style={{ color: colors.textSecondary, fontSize: 12 }}>
+                <div style={{ color: colors.textSecondary, fontSize: typography.caption }}>
                   This will complete in a few seconds
                 </div>
               </div>
@@ -423,27 +450,27 @@ export function MessagingView() {
       </Panel>
 
       <Panel title="Async Utilities Test">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
           {/* Debouncer Test */}
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Debouncer Test</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Debouncer Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
               <Input
                 value={debounceInput}
                 onChange={handleDebounceInput}
                 placeholder="Type to test debouncing (500ms delay)..."
               />
               <div style={{
-                padding: 8,
+                padding: spacing.xs,
                 background: colors.backgroundSecondary,
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: typography.caption,
                 color: colors.textSecondary,
                 minHeight: 20
               }}>
                 {debounceOutput || 'Output will appear here after 500ms of no typing...'}
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: spacing.xs }}>
                 <Button
                   onClick={handleDebouncerManualControl}
                   size="small"
@@ -464,13 +491,13 @@ export function MessagingView() {
 
           {/* Throttler Test */}
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Throttler Test</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Throttler Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
               <div style={{
-                padding: 8,
+                padding: spacing.xs,
                 background: colors.backgroundSecondary,
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: typography.caption,
                 color: colors.textSecondary
               }}>
                 Throttle count: {throttleCount} (max once per 1s)
@@ -486,13 +513,13 @@ export function MessagingView() {
 
           {/* Cancelable Promise Test */}
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Cancelable Promise Test</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Cancelable Promise Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
               <div style={{
-                padding: 8,
+                padding: spacing.xs,
                 background: colors.backgroundSecondary,
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: typography.caption,
                 color: colors.textSecondary
               }}>
                 Status: {cancelableStatus}
@@ -510,13 +537,13 @@ export function MessagingView() {
 
           {/* Retry with Backoff Test */}
           <div>
-            <h4 style={{ color: colors.textColor, margin: '0 0 8px 0', fontSize: 14 }}>Retry with Backoff Test</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h4 style={{ color: colors.textColor, margin: `0 0 ${spacing.xs}px 0`, fontSize: typography.body }}>Retry with Backoff Test</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
               <div style={{
-                padding: 8,
+                padding: spacing.xs,
                 background: colors.backgroundSecondary,
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: typography.caption,
                 color: colors.textSecondary
               }}>
                 Status: {retryStatus} | Attempts: {retryAttempts}
@@ -542,8 +569,8 @@ export function MessagingView() {
       </Panel>
 
       <Panel title="Error Boundary Demo">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+          <div style={{ display: 'flex', gap: spacing.xs, flexWrap: 'wrap' }}>
             <Button
               onClick={handleErrorDemo}
               size="small"
@@ -559,7 +586,7 @@ export function MessagingView() {
             }}
           >
             <div style={{
-              padding: 12,
+              padding: spacing.sm,
               background: colors.backgroundSecondary,
               borderRadius: 6,
               border: `1px solid ${colors.border}`

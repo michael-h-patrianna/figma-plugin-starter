@@ -56,14 +56,27 @@ jest.mock('../../../src/ui/components/base/Modal', () => ({
 jest.mock('../../../src/ui/components/base/ProgressBar', () => ({
   ProgressBar: (props: any) => {
     const { h } = require('preact');
-    return h('div', {
-      'data-testid': 'progress-bar',
-      'aria-label': props.label,
-      'data-progress': props.progress
+    const clampedProgress = Math.max(0, Math.min(props.progress || 0, 100));
+    const showPercentage = props.showPercentage !== false; // Default to true
+    const label = props.label;
+
+    // Create label/percentage section if needed
+    const labelSection = (label || showPercentage) ? h('div', {
+      style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }
     }, [
-      h('div', { 'data-testid': 'progress-fill' }),
-      h('span', { 'data-testid': 'progress-label' }, props.label)
-    ]);
+      label && h('span', { 'data-testid': 'progress-label' }, label),
+      showPercentage && h('span', { 'data-testid': 'progress-percentage' }, `${Math.round(clampedProgress)}%`)
+    ]) : null;
+
+    // Create progress bar section
+    const progressBar = h('div', {
+      'data-testid': 'progress-bar',
+      'aria-label': label || `Progress: ${Math.round(clampedProgress)}%`,
+      'data-progress': props.progress
+    }, h('div', { 'data-testid': 'progress-fill' }));
+
+    // Return container with both sections
+    return h('div', { style: { width: '100%' } }, [labelSection, progressBar].filter(Boolean));
   }
 }));
 
@@ -138,35 +151,46 @@ describe('ProgressModal Component', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 33 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 33%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      // The percentage is displayed separately in the ProgressBar component
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('33%');
     });
 
     test('handles 0% progress', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 0 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 0%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('0%');
     });
 
     test('handles 100% progress', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 100 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 100%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('100%');
     });
 
     test('rounds decimal progress values', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 33.7 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 34%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('34%');
     });
 
     test('handles very small progress values', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 0.1 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 0%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('0%');
     });
   });
 
@@ -258,12 +282,12 @@ describe('ProgressModal Component', () => {
       const { rerender } = render(h(ProgressModal, { ...defaultProps, progress: 30 }));
 
       expect(screen.getByTestId('progress-bar')).toHaveAttribute('data-progress', '30');
-      expect(screen.getByText('Processing... 30%')).toBeInTheDocument();
+      expect(screen.getByTestId('progress-percentage')).toHaveTextContent('30%');
 
       rerender(h(ProgressModal, { ...defaultProps, progress: 70 }));
 
       expect(screen.getByTestId('progress-bar')).toHaveAttribute('data-progress', '70');
-      expect(screen.getByText('Processing... 70%')).toBeInTheDocument();
+      expect(screen.getByTestId('progress-percentage')).toHaveTextContent('70%');
     });
 
     test('shows close button when progress reaches 100%', () => {
@@ -328,7 +352,7 @@ describe('ProgressModal Component', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 60 }));
 
       const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('aria-label', 'Processing... 60%');
+      expect(progressBar).toHaveAttribute('aria-label', 'Processing...');
     });
 
     test('modal has proper title for screen readers', () => {
@@ -351,14 +375,20 @@ describe('ProgressModal Component', () => {
       render(h(ProgressModal, { ...defaultProps, progress: -10 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... -10%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      // ProgressBar component clamps negative values to 0
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('0%');
     });
 
     test('handles progress values over 100%', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 150 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 150%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      // ProgressBar component clamps values over 100 to 100
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('100%');
       expect(screen.getByTestId('close-button')).toBeInTheDocument();
     });
 
@@ -384,14 +414,19 @@ describe('ProgressModal Component', () => {
       render(h(ProgressModal, { ...defaultProps, progress: Number.MAX_SAFE_INTEGER }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent(`Processing... ${Number.MAX_SAFE_INTEGER}%`);
+      expect(progressLabel).toHaveTextContent('Processing...');
+      // ProgressBar component clamps extreme values to 100
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('100%');
     });
 
     test('handles floating point precision issues', () => {
       render(h(ProgressModal, { ...defaultProps, progress: 33.333333333 }));
 
       const progressLabel = screen.getByTestId('progress-label');
-      expect(progressLabel).toHaveTextContent('Processing... 33%');
+      expect(progressLabel).toHaveTextContent('Processing...');
+      const progressPercentage = screen.getByTestId('progress-percentage');
+      expect(progressPercentage).toHaveTextContent('33%');
     });
   });
 
@@ -412,7 +447,7 @@ describe('ProgressModal Component', () => {
 
       const progressBar = screen.getByTestId('progress-bar');
       expect(progressBar).toHaveAttribute('data-progress', '85');
-      expect(progressBar).toHaveAttribute('aria-label', 'Processing... 85%');
+      expect(progressBar).toHaveAttribute('aria-label', 'Processing...');
     });
 
     test('handles modal visibility correctly', () => {
