@@ -5,15 +5,14 @@
 
 import { render, screen } from '@testing-library/preact';
 import userEvent from '@testing-library/user-event';
-import { Button } from '@ui/components/base/Button';
-import { ThemeProvider } from '@ui/contexts/ThemeContext';
+import { h } from 'preact';
+import { Button } from '../../../src/ui/components/base/Button';
+import { ThemeProvider } from '../../../src/ui/contexts/ThemeContext';
 
 // Helper to render Button with theme context
-const renderButton = (props = {}, theme = 'light') => {
+const renderButton = (props = {}, theme: 'light' | 'dark' = 'light') => {
   return render(
-    <ThemeProvider theme={theme}>
-      <Button {...props}>Test Button</Button>
-    </ThemeProvider>
+    h(ThemeProvider, { defaultTheme: theme, children: h(Button, { ...props, children: 'Test Button' }) })
   );
 };
 
@@ -189,21 +188,22 @@ describe('Button Component', () => {
   describe('Edge Cases', () => {
     test('handles null children gracefully', () => {
       render(
-        <ThemeProvider theme="light">
-          <Button>{null}</Button>
-        </ThemeProvider>
+        h(ThemeProvider, { defaultTheme: 'light', children: h(Button, { children: null }) })
       );
       expect(screen.getByRole('button')).toBeInTheDocument();
     });
 
     test('handles multiple children', () => {
       render(
-        <ThemeProvider theme="light">
-          <Button>
-            <span>Icon</span>
-            <span>Text</span>
-          </Button>
-        </ThemeProvider>
+        h(ThemeProvider, {
+          defaultTheme: 'light',
+          children: h(Button, {
+            children: [
+              h('span', {}, 'Icon'),
+              h('span', {}, 'Text')
+            ]
+          })
+        })
       );
       expect(screen.getByRole('button')).toBeInTheDocument();
     });

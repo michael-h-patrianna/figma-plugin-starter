@@ -3,7 +3,7 @@
  * Tests the communication layer that's critical for Figma plugins
  */
 
-import { MessagePool } from '@shared/messagePool';
+import { MessagePool } from '../../src/shared/messagePool';
 
 // Mock for the main thread environment
 const mockMainThread = {

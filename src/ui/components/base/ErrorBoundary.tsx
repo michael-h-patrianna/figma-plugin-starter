@@ -192,7 +192,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback(this.state.error, this.state.errorInfo, this.handleRetry);
       }
 
-      const hasExceededRetries = this.state.errorCount >= maxRetries;
+      const hasExceededRetries = this.state.errorCount > maxRetries;
 
       // Default enhanced error UI
       return (

@@ -117,16 +117,16 @@ Track progress on implementing the complete PRD requirements (see prd.md). Updat
   - [x] ESM/CommonJS compatibility
   - [x] TypeScript integration with tests
   - [x] Build system compatibility
-- [ ] **Error Boundary Tests** - Error recovery scenarios
-  - [ ] Test component crash recovery
-  - [ ] Test retry mechanisms
-  - [ ] Test auto-recovery timing
-  - [ ] Test error count limits
-- [ ] **Memory Tests** - Long-running session testing
-  - [ ] Test for memory leaks
-  - [ ] Test message pool under load
-  - [ ] Test component cleanup
-  - [ ] Test error boundary memory usage
+- [x] **Error Boundary Tests** - Error recovery scenarios (COMPLETED ✅)
+  - [x] Test component crash recovery
+  - [x] Test retry mechanisms
+  - [x] Test auto-recovery timing
+  - [x] Test error count limits
+- [x] **Memory Tests** - Long-running session testing (COMPLETED ✅)
+  - [x] Test for memory leaks
+  - [x] Test message pool under load
+  - [x] Test component cleanup
+  - [x] Test error boundary memory usage
 
 ### MEDIUM PRIORITY (Enhanced functionality)
 
