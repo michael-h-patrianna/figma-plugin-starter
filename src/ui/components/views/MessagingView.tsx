@@ -90,6 +90,10 @@ export function MessagingView() {
       setLastMessage(data);
       ToastService.success(`Selection: ${data.count} items`);
     },
+    COLOR_SCAN_COMPLETE: (data) => {
+      setLastMessage(data);
+      ToastService.success(`Found ${data.totalColors} unique colors!`);
+    },
   });
 
   const handlePing = () => {
@@ -112,6 +116,18 @@ export function MessagingView() {
         total: 25 // 25 rectangles to create
       },
       'CREATE_COLOR_GRID'
+    );
+  };
+
+  // New Progress Manager demo that scans colors from selected nodes
+  const handleScanColors = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Scanning Colors',
+        description: 'Analyzing selected nodes for colors...',
+        cancellable: true
+      },
+      'SCAN_COLORS'
     );
   };
 
@@ -291,6 +307,9 @@ export function MessagingView() {
             </Button>
             <Button onClick={handleCreateColorGrid} size="small">
               Create Color Grid
+            </Button>
+            <Button onClick={handleScanColors} size="small">
+              Scan Colors
             </Button>
           </div>
         </div>

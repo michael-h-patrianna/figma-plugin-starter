@@ -8,6 +8,7 @@ This document shows **complete, practical communication flows** between UI threa
 - [Progress Manager Operations](#progress-manager-operations)
 - [Cancelable Operations](#cancelable-operations)
 - [Selection & Data Retrieval](#selection--data-retrieval)
+- [Color Scanning Operations](#color-scanning-operations)
 - [Creation Operations](#creation-operations)
 - [Export Operations](#export-operations)
 - [Error Handling Flows](#error-handling-flows)
@@ -418,6 +419,229 @@ async exportSelection(options = {}, abortSignal) {
   });
 }
 ```
+
+## Color Scanning Operations
+
+### Complete Color Scanning Flow
+
+**UI Thread → Start Color Scan:**
+```tsx
+// UI: Color scanning with progress manager
+import { ProgressManagerService } from '@ui/services/progressManager';
+import { useProgressManager } from '@ui/hooks/useProgressManager';
+import { sendToMain, usePluginMessages } from '@ui/messaging';
+
+function ColorScanner() {
+  const [scanResults, setScanResults] = useState(null);
+
+  // Handle progress completion/error
+  useProgressManager(
+    (operationId) => {
+      console.log('Color scan completed:', operationId);
+    },
+    (operationId, error) => {
+      console.error('Color scan failed:', error);
+    }
+  );
+
+  // Handle scan results
+  usePluginMessages({
+    'COLOR_SCAN_COMPLETE': (data) => {
+      setScanResults(data);
+      console.log(`Found ${data.totalColors} unique colors:`, data.colors);
+    }
+  });
+
+  const handleScanColors = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Scanning Colors',
+        description: 'Analyzing selected nodes for colors...',
+        cancellable: true
+      },
+      'SCAN_COLORS'
+    );
+  };
+
+  return (
+    <div>
+      <button onClick={handleScanColors}>Scan Colors</button>
+      {scanResults && (
+        <div>
+          <h4>Color Scan Results</h4>
+          <p>Found {scanResults.totalColors} unique colors</p>
+          <p>Scanned {scanResults.scannedNodes} nodes</p>
+          <div>
+            Colors: {scanResults.colors.join(', ')}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+**Main Thread Handler with Color Extraction:**
+```typescript
+// Main: Handle color scanning with progress
+import { UIHelpers } from '@main/tools/ui-helpers';
+
+const uiHelpers = new UIHelpers();
+
+// Utility functions for color extraction
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => {
+    const hex = Math.round(c * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+function extractColorsFromPaint(paint: Paint): string[] {
+  const colors: string[] = [];
+  
+  if (paint.type === 'SOLID') {
+    const solidPaint = paint as SolidPaint;
+    if (solidPaint.visible !== false && solidPaint.color) {
+      const hex = rgbToHex(solidPaint.color.r, solidPaint.color.g, solidPaint.color.b);
+      colors.push(hex);
+    }
+  }
+  
+  return colors;
+}
+
+function extractColorsFromNode(node: SceneNode, colors: Set<string>): void {
+  // Extract fill colors
+  if ('fills' in node && Array.isArray(node.fills)) {
+    for (const fill of node.fills) {
+      const nodeColors = extractColorsFromPaint(fill);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Extract stroke colors
+  if ('strokes' in node && Array.isArray(node.strokes)) {
+    for (const stroke of node.strokes) {
+      const nodeColors = extractColorsFromPaint(stroke);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Traverse children
+  if ('children' in node && Array.isArray(node.children)) {
+    for (const child of node.children) {
+      extractColorsFromNode(child, colors);
+    }
+  }
+}
+
+uiHelpers.setupMessageHandler({
+  'SCAN_COLORS': async (data) => {
+    const { operationId } = data;
+
+    try {
+      const selection = uiHelpers.getSelection();
+      
+      if (selection.length === 0) {
+        throw new Error('No elements selected. Please select at least one element to scan for colors.');
+      }
+
+      // Send initial progress
+      uiHelpers.sendProgress(0, selection.length, 'Starting color analysis...', operationId);
+
+      const allColors = new Set<string>();
+      let processedNodes = 0;
+
+      // Process each selected node and descendants
+      for (const selectedNode of selection) {
+        // Check for cancellation
+        if (isCancelled(operationId)) {
+          uiHelpers.sendToUI('OPERATION_CANCELLED', { operationId });
+          cleanupOperation(operationId);
+          return;
+        }
+
+        processedNodes++;
+        
+        // Update progress
+        uiHelpers.sendProgress(
+          processedNodes, 
+          selection.length, 
+          `Scanning colors in ${selectedNode.name || selectedNode.type}...`, 
+          operationId
+        );
+
+        // Extract colors from node tree
+        extractColorsFromNode(selectedNode, allColors);
+
+        // Prevent blocking
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Prepare results
+      const uniqueColors = Array.from(allColors).sort();
+
+      // Send completion
+      uiHelpers.sendToUI('OPERATION_COMPLETE', { operationId });
+      uiHelpers.sendToUI('COLOR_SCAN_COMPLETE', {
+        operationId,
+        message: `Found ${uniqueColors.length} unique colors in selected elements`,
+        totalColors: uniqueColors.length,
+        colors: uniqueColors,
+        scannedNodes: selection.length,
+        nodeDetails: selection.map(node => ({
+          id: node.id,
+          name: node.name,
+          type: node.type
+        }))
+      });
+
+    } catch (error) {
+      uiHelpers.sendToUI('OPERATION_ERROR', {
+        operationId,
+        error: error instanceof Error ? error.message : 'Color scan failed'
+      });
+    } finally {
+      cleanupOperation(operationId);
+    }
+  }
+});
+```
+
+**Example Output:**
+```json
+{
+  "operationId": "scan_123",
+  "message": "Found 8 unique colors in selected elements",
+  "totalColors": 8,
+  "colors": [
+    "#FF0000",
+    "#00FF00", 
+    "#0000FF",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF",
+    "#000000",
+    "#FFFFFF"
+  ],
+  "scannedNodes": 3,
+  "nodeDetails": [
+    {"id": "123:1", "name": "Button", "type": "FRAME"},
+    {"id": "123:2", "name": "Icon", "type": "COMPONENT"},
+    {"id": "123:3", "name": "Background", "type": "RECTANGLE"}
+  ]
+}
+```
+
+**Key Features:**
+- ✅ **Tree Traversal**: Scans selected nodes and all descendants
+- ✅ **Progress Tracking**: Shows scanning progress per node
+- ✅ **Cancellation**: Can be cancelled mid-operation
+- ✅ **Deduplication**: Returns unique colors only
+- ✅ **Both Fills & Strokes**: Extracts from both paint types
+- ✅ **Hex Format**: Colors returned as uppercase hex values
+- ✅ **Error Handling**: Validates selection and handles failures
 
 ## Creation Operations
 

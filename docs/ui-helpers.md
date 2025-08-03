@@ -930,6 +930,11 @@ function MessageHandler() {
       console.log('Received scan results:', data);
       // Handle scan results
     },
+    'COLOR_SCAN_COMPLETE': (data) => {
+      console.log('Color scan completed:', data);
+      console.log(`Found ${data.totalColors} unique colors:`, data.colors);
+      // Handle color scan results
+    },
     'EXPORT_COMPLETE': (data) => {
       console.log('Export completed:', data);
       // Handle export completion
@@ -980,9 +985,26 @@ function NodeScanner() {
     });
   };
 
+  const handleScanColors = () => {
+    ProgressManagerService.start(
+      {
+        title: 'Scanning Colors',
+        description: 'Analyzing selected nodes for colors...',
+        cancellable: true
+      },
+      'SCAN_COLORS' // Message type sent to main thread
+    );
+  };
+
   return (
-    <button onClick={handleScan}>
-      Scan Document
+    <div>
+      <button onClick={handleScan}>
+        Scan Document
+      </button>
+      <button onClick={handleScanColors}>
+        Scan Colors
+      </button>
+    </div>
     </button>
   );
 }

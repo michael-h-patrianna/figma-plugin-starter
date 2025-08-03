@@ -423,6 +423,176 @@ uiHelpers.setupMessageHandler({
 });
 ```
 
+## Color Scanning Utilities
+
+### RGB to Hex Conversion
+
+```typescript
+/**
+ * Convert RGB color values to hex format
+ * @param r - Red component (0-1)
+ * @param g - Green component (0-1) 
+ * @param b - Blue component (0-1)
+ * @returns Uppercase hex color string (e.g., "#FF0000")
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => {
+    const hex = Math.round(c * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+```
+
+### Paint Color Extraction
+
+```typescript
+/**
+ * Extract solid colors from Figma paint objects
+ * @param paint - Figma Paint object (fill or stroke)
+ * @returns Array of hex color strings
+ */
+function extractColorsFromPaint(paint: Paint): string[] {
+  const colors: string[] = [];
+  
+  if (paint.type === 'SOLID') {
+    const solidPaint = paint as SolidPaint;
+    if (solidPaint.visible !== false && solidPaint.color) {
+      const hex = rgbToHex(solidPaint.color.r, solidPaint.color.g, solidPaint.color.b);
+      colors.push(hex);
+    }
+  }
+  // Note: Only extracts solid colors
+  // Other paint types (gradients, images) are ignored
+  
+  return colors;
+}
+```
+
+### Node Tree Color Traversal
+
+```typescript
+/**
+ * Recursively traverse node tree and extract all colors
+ * @param node - Starting Figma node
+ * @param colors - Set to collect unique colors
+ */
+function extractColorsFromNode(node: SceneNode, colors: Set<string>): void {
+  // Extract fill colors
+  if ('fills' in node && Array.isArray(node.fills)) {
+    for (const fill of node.fills) {
+      const nodeColors = extractColorsFromPaint(fill);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Extract stroke colors
+  if ('strokes' in node && Array.isArray(node.strokes)) {
+    for (const stroke of node.strokes) {
+      const nodeColors = extractColorsFromPaint(stroke);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Traverse children recursively
+  if ('children' in node && Array.isArray(node.children)) {
+    for (const child of node.children) {
+      extractColorsFromNode(child, colors);
+    }
+  }
+}
+```
+
+### Complete Color Scanning Handler
+
+```typescript
+/**
+ * Handle color scanning operation with progress tracking
+ * @param operationId - Progress manager operation ID
+ * @param options - Scanning options (currently unused)
+ */
+async function handleScanColors(operationId: string, options: any) {
+  try {
+    const selection = uiHelpers.getSelection();
+    
+    // Validate selection
+    if (selection.length === 0) {
+      throw new Error('No elements selected. Please select at least one element to scan for colors.');
+    }
+
+    // Initialize progress
+    uiHelpers.sendProgress(0, selection.length, 'Starting color analysis...', operationId);
+
+    const allColors = new Set<string>();
+    let processedNodes = 0;
+
+    // Process each selected node and descendants
+    for (const selectedNode of selection) {
+      // Check for cancellation
+      if (isCancelled(operationId)) {
+        uiHelpers.sendToUI('OPERATION_CANCELLED', { operationId });
+        cleanupOperation(operationId);
+        return;
+      }
+
+      processedNodes++;
+      
+      // Update progress
+      uiHelpers.sendProgress(
+        processedNodes, 
+        selection.length, 
+        `Scanning colors in ${selectedNode.name || selectedNode.type}...`, 
+        operationId
+      );
+
+      // Extract colors from node tree
+      extractColorsFromNode(selectedNode, allColors);
+
+      // Prevent blocking
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    // Prepare results
+    const uniqueColors = Array.from(allColors).sort();
+
+    // Send completion
+    uiHelpers.sendToUI('OPERATION_COMPLETE', { operationId });
+    uiHelpers.sendToUI('COLOR_SCAN_COMPLETE', {
+      operationId,
+      message: `Found ${uniqueColors.length} unique colors in selected elements`,
+      totalColors: uniqueColors.length,
+      colors: uniqueColors,
+      scannedNodes: selection.length,
+      nodeDetails: selection.map(node => ({
+        id: node.id,
+        name: node.name,
+        type: node.type
+      }))
+    });
+
+  } catch (error) {
+    uiHelpers.sendToUI('OPERATION_ERROR', {
+      operationId,
+      error: error instanceof Error ? error.message : 'Color scan failed'
+    });
+  } finally {
+    cleanupOperation(operationId);
+  }
+}
+```
+
+### Usage in Message Handler
+
+```typescript
+// Add to main thread message handler setup
+uiHelpers.setupMessageHandler({
+  'SCAN_COLORS': (data) => {
+    handleScanColors(data.operationId, data);
+  },
+  // ... other handlers
+});
+```
+
 ## Required Implementation Checklist
 
 ### For Any UI Request:

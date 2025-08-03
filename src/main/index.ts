@@ -170,6 +170,130 @@ function generateRandomColor(): RGB {
   };
 }
 
+// Convert RGB color to hex format
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => {
+    const hex = Math.round(c * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+// Extract colors from a paint object
+function extractColorsFromPaint(paint: Paint): string[] {
+  const colors: string[] = [];
+  
+  if (paint.type === 'SOLID') {
+    const solidPaint = paint as SolidPaint;
+    if (solidPaint.visible !== false && solidPaint.color) {
+      const hex = rgbToHex(solidPaint.color.r, solidPaint.color.g, solidPaint.color.b);
+      colors.push(hex);
+    }
+  }
+  // Note: We're only extracting solid colors as requested
+  // Other paint types like gradients, images, etc. are not included
+  
+  return colors;
+}
+
+// Traverse node tree and extract all colors
+function extractColorsFromNode(node: SceneNode, colors: Set<string>): void {
+  // Extract fill colors
+  if ('fills' in node && Array.isArray(node.fills)) {
+    for (const fill of node.fills) {
+      const nodeColors = extractColorsFromPaint(fill);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Extract stroke colors
+  if ('strokes' in node && Array.isArray(node.strokes)) {
+    for (const stroke of node.strokes) {
+      const nodeColors = extractColorsFromPaint(stroke);
+      nodeColors.forEach(color => colors.add(color));
+    }
+  }
+
+  // Traverse children
+  if ('children' in node && Array.isArray(node.children)) {
+    for (const child of node.children) {
+      extractColorsFromNode(child, colors);
+    }
+  }
+}
+
+async function handleScanColors(operationId: string, options: any) {
+  console.log('🎨 Starting handleScanColors with operationId:', operationId);
+
+  try {
+    const selection = uiHelpers.getSelection();
+    
+    if (selection.length === 0) {
+      throw new Error('No elements selected. Please select at least one element to scan for colors.');
+    }
+
+    // Send initial progress
+    uiHelpers.sendProgress(0, selection.length, 'Starting color analysis...', operationId);
+
+    const allColors = new Set<string>();
+    let processedNodes = 0;
+
+    // Process each selected node and its descendants
+    for (const selectedNode of selection) {
+      // Check for cancellation
+      if (isCancelled(operationId)) {
+        console.log('🚫 Color scan cancelled:', operationId);
+        uiHelpers.sendToUI('OPERATION_CANCELLED', { operationId });
+        cleanupOperation(operationId);
+        return;
+      }
+
+      processedNodes++;
+      
+      // Update progress
+      uiHelpers.sendProgress(
+        processedNodes, 
+        selection.length, 
+        `Scanning colors in ${selectedNode.name || selectedNode.type}...`, 
+        operationId
+      );
+
+      // Extract colors from this node and all its descendants
+      extractColorsFromNode(selectedNode, allColors);
+
+      // Small delay to show progress and prevent blocking
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    // Convert Set to Array and sort for consistent output
+    const uniqueColors = Array.from(allColors).sort();
+
+    console.log('✅ Color scan complete');
+    uiHelpers.sendToUI('OPERATION_COMPLETE', { operationId });
+    uiHelpers.sendToUI('COLOR_SCAN_COMPLETE', {
+      operationId,
+      message: `Found ${uniqueColors.length} unique colors in selected elements`,
+      totalColors: uniqueColors.length,
+      colors: uniqueColors,
+      scannedNodes: selection.length,
+      nodeDetails: selection.map(node => ({
+        id: node.id,
+        name: node.name,
+        type: node.type
+      }))
+    });
+
+  } catch (error) {
+    console.error('❌ Error in handleScanColors:', error);
+    uiHelpers.sendToUI('OPERATION_ERROR', {
+      operationId,
+      error: error instanceof Error ? error.message : 'Color scan failed'
+    });
+  } finally {
+    cleanupOperation(operationId);
+  }
+}
+
 async function handleCreateColorGrid(operationId: string, options: any) {
   console.log('🎨 Starting handleCreateColorGrid with operationId:', operationId);
 
@@ -349,6 +473,11 @@ export default function () {
     CREATE_COLOR_GRID: (data) => {
       console.log('📥 Main thread received CREATE_COLOR_GRID message:', data);
       handleCreateColorGrid(data.operationId, data);
+    },
+
+    SCAN_COLORS: (data) => {
+      console.log('📥 Main thread received SCAN_COLORS message:', data);
+      handleScanColors(data.operationId, data);
     },
 
     CANCEL_OPERATION: (data) => {

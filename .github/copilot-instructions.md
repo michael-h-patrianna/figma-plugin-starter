@@ -295,3 +295,126 @@ useLayoutEffect(() => {
 ### Max Height and Scrollbars
 
 The `Code` component supports a `maxHeight` prop. When the content exceeds the maximum height, scrollbars are automatically displayed.
+
+## New Utility Functions
+
+When creating new features, consider creating modular, single-responsibility utility functions. These functions should be:
+
+- **WASM-Safe**: Immediate primitive extraction, no object references held
+- **Modular**: Single-responsibility functions that can be reused
+- **Type-Safe**: Proper TypeScript typing throughout
+- **Performance**: Use efficient data structures (e.g., `Set` for O(1) deduplication)
+- **Robust**: Handle edge cases (e.g., invisible paints, missing properties)
+- **Testable**: Each function should have a clear input/output contract
+- **Maintainable**: Well-documented and focused responsibilities
+- **Extensible**: Easy to add support for new features later
+
+### Color Conversion Utility
+
+- When converting colors from Figma's RGB (0-1 range) to hex format, use the following utility function:
+
+```typescript
+/**
+ * Converts Figma's RGB color values (0-1 range) to hex format.
+ * @param r Red value (0-1)
+ * @param g Green value (0-1)
+ * @param b Blue value (0-1)
+ * @returns Uppercase hex string (e.g., "#80FF33")
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => {
+    const hex = Math.round(c * 255).toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+  };
+
+  const hexR = toHex(r);
+  const hexG = toHex(g);
+  const hexB = toHex(b);
+
+  return "#" + hexR + hexG + hexB;
+}
+```
+
+### Extracting Colors from Paint
+
+- When extracting solid colors from Figma paint objects, use the following function:
+
+```typescript
+/**
+ * Extracts solid colors from Figma paint objects.
+ * @param paint A Figma Paint object (fill or stroke)
+ * @returns Array of hex color strings
+ */
+function extractColorsFromPaint(paint: Paint): string[] {
+  if (paint.type === 'SOLID' && paint.visible !== false) {
+    const { color } = paint;
+    return [rgbToHex(color.r, color.g, color.b)];
+  }
+  return [];
+}
+```
+
+### Tree Traversal and Color Extraction
+
+- To recursively traverse a node tree and extract all colors, use the following approach:
+
+```typescript
+/**
+ * Recursively traverses a node tree and extracts all colors.
+ * @param node A Figma node
+ * @param colors A Set to collect unique colors
+ */
+function extractColorsFromNode(node: SceneNode, colors: Set<string>): void {
+  if ('fills' in node && Array.isArray(node.fills)) {
+    node.fills.forEach(fill => {
+      extractColorsFromPaint(fill as SolidPaint).forEach(color => colors.add(color));
+    });
+  }
+
+  if ('strokes' in node && Array.isArray(node.strokes)) {
+    node.strokes.forEach(stroke => {
+      extractColorsFromPaint(stroke as SolidPaint).forEach(color => colors.add(color));
+    });
+  }
+
+  if ('children' in node) {
+    node.children.forEach(child => {
+      extractColorsFromNode(child, colors);
+    });
+  }
+}
+```
+
+### Main Operation Handler Pattern
+
+- When creating a main operation handler, ensure it includes:
+    - Progress tracking with `ProgressManager`
+    - Cancellation support
+    - Error handling
+    - Selection validation
+    - Results formatting and messaging
+
+### New Color Scanning Utilities
+
+The following utility functions are used for color scanning in the main thread (`index.ts`):
+
+#### 1. `rgbToHex(r: number, g: number, b: number): string`
+- **Purpose**: Converts Figma's RGB color values (0-1 range) to hex format.
+- **Input**: RGB values as decimals (e.g., `r: 0.5, g: 1.0, b: 0.2`).
+- **Output**: Uppercase hex string (e.g., `"#80FF33"`).
+- **Logic**: Multiplies by 255, rounds, converts to hex, pads with zero if needed.
+
+#### 2. `extractColorsFromPaint(paint: Paint): string[]`
+- **Purpose**: Extracts solid colors from Figma paint objects.
+- **Input**: A Figma `Paint` object (fill or stroke).
+- **Output**: Array of hex color strings.
+- **Logic**: Only processes `SOLID` paint types, ignores gradients/images/etc. Filters skips invisible paints (`visible: false`).
+
+#### 3. `extractColorsFromNode(node: SceneNode, colors: Set<string>): void`
+- **Purpose**: Recursively traverses a node tree and extracts all colors.
+- **Input**: A Figma node and a Set to collect unique colors.
+- **Logic**: Extracts colors from both `fills` and `strokes` arrays, recursively processes all child nodes, uses a Set for automatic deduplication, and handles the tree traversal pattern safely.
+
+#### 4. `handleScanColors(operationId: string, options: any): Promise<void>`
+- **Purpose**: Main operation handler for the color scanning process.
+- **Features**: Progress tracking with `ProgressManager`, cancellation support, error handling, selection validation, and results formatting and messaging.
